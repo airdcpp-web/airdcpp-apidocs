@@ -1072,7 +1072,24 @@ Required permission: *events_view*
 
 # Group View file API
 
-Hub API provides methods for communicating with hubs
+## Fetching file content
+
+All viewed files that have completed downloading can be accessed via HTTP by using the following URL:
+
+`http(s)://<server address>/view/<file id>`
+
+Authentication information is required for accessing the file. 
+You may use the regular HTTP authorization header or alternatively add the query *`?auth=<authorization>`* after the URL.
+
+Example:
+
+`http://localhost:5600/view/ZMT6DPFKQGNGWO6I5Y6FKRHJJSL73DI5YAFGB6I?auth=417886b3-7419-48f1-a541-f308947db011`
+
+Warning: 
+
+Due to limitations of the embedded web server, the whole file content will be loaded in memory before uploading. This may cause stability issues
+on systems with low amount of memory. Therefore, it's recommended to use this API for viewing relatively small files.
+
 
 ## Viewed files [/view_files/sessions]
 
@@ -1092,113 +1109,99 @@ Open a new file from remote user.
 Required permission: *view_files_edit*
 
 + Request (application/json)
-    + Attributes (View file base)
+    + Attributes
+        + name: Ubuntu 14.04.nfo
+        + size: 9552 (number) - Size in bytes
+        + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
+        + text: false (boolean) - Is the file viewed as text
         + user (Hinted user base)
 + Response 200 (application/json)
     + Attributes (View file)
 
-### Get session [GET /view_files/session/{session_id}]
+### Open local file [POST /view_files/session/{tth}]
+
+Open a file that exists in share. 
 
 Required permission: *view_files_edit*
 
-Get a single session by ID.
++ Request (application/json)
+    + Attributes
+        + text: false (boolean) - Is the file viewed as text
++ Response 200 (application/json)
+    + Attributes (View file)
+
+### Get file [GET /view_files/session/{file_id}]
+
+Required permission: *view_files_view*
 
 + Request (application/json)
 
 + Response 200 (application/json)
-    + Attributes (Hub)
+    + Attributes (View file)
 
-### Remove session [DELETE /view_files/session/{session_id}]
+### Remove session [DELETE /view_files/session/{file_id}]
 
 Required permission: *view_files_edit*
 
 + Response 204
 
-## Miscellaneous [/hubs]
+### Set the file as read [POST /view_files/session/{file_id}/read]
 
-### Search nicks [POST /hubs/search_nicks]
+Required permission: *view_files_view*
 
-Search users from all hubs with nick matching the provided pattern. The most relevant match is returned first.
++ Response 204
 
-+ Request (application/json)
-    + Attributes
-        + pattern: Share (required)
-        + max_results: 5 (number, required)
-        + ignore_prefixes: true (optional) - Ignore nick prefixes (eg. [0.5], [10]) when comparing match relevancies
-            + Default: true
+### Get the content as text [GET /view_files/session/{file_id}/text]
 
-+ Response 200 (application/json)
+Receive the content of the file as text. Using this method with files larger than 1 MB will return an error.
 
-    + Attributes (array[Hub user])
-
-### Stats [GET /hubs/stats]
-
-Return various statistics about the connected hubs and their users
-
-+ Response 200 (application/json)
-
-### Send chat message [POST /hubs/message]
-
-Send a public chat message message to specified hubs.
-
-Required permission: *hubs_send*
+Required permission: *view_files_view*
 
 + Request (application/json)
-    + Attributes 
-        + message (Chat message request)
-        + hub_urls: adcs://myhub.com:6423, mynmdchub.com (array)
 
 + Response 200 (application/json)
     + Attributes
-        + sent: 1 (number) - Number of messages that were sent successfully. Message won't be sent to URLs without a corresponding hub session or hubs that are not in a connected state.
+        + text: This is the file content
 
-### Send status message [POST /hubs/status]
 
-Send a status message message that is only shown locally in specified hubs.
-
-Required permission: *hubs_edit*
-
-+ Request (application/json)
-    + Attributes 
-        + message (Status message request)
-        + hub_urls: adcs://myhub.com:6423, mynmdchub.com (array)
-
-+ Response 200 (application/json)
-
-    + Attributes
-        + sent: 1 (number) - Number of messages that were sent successfully. Message won't be sent to URLs without a corresponding hub session.
-
-## Subscriptions [/hubs/listener]
+## Subscriptions [/view_files/listener]
 
 Required permission: *hubs_view*
 
 All subscriptions from hub entities are also available to be used across all sessions (add them with */hubs/listener/event_name*).
 
-### Hub session created [POST /hubs/listener/hub_created]
+### File added [POST /hubs/listener/view_file_added]
 
 + Response 200 (application/json)
 
-    + Attributes
-        + session (Hub)
+    + Attributes (View file)
 
-### Hub session removed [POST /hubs/listener/hub_removed]
+### File updated [POST /hubs/listener/view_file_updated]
+
+Download state was updated
 
 + Response 200 (application/json)
-    + Attributes
-        + session (Hub)
+
+    + Attributes (View file)
+
+### File finished [POST /hubs/listener/view_file_finished]
+
+Fired when the file is ready for viewing
+
++ Response 200 (application/json)
+
+    + Attributes (View file)
+
+### File removed [POST /hubs/listener/view_file_removed]
+
++ Response 200 (application/json)
+    + Attributes (View file)
 
 
 
 
 ## Data Structures
 
-
-### View file base
-
-+ name: Ubuntu 14.04.nfo
-+ size: 9552 (number) - Size in bytes
-+ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
-+ text: false (boolean) - Is the file viewed as text
 
 ### View file
 
