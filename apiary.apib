@@ -4,98 +4,156 @@ FORMAT: 1A
 
 
 
+# Group Favorite directories
 
-# Group Session API
+# Group Favorite hubs
 
-Session API provides methods for authentication and generic session management
 
-## Session [/session/auth]
+## Favorite hubs [/favorite_hubs/hubs/{start}/{count}]
 
-### Create session [POST]
+### List favorite hubs [GET]
 
-Create a new API session by providing the web user credentials.
+Get a list of favorite hubs
+
+Required permission: *favorite_hubs_view*
+
++ Response 200 (application/json)
+    + Attributes (array[Favorite hub])
+
+
+## Favorite hub [/favorite_hubs/hub]
+
+### Create favorite hub [POST]
+
+Required permission: *favorite_hubs_edit*
 
 + Request (application/json)
-    + Attributes
-        + username: user1 (required)
-        + password: password (required)
-        + max_inactivity: 60 (optional) - Time in minutes after which the session is invalidated if there is no activity. Note that sessions with a connected websocket won't expire. The default session inactivity timeout can be configured from web server settings.
-            + Default: 20
+    + Attributes (Favorite hub request)
+    
 + Response 200 (application/json)
-    + Attributes
-        + token: `25793d1e-6d48-407c-9c27-a9dcbd2e1188` - Authorization token
-        + system (System info) - Generic information about the system that the application is running on
-        + session (Session) - Session information
+    + Attributes (Favorite hub)
 
-### Remove session [DELETE]
+### Update favorite hub [PATCH /favorite_hubs/hub/{hub_id}]
 
-Invalidate the current session
+Update the specified fields of a favorite hub
+
+Required permission: *favorite_hubs_edit*
+
++ Request (application/json)
+    + Attributes (Favorite hub request)
+    
++ Response 200 (application/json)
+    + Attributes (Favorite hub)
+
+### Get favorite hub [GET /favorite_hubs/hub/{hub_id}]
+
+Required permission: *favorite_hubs_view*
+
+Get a single hub by ID.
+
++ Request (application/json)
+
++ Response 200 (application/json)
+
+    + Attributes (Favorite hub)
+    
+### Remove favorite hub [DELETE /favorite_hubs/hub/{hub_id}]
+
+Required permission: *favorite_hubs_edit*
 
 + Response 204
 
-### Get current session [GET /session/session]
 
-Get the current session entity
+## Subscriptions [/favorite_hubs/listener]
+
+Required permission: *favorite_hubs_view*
+    
+### Favorite hub created [POST /hubs/listener/favorite_hub_created]
 
 + Response 200 (application/json)
-    + Attributes (Session)
+    + Attributes (Favorite hub)
 
-### Socket [POST /session/socket]
+### Favorite hub updated [POST /favorite_hubs/listener/favorite_hub_updated]
 
-Associate socket with an existing session.
++ Response 200 (application/json)
+    + Attributes (Favorite hub)
+
+### Favorite hub created [POST /hubs/listener/favorite_hub_removed]
+
++ Response 200 (application/json)
+    + Attributes (Favorite hub)
+
+
+
+# Group Events
+
+Events API will manage an application-wide list of generic messages.
+
+## Methods [/events]
+
+### Get messages [GET /events/messages/{max_count}]
+
+Required permission: *events_view*
+
++ Parameters
+    + max_count: 0 - Maximum number of messages to return (0 = unlimited)
+
++ Response 200 (application/json)
+    + Attributes (array[Status message])
+
+### Send event message [POST /events/message]
+
+Send a status message message that is only shown locally in this hub.
+
+Required permission: *events_edit*
 
 + Request (application/json)
-    + Attributes
-        + authorization: `25793d1e-6d48-407c-9c27-a9dcbd2e1188` (required) - Session identifier token
+    + Attributes (Status message request)
 
 + Response 204
 
+### Clear message cache [POST /events/clear]
 
-### Activity [POST /session/activity]
-
-Notify the application about user activity or ensure that HTTP session won't expire.
-
-+ Request (application/json)
-    + Attributes
-        + user_active: false (optional)
-        
-          Specifies whether the user has been active since the last activity report. This information is used for calculating the away state of the application. Scripts that don't involve user interaction shouldn't provide this attribute.
-        
-          + Default: false
+Required permission: *events_edit*
 
 + Response 204
 
+### Set all messages as read [POST /events/read]
 
-## Sessions [/session/sessions]
-        
-### Get sessions [GET]
+Required permission: *events_edit*
 
-Get a list of web server session
++ Response 204
 
-Required permission: *admin*
+### Get message counts [GET /events/counts]
 
-+ Response 200 (application/json)
-    + Attributes (array[Session])
-
-## Subscriptions [/session/listener]
-
-Required permission: *admin*
-
-### Session created [POST /session/listener/session_created]
-
-+ Response 200
-    + Attributes
-        + session (Session)
-
-### Session removed [POST /session/listener/session_removed]
+Required permission: *events_view*
 
 + Response 200 (application/json)
-    + Attributes
-        + session (Session)
+    + Attributes (Unread info)
 
 
+## Subscriptions [/events/listener]
 
-# Group Filesystem API
+Required permission: *events_view*
+
+### Message counts updated [POST /events/listener/event_counts]
+
++ Response 200 (application/json)
+    + Attributes (Unread info)
+
+### Message posted [POST /events/listener/event_message]
+
++ Response 200 (application/json)
+    + Attributes (Status message)
+
+
+# Group Filelists
+
+
+# Group Filelist entities
+
+
+# Group Filesystem
 
 ## Methods [/filesystem]
 
@@ -149,7 +207,100 @@ Get disk space info for a set of directory paths
 
 
 
-# Group Hub API
+# Group Hashing
+
+
+
+
+
+## Methods [/hash]
+
+### Get database status [GET /hash/database_status]
+
+Required permission: *settings_view*
+
++ Response 200 (application/json)
+    + Attributes (Hash database status)
+
+
+### Optimize database [POST /hash/optimize_database]
+
+This operation will delete all hash information for files that aren't currently in share. If you are sharing files from network disks or from a removable storage, make sure that the files are currently shown in share (otherwise they have to be rehashed)
+
+Required permission: *settings_edit*
+
++ Request (application/json)
+    + Attributes
+        + verify: true (boolean) - Verify integrity of the databases. This will remove corrupted hash data entries.
+
++ Response 204
+
+### Pause hashing [POST /hash/pause]
+
+Pause all running hashers.
+
+Required permission: *settings_edit*
+
++ Response 204
+
+### Resume hashing [POST /hash/resume]
+
+Resume all hashers in case they have been paused earlier.
+
+Required permission: *settings_edit*
+
++ Response 204
+
+### Stop hashing [POST /hash/stop]
+
+Stop all hashers and clear the files that have been queued for hashing.
+
+Required permission: *settings_edit*
+
++ Response 204
+
+
+## Subscriptions [/hash/listener]
+
+### Database status updated [POST /hash/listener/hash_database_status]
+
++ Response 200 (application/json)
+    + Attributes (Hash database status)
+
+### Hashing of a directory finished [POST /hash/listener/hasher_directory_finished]
+
++ Response 200 (application/json)
+    + Attributes
+        + path: /home/airdcpp/share/Ubuntu/ - Directory path
+        + size: 43676423 (number) - Total size of the files that were hashed from this directory
+        + files: 7 (number) - Number of files that were hashed from this directory
+        + duration: 32574 (number) - Time in milliseconds that was spent on hashing the directory
+        + hasher_id: 0 (number) - ID of the hasher
+
+### Hashing finished [POST /hash/listener/hasher_finished]
+
+A single hasher has finished.
+
++ Response 200 (application/json)
+    + Attributes
+        + size: 436764423 (number) - Total size of the files that were hashed
+        + files: 52 (number) - Number of files that were hashed
+        + directories: 4 (number) - Number of directories that were hashed
+        + duration: 6332574 (number) - Time in milliseconds that was spent on hashing the items
+        + hashed_id: 0 (number) - ID of the hasher
+
+
+### Hash statistics [POST /hash/listener/hash_statistics]
+
++ Response 200 (application/json)
+    + Attributes
+        + hash_speed: 4367623 (number) - Total current hashing speed, bytes per second
+        + hash_bytes_left: 52 (number) - Total number of bytes remaining to be hashed
+        + hash_files_left: 4 (number) - Total number of files remaining to be hashed
+        + hashers: 2 (number) - Number of hashing threads running
+
+
+# Group Hubs
 
 Hub API provides methods for communicating with hubs
 
@@ -272,7 +423,7 @@ All subscriptions from hub entities are also available to be used across all ses
 
 
 
-# Group Hub entity
+# Group Hub sessions
 
 ## Methods [/hubs/session/{id}]
 
@@ -421,204 +572,10 @@ Only the user ID and possibly changed fields are sent
     + Attributes (Hub user)
 
 
+# Group Private chat
 
-# Group Favorite hubs
 
-
-## Favorite hubs [/favorite_hubs/hubs/{start}/{count}]
-
-### List favorite hubs [GET]
-
-Get a list of favorite hubs
-
-Required permission: *favorite_hubs_view*
-
-+ Response 200 (application/json)
-    + Attributes (array[Favorite hub])
-
-
-## Favorite hub [/favorite_hubs/hub]
-
-### Create favorite hub [POST]
-
-Required permission: *favorite_hubs_edit*
-
-+ Request (application/json)
-    + Attributes (Favorite hub request)
-    
-+ Response 200 (application/json)
-    + Attributes (Favorite hub)
-
-### Update favorite hub [PATCH /favorite_hubs/hub/{hub_id}]
-
-Update the specified fields of a favorite hub
-
-Required permission: *favorite_hubs_edit*
-
-+ Request (application/json)
-    + Attributes (Favorite hub request)
-    
-+ Response 200 (application/json)
-    + Attributes (Favorite hub)
-
-### Get favorite hub [GET /favorite_hubs/hub/{hub_id}]
-
-Required permission: *favorite_hubs_view*
-
-Get a single hub by ID.
-
-+ Request (application/json)
-
-+ Response 200 (application/json)
-
-    + Attributes (Favorite hub)
-    
-### Remove favorite hub [DELETE /favorite_hubs/hub/{hub_id}]
-
-Required permission: *favorite_hubs_edit*
-
-+ Response 204
-
-
-## Subscriptions [/favorite_hubs/listener]
-
-Required permission: *favorite_hubs_view*
-    
-### Favorite hub created [POST /hubs/listener/favorite_hub_created]
-
-+ Response 200 (application/json)
-    + Attributes (Favorite hub)
-
-### Favorite hub updated [POST /favorite_hubs/listener/favorite_hub_updated]
-
-+ Response 200 (application/json)
-    + Attributes (Favorite hub)
-
-### Favorite hub created [POST /hubs/listener/favorite_hub_removed]
-
-+ Response 200 (application/json)
-    + Attributes (Favorite hub)
-
-
-
-# Group Users
-
-## Ignores [/users/ignores]
-
-### Get ignored users [GET]
-
-Required permission: *settings_view*
-
-+ Response 200 (application/json)
-    + Attributes (array[User])
-    
-
-### Add ignored user [POST /users/ignore/{cid}]
-
-Required permission: *settings_edit*
-
-+ Response 204
-
-    
-### Remove ignored user [DELETE /users/ignore/{cid}]
-
-Required permission: *settings_edit*
-
-+ Response 204
-    
-
-## Subscriptions [/users/listener]
-
-### User connected [POST /users/listener/user_connected]
-
-+ Response 200 (application/json)
-    + Attributes
-        + user (User)
-        + was_offline: true (boolean) - true if the user wasn't online in any hub before this event
-
-### User updated [POST /users/listener/user_updated]
-
-+ Response 200 (application/json)
-    + Attributes
-        + Attributes (User)
-
-### User disconnected [POST /users/listener/user_disconnected]
-
-+ Response 200 (application/json)
-    + Attributes 
-        + user (User)
-        + went_offline: false (boolean) - true if the user isn't online in any hub
-
-### Ignored user added [POST /users/listener/ignored_user_added]
-
-+ Response 200 (application/json)
-    + Attributes (User)
-
-### Ignored user removed [POST /users/listener/ignored_user_removed]
-
-+ Response 200 (application/json)
-    + Attributes (User)
-
-
-
-
-# Group System
-
-## Methods [/system]
-
-### Get away state [GET /system/away]
-
-+ Response 200 (application/json)
-    + Attributes (Away state)
-
-### Set manual away state [POST /system/away]
-
-+ Request (application/json)
-    + Attributes
-        + away: true (boolean, required)
-
-+ Response 200 (application/json)
-    + Attributes (Away state)
-
-
-### Get stats [GET /system/stats]
-
-+ Response 200 (application/json)
-    + Attributes
-        + server_threads: 4 (number) - Number of configured web server threads
-        + client_started: 6338924325 (number) - Time when the application was started
-        + client_version: AirDC++w 1.4.1 - Full application version
-        + active_session: 2 (number)
-
-    
-### Get system info [GET /system/system_info]
-
-Get generic information about the application and the system it's running on
-
-+ Response 200 (application/json)
-    + Attributes (System info)
-
-
-### Restart web server [POST /system/restart_web]
-
-Required permission: *admin*
-
-+ Response 204
-
-### Shutdown application [POST /system/shutdown]
-
-Required permission: *admin*
-
-+ Response 204
-    
-
-## Subscriptions [/system/listener]
-
-### Away state changed [POST /system/listener/away_state]
-
-+ Response 200 (application/json)
-    + Attributes (Away state)
-
+# Group Private chat sessions
 
 
 # Group Queue
@@ -803,6 +760,94 @@ You may also use the following listeners for specific types of events:
 
     + Attributes (Queue bundle)
 
+
+# Group Sessions
+
+Session API provides methods for authentication and generic session management
+
+## Session [/session/auth]
+
+### Create session [POST]
+
+Create a new API session by providing the web user credentials.
+
++ Request (application/json)
+    + Attributes
+        + username: user1 (required)
+        + password: password (required)
+        + max_inactivity: 60 (optional) - Time in minutes after which the session is invalidated if there is no activity. Note that sessions with a connected websocket won't expire. The default session inactivity timeout can be configured from web server settings.
+            + Default: 20
++ Response 200 (application/json)
+    + Attributes
+        + token: `25793d1e-6d48-407c-9c27-a9dcbd2e1188` - Authorization token
+        + system (System info) - Generic information about the system that the application is running on
+        + session (Session) - Session information
+
+### Remove session [DELETE]
+
+Invalidate the current session
+
++ Response 204
+
+### Get current session [GET /session/session]
+
+Get the current session entity
+
++ Response 200 (application/json)
+    + Attributes (Session)
+
+### Socket [POST /session/socket]
+
+Associate socket with an existing session.
+
++ Request (application/json)
+    + Attributes
+        + authorization: `25793d1e-6d48-407c-9c27-a9dcbd2e1188` (required) - Session identifier token
+
++ Response 204
+
+
+### Activity [POST /session/activity]
+
+Notify the application about user activity or ensure that HTTP session won't expire.
+
++ Request (application/json)
+    + Attributes
+        + user_active: false (optional)
+        
+          Specifies whether the user has been active since the last activity report. This information is used for calculating the away state of the application. Scripts that don't involve user interaction shouldn't provide this attribute.
+        
+          + Default: false
+
++ Response 204
+
+
+## Sessions [/session/sessions]
+        
+### Get sessions [GET]
+
+Get a list of web server session
+
+Required permission: *admin*
+
++ Response 200 (application/json)
+    + Attributes (array[Session])
+
+## Subscriptions [/session/listener]
+
+Required permission: *admin*
+
+### Session created [POST /session/listener/session_created]
+
++ Response 200
+    + Attributes
+        + session (Session)
+
+### Session removed [POST /session/listener/session_removed]
+
++ Response 200 (application/json)
+    + Attributes
+        + session (Session)
 
 
 # Group Share
@@ -1007,70 +1052,132 @@ Required permission: *settings_edit*
     + Attributes (Share profile)
 
 
-# Group Events
 
-Events API will manage an application-wide list of generic messages.
+# Group Share roots
 
-## Methods [/events]
 
-### Get messages [GET /events/messages/{max_count}]
+# Group System
 
-Required permission: *events_view*
+## Methods [/system]
 
-+ Parameters
-    + max_count: 0 - Maximum number of messages to return (0 = unlimited)
+### Get away state [GET /system/away]
 
 + Response 200 (application/json)
-    + Attributes (array[Status message])
+    + Attributes (Away state)
 
-### Send event message [POST /events/message]
-
-Send a status message message that is only shown locally in this hub.
-
-Required permission: *events_edit*
+### Set manual away state [POST /system/away]
 
 + Request (application/json)
-    + Attributes (Status message request)
+    + Attributes
+        + away: true (boolean, required)
+
++ Response 200 (application/json)
+    + Attributes (Away state)
+
+
+### Get stats [GET /system/stats]
+
++ Response 200 (application/json)
+    + Attributes
+        + server_threads: 4 (number) - Number of configured web server threads
+        + client_started: 6338924325 (number) - Time when the application was started
+        + client_version: AirDC++w 1.4.1 - Full application version
+        + active_session: 2 (number)
+
+    
+### Get system info [GET /system/system_info]
+
+Get generic information about the application and the system it's running on
+
++ Response 200 (application/json)
+    + Attributes (System info)
+
+
+### Restart web server [POST /system/restart_web]
+
+Required permission: *admin*
 
 + Response 204
 
-### Clear message cache [POST /events/clear]
+### Shutdown application [POST /system/shutdown]
 
-Required permission: *events_edit*
+Required permission: *admin*
+
++ Response 204
+    
+
+## Subscriptions [/system/listener]
+
+### Away state changed [POST /system/listener/away_state]
+
++ Response 200 (application/json)
+    + Attributes (Away state)
+
+
+# Group Transfers
+
+
+# Group Users
+
+## Ignores [/users/ignores]
+
+### Get ignored users [GET]
+
+Required permission: *settings_view*
+
++ Response 200 (application/json)
+    + Attributes (array[User])
+    
+
+### Add ignored user [POST /users/ignore/{cid}]
+
+Required permission: *settings_edit*
 
 + Response 204
 
-### Set all messages as read [POST /events/read]
+    
+### Remove ignored user [DELETE /users/ignore/{cid}]
 
-Required permission: *events_edit*
+Required permission: *settings_edit*
 
 + Response 204
+    
 
-### Get message counts [GET /events/counts]
+## Subscriptions [/users/listener]
 
-Required permission: *events_view*
-
-+ Response 200 (application/json)
-    + Attributes (Unread info)
-
-
-## Subscriptions [/events/listener]
-
-Required permission: *events_view*
-
-### Message counts updated [POST /events/listener/event_counts]
+### User connected [POST /users/listener/user_connected]
 
 + Response 200 (application/json)
-    + Attributes (Unread info)
+    + Attributes
+        + user (User)
+        + was_offline: true (boolean) - true if the user wasn't online in any hub before this event
 
-### Message posted [POST /events/listener/event_message]
+### User updated [POST /users/listener/user_updated]
 
 + Response 200 (application/json)
-    + Attributes (Status message)
+    + Attributes
+        + Attributes (User)
+
+### User disconnected [POST /users/listener/user_disconnected]
+
++ Response 200 (application/json)
+    + Attributes 
+        + user (User)
+        + went_offline: false (boolean) - true if the user isn't online in any hub
+
+### Ignored user added [POST /users/listener/ignored_user_added]
+
++ Response 200 (application/json)
+    + Attributes (User)
+
+### Ignored user removed [POST /users/listener/ignored_user_removed]
+
++ Response 200 (application/json)
+    + Attributes (User)
 
 
 
-# Group View file API
+# Group Viewed files
 
 ## Fetching file content
 
@@ -1201,6 +1308,13 @@ Fired when the file is ready for viewing
 
 
 ## Data Structures
+
+
+### Hash database status
+
++ maintenance_running: false (boolean)
++ file_index_size: 2143207 (number)
++ hash_store_size: 446720235 (number)
 
 
 ### View file
