@@ -2,12 +2,17 @@ FORMAT: 1A
 
 # AirDC++ Web API
 
+WORK IN PROGRESS
 
+This documentation isn't compatible with the current stable versions of AirDC++/AirDC++ Web client
 
 # Group Favorite directories
 
+TODO
+
 # Group Favorite hubs
 
+Favorite hubs allow storing commonly used hubs that can be opened automatically on application startup. Various settings, such as user identification info and connectivity, can be customized on per-hub basis.
 
 ## Favorite hubs [/favorite_hubs/hubs/{start}/{count}]
 
@@ -87,23 +92,26 @@ Required permission: *favorite_hubs_view*
 
 # Group Events
 
-Events API will manage an application-wide list of generic messages.
+Events are used for displaying and logging informative messages and errors to the application user. Note that events are not bind to any specific context;
+some entities, such as hubs, provide similar methods for showing information locally to the application user.
 
 ## Methods [/events]
 
 ### Get messages [GET /events/messages/{max_count}]
 
+Get the latest event message. Returned messages are be sorted from oldest to newest.
+
 Required permission: *events_view*
 
 + Parameters
-    + max_count: 0 - Maximum number of messages to return (0 = unlimited)
+    + max_count: 0 - Maximum number of messages to return (starts from the latest ones, 0 = unlimited)
 
 + Response 200 (application/json)
     + Attributes (array[Status message])
 
 ### Send event message [POST /events/message]
 
-Send a status message message that is only shown locally in this hub.
+Send a new event message.
 
 Required permission: *events_edit*
 
@@ -149,9 +157,11 @@ Required permission: *events_view*
 
 # Group Filelists
 
+TODO
 
 # Group Filelist entities
 
+TODO
 
 # Group Filesystem
 
@@ -379,7 +389,7 @@ Required permission: *hubs_send*
 + Request (application/json)
     + Attributes 
         + message (Chat message request)
-        + hub_urls: adcs://myhub.com:6423, mynmdchub.com (array)
+        + hub_urls: adcs://myhub.com:6423, mynmdchub.com (array) - A list of hub URLs where the message should be sent to. The message will be sent to all connected hubs if this field is not provided.
 
 + Response 200 (application/json)
     + Attributes
@@ -394,7 +404,7 @@ Required permission: *hubs_edit*
 + Request (application/json)
     + Attributes 
         + message (Status message request)
-        + hub_urls: adcs://myhub.com:6423, mynmdchub.com (array)
+        + hub_urls: adcs://myhub.com:6423, mynmdchub.com (array) - A list of hub URLs where the message should be shown. The message will be shown in all hubs if this field is not provided.
 
 + Response 200 (application/json)
 
@@ -574,9 +584,11 @@ Only the user ID and possibly changed fields are sent
 
 # Group Private chat
 
+TODO
 
 # Group Private chat sessions
 
+TODO
 
 # Group Queue
 
@@ -637,10 +649,7 @@ Note: this method is generally meant for importing content from external sources
 Required permission: *queue_edit*
 
 + Request (application/json)
-    + Attributes
-        + target_name: Ubuntu (required)
-        + target_directory: /home/airdcpp/share/ (required)
-        + priority (Priority ID, optional) - Bundle priority
+    + Attributes (Download params)
         + time: 42421412 - Original directory creation/modify time (optional)
         + files (array)
             + name: `CD1/Ubuntu 16.04.iso` (required) - File name that may also contain subdirectories relative to the main bundle path
@@ -759,6 +768,164 @@ You may also use the following listeners for specific types of events:
 + Response 200 (application/json)
 
     + Attributes (Queue bundle)
+
+# Group Searching
+
+
+Hub API provides methods for communicating with hubs
+
+## Search instances [/search/instances]
+
+### Get a list of all search instances [GET]
+
+Required permission: *search*
+
++ Response 200 (application/json)
+    + Attributes (array[Search instance])
+
+
+
+## Search instance [/search/instance]
+
+### Create instance [POST]
+
+Required permission: *search*
+
++ Request (application/json)
+    + Attributes
+        + expiration: 5 (optional) - Time in minutes after which the instance will be removed automatically (0 = no expiration)
+            + Default: 5
++ Response 200 (application/json)
+    + Attributes (Search instance)
+
+### Get instance [GET /search/instance/{instance_id}]
+
+Required permission: *search*
+
+Get a single instance by ID.
+
++ Request (application/json)
+
++ Response 200 (application/json)
+    + Attributes (Search instance)
+
+### Remove instance [DELETE /search/instance/{instance_id}]
+
+Required permission: *search*
+
++ Response 204
+
+## Miscellaneous [/search]
+
+### Search types [GET /search/types]
+
+Return all search types
+
++ Response 200 (application/json)
+    + Attributes (array)
+        + (object)
+            + id: 1
+            + str: Audio
+            + extensions: ape, flac, m4a, mid, mp3, mpc, ogg, ra, wav, wma
+            + default_type: true (boolean) - This is an inbuilt type that can't be removed (extensions can still be modified)
+
+## Subscriptions [/search/listener]
+
+Required permission: *search*
+
+All subscriptions from search instances are also available to be used across all instances (add them with */search/listener/event_name*).
+
+
+# Group Search instances
+
+## Methods [/search/instance/{instance_id}]
+
+### Perform hub search [POST /search/instance/{instance_id}/hub_search]
+
+Post hub search
+
+Required permission: *search*
+
++ Request (application/json)
+    + Attributes 
+        + query (Search query, required)
+        + hub_urls: adcs://myhub.com:6423, mynmdchub.com (optional) - A list of hub URLs where the search should be sent to. Search will be sent to all connected hubs if this field is not provided.
+
++ Response 200 (application/json)
+    + Attributes
+        + queue_time: 5000 - Current queue time for this search
+        + search_id: 643345 - An individual search ID for this query
+        + sent: 3 - Number of hubs for which the search was queued
+
+### Perform user search [POST /search/instance/{instance_id}/user_search]
+
+Post user search
+
+This method can be used with ADC users only.
+
+Required permission: *search*
+
++ Request (application/json)
+    + Attributes 
+        + query (Search query, required)
+        + user (Hinted user, required) 
+
++ Response 204
+
+### Get results [GET /search/instance/{instance_id}/results/{start}/{max_count}]
+
+Required permission: *search*
+
++ Response 200 (application/json)
+    + Attributes (array[Grouped search results])
+
+### Download result [POST /search/instance/{instance_id}/result/{result_id}/download]
+
+Queue the specified result. If there is a large number of users sharing the same item, the application will pick the fastest ones automatically.
+
+Required permission: *download*
+
++ Request (application/json)
+    + Attributes (Download params)
+
++ Response 200 (application/json)
+    + Attributes
+        + One of
+            + bundle_info (Queue bundle add info) - Response for file downloads
+            + directory_downloads (array[Directory download item]) - Response for directory downloads
+
+
+### Get child user results [GET /search/instance/{instance_id}/result/{result_id}/children]
+
+Get a list of individual user results.
+
+Required permission: *search*
+
++ Response 200 (application/json)
+    + Attributes (array[User search results])
+
+
+## Subscriptions [/search/instance/{id}/listener]
+
+Required permission: *search*
+
+All subscriptions from search instances are also available to be used across all instances (add them with */search/listener/event_name*).
+
+### Parent result added [POST /search/instance/{id}/listener/search_result_added]
+
++ Response 200 (application/json)
+    + Attributes (Grouped search result)
+
+### Parent result updated [POST /search/instance/{id}/listener/search_result_updated]
+
++ Response 200 (application/json)
+    + Attributes (Grouped search result)
+
+### User result received [POST /search/instance/{id}/listener/search_user_result]
+
++ Response 200 (application/json)
+    + Attributes (User search result)
+
 
 
 # Group Sessions
@@ -1055,6 +1222,7 @@ Required permission: *settings_edit*
 
 # Group Share roots
 
+TODO
 
 # Group System
 
@@ -1116,6 +1284,7 @@ Required permission: *admin*
 
 # Group Transfers
 
+TODO
 
 # Group Users
 
@@ -1309,6 +1478,84 @@ Fired when the file is ready for viewing
 
 ## Data Structures
 
+### Directory download item (Download params)
+
++ id: 427 (number)
++ list_path: /Linux/Ubuntu/Ubuntu 14.04/
++ user (Hinted user)
+
+### Download params
+
++ target_name: Ubuntu (required)
++ target_directory: /home/airdcpp/share/ (required)
++ priority (Priority ID, optional) - Bundle priority. Auto priority will be used if not specified.
+
+### Search instance
+
++ id: 0 (number)
++ expiration: 600 (number) - Time in milliseconds until the instance expires
+
+### Search query
+
++ pattern: Ubuntu - Search string. All words must be found from the full file/directory path (partial match)
++ file_type (File content)
+    + any
+    + tth
+    + directory
+    + file
++ extensions: iso, img - Allowed file extensions (files only)
++ min_size: 50000000 - Minimum file size (files only)
++ max_size: 100000000 - Maximum file size (files only)
++ excluded: server, iot - List of strings that should not be found from the file name (partial match)
+
+### Grouped search result
+
+Grouped search result
+
++ id: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
++ name: dir
++ relevance: 1.34 (number) - Calculated item relevance based on the result name and number of hits
++ hits: 4 (number) - Number of users (child users) from who the item was found
++ user (Hinted user) - Base user from who the result name and path were picked from
++ type (Item type)
++ path: /home/airdcpp/share/dir/
++ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
++ dupe (Dupe)
++ time: 1483611358 (number) - File creation/modification date. The oldest found date is shown for parent results. Not available for NMDC results.
++ slots (Slot count) - Accummulated slot counts from users
++ connection: 42500000 (number) - Accummulated connection speed from users, bytes per second
++ size: 62523525626 (number) - Size in bytes (not available for NMDC directory results)
+
+### User search result
+
++ id: 427 (number)
++ path: /home/airdcpp/share/dir/
++ user (Hinted user)
++ slots (Slot count)
++ time: 1483611358 (number) - File creation/modification date.
++ connection: 12500000 (number)
++ ip
+    + country_id: NL - Netherlands
+    + ip: 2a00:1a48:1261::168
+    + str: NL - Netherlands (2a00:1a48:1261::168)
+
+### Slot count
+
++ free: 2 (number)
++ total: 11 (number)
++ str: 2/11
+
+### Dupe
+
++ id (enum[string])
+    + share_partial
+    + share_full
+    + queue_partial - Bundle item that has not finished downloading yet
+    + queue_full
+    + finished_partial - Bundle item that has finished downloading
+    + finished_full
+    + share_queue
++ paths: /home/airdcpp/share/dir/, /mnt/disk2/dir/ - An array of local paths for this item
 
 ### Hash database status
 
@@ -1420,15 +1667,17 @@ Fired when the file is ready for viewing
 
 + id: file
 + str: iso
-+ content_type (enum[string])
-    + audio
-    + compressed
-    + document
-    + executable
-    + picture
-    + video
++ content_type (File content)
     + other
 
+### File content (enum[string])
+
++ audio
++ compressed
++ document
++ executable
++ picture
++ video
 
 ### Folder type
 
@@ -1486,7 +1735,7 @@ Fired when the file is ready for viewing
 
 ### Severity (enum[string])
 
-+ notify
++ notify - Notify events are not stored by the application (they are generally real-time notifications related to a recent activity)
 + info
 + warning
 + error
