@@ -88,6 +88,44 @@ Required permission: *favorite_hubs_view*
 + Response 200 (application/json)
     + Attributes (Favorite hub)
 
+## Data Structures
+
+### Favorite hub base
+
++ name: Demo hub
++ hub_description: Demo hub for AirDC++ Web Client
++ hub_url: adcs://myhub.com:6423
++ auto_connect: true (boolean) - Automatically connect to this hub on startup
++ nick: Developer - User nick (defaults to global value if not set)
++ user_description: Just writing scripts - User description (defaults to global value if not set)
++ nmdc_encoding: CP1252 - Iconv codepage to use for text conversion (NMDC hubs only, defaults to global value if not set)
++ connection_mode_v4 (Connectivity mode) - IPv4 connectivity mode (defaults to global value if not set)
++ connection_mode_v6 (Connectivity mode) - IPv6 connectivity mode (defaults to global value if not set)
++ connection_ip_v4: 89.255.248.35 - IPv4 address (defaults to global value if not set)
++ connection_ip_v6: 2a00:1a48:1261::168 - IPv6 address (defaults to global value if not set)
+
+### Favorite hub (Favorite hub base)
+
++ id: 64723743 (number)
++ connect_state (object)
+    + id: connected (enum[string])
+        + connecting
+        + connected
+        + disconnected
+    + str: Connected
+    + current_hub_id: 5 (number) - Current hub session ID (0 = no session)
++ share_profile (Share profile basic) - Share profile to use (ADC hubs only, defaults to global value if not set)
++ has_password: true (boolean) - Specifies whether a password has been saved for this entry
+
+### Favorite hub request (Favorite hub base)
+
++ share_profile: 7436564 (number)  - Share profile to use (ADC hubs only, defaults to global value if not set)
++ password: mystrongpassword
+
+### Share profile basic
+
++ id: 7453466 (number)
++ str: `Videos only (default)`
 
 
 # Group Events
@@ -155,9 +193,22 @@ Required permission: *events_view*
     + Attributes (Status message)
 
 
+
 # Group Filelists
 
 TODO
+
+## Data Structures
+
+
+
+### Directory download item (Download params)
+
++ id: 427 (number)
++ list_path: /Linux/Ubuntu/Ubuntu 14.04/
++ user (Hinted user)
+
+
 
 # Group Filelist entities
 
@@ -310,6 +361,16 @@ A single hasher has finished.
         + hashers: 2 (number) - Number of hashing threads running
 
 
+## Data Structures
+
+### Hash database status
+
++ maintenance_running: false (boolean) - Whether database optimization is currently running
++ file_index_size: 2143207 (number) - Size of the file index database on disk (bytes)
++ hash_store_size: 446720235 (number) - Size of the hash store database on disk (bytes)
+
+
+
 # Group Hubs
 
 Hub API provides methods for communicating with hubs
@@ -431,6 +492,33 @@ All subscriptions from hub entities are also available to be used across all ses
         + session (Hub)
 
 
+## Data Structures
+
+### Hub
+
++ id: 5 (number)
++ hub_url: adcs://myhub.com:6423
++ connect_state (object)
+    + id: connected (enum[string])
+        + connecting
+        + password
+        + connected
+        + keyprint_mismatch
+        + disconnected
+        + redirect
+    + encryption (Encryption, optional) - Available only for ADCS hubs after the connection has been established
++ identity (object)
+    + name: Demo hub
+    + description: Demo hub for AirDC++ Web Client
++ share_profile (Share profile)
++ favorite_hub: 64723743 (number) - Favorite hub ID (0 = no favorite hub)
++ unread_messages (Unread info)
++ total_messages: 54 (number)
+
+### Hub counts
+
++ share_size: 832572352 (number)
++ user_count: 3 (number)
 
 
 # Group Hub sessions
@@ -769,6 +857,74 @@ You may also use the following listeners for specific types of events:
 
     + Attributes (Queue bundle)
 
+
+## Data Structures
+
+### Queue bundle add info
+
++ id: 83425443 (number) - Bundle ID
++ merged: true (boolean) - Indicates whether this is a new bundle or was the queued item merged into an existing one
+
+### Queue directory bundle add info
+
++ files_queued: 14 (number) - Number of new files that were queued successfully
++ files_updated: 34 (number) - Number of existing files that were possibly updated (new source was added)
++ files_failed: 1 (number) - Number of files that could not be queued
++ error: `A file with different TTH root already exists in the queue (affected file(s): Ubuntu 14.04.nfo)`
++ bundle (Queue bundle add info) 
+
+### Queue item base
+
++ size: 62523525626 (number) - Size in bytes
++ downloaded_bytes: 4521124 (number)
++ priority (Priority)
++ time_added: 65235235 (number)
++ time_finished: 0 (number) - Time when the item was finished (0 = not finished)
++ speed: 5234324 (number) - Current download speed, bytes per second
++ seconds_left: 632576 - Seconds left based on the current download speed
++ sources (Queue source info)
+
+### Queue bundle (Queue item base)
+
++ id: 83425443
++ name: Ubuntu
++ target: /home/airdcpp/share/Ubuntu/
++ type (Item type)
+
+### Queue file (Queue item base)
+
++ id: 23425443
++ name: Ubuntu 14.04.iso
++ target: /home/airdcpp/share/Ubuntu/Ubuntu 14.04.iso
++ type (File type)
++ bundle: 83425443 (number) - Bundle (0 = no bundle)
++ status
+    + str: `Running (42.3%)`
+    + finished: false
++ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
+
+### Queue bundle source
+
++ user (Hinted user)
++ last_speed: 57453654 (number) - Last known total speed from the user, bytes per second
++ files: 53 (number) - Bundle files remaining from this source
++ size: 734234563 (number) - Total number of bytes remaining from this source
+
+### Queue source info
+
++ online: 2 (number) - Number of sources online
++ total: 3 (number) - Total number of item sources
++ str: 2/3 online
+
+### Priority
+
++ id (Priority ID)
++ str: Paused
++ auto: false (boolean) - Auto priority state
+
+
+
+
 # Group Searching
 
 
@@ -836,13 +992,57 @@ Required permission: *search*
 All subscriptions from search instances are also available to be used across all instances (add them with */search/listener/event_name*).
 
 
+## Data Structures
+
+### Search instance
+
++ id: 0 (number)
++ expiration: 600 (number) - Time in milliseconds until the instance expires
+
+### Grouped search result
+
++ id: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
++ name: dir
++ relevance: 1.34 (number) - Calculated item relevance based on the result name and number of hits
++ hits: 4 (number) - Number of users (child users) from who the item was found
++ user (Hinted user) - Base user from who the result name and path were picked from
++ type (Item type)
++ path: /home/airdcpp/share/dir/ - Path in remote user's share
++ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
++ dupe (Dupe)
++ time: 1483611358 (number) - File creation/modification date. The oldest found date is shown for parent results. Not available for NMDC results.
++ slots (Slot count) - Accummulated slot counts from users
++ connection: 42500000 (number) - Accummulated connection speed from users, bytes per second
++ size: 62523525626 (number) - Size in bytes (not available for NMDC directory results)
+
+### Child search result
+
++ id: 427 (number)
++ path: /Linux/Ubuntu 14.04/ - Path in remote user's share
++ user (Hinted user)
++ slots (Slot count)
++ time: 1483611358 (number) - File creation/modification date.
++ connection: 12500000 (number)  - Connection speed, bytes per second
++ ip
+    + country_id: NL - Netherlands
+    + ip: 2a00:1a48:1261::168
+    + str: NL - Netherlands (2a00:1a48:1261::168)
+
+### Slot count
+
++ free: 2 (number)
++ total: 11 (number)
++ str: 2/11
+
+
+
 # Group Search instances
 
 ## Methods [/search/instance/{instance_id}]
 
 ### Perform hub search [POST /search/instance/{instance_id}/hub_search]
 
-Post hub search
+Search files from all or separately specified hubs.
 
 Required permission: *search*
 
@@ -853,13 +1053,13 @@ Required permission: *search*
 
 + Response 200 (application/json)
     + Attributes
-        + queue_time: 5000 - Current queue time for this search
+        + queue_time: 5000 - Current queue time for this search in milliseconds
         + search_id: 643345 - An individual search ID for this query
         + sent: 3 - Number of hubs for which the search was queued
 
 ### Perform user search [POST /search/instance/{instance_id}/user_search]
 
-Post user search
+Search files from an individual user. The search will be sent instantly without queueing.
 
 This method can be used with ADC users only.
 
@@ -873,6 +1073,8 @@ Required permission: *search*
 + Response 204
 
 ### Get results [GET /search/instance/{instance_id}/results/{start}/{max_count}]
+
+Get results for the previously posted search query.
 
 Required permission: *search*
 
@@ -890,7 +1092,7 @@ Required permission: *download*
 
 + Response 200 (application/json)
     + Attributes
-        + One of
+        + One of (object)
             + bundle_info (Queue bundle add info) - Response for file downloads
             + directory_downloads (array[Directory download item]) - Response for directory downloads
 
@@ -902,7 +1104,7 @@ Get a list of individual user results.
 Required permission: *search*
 
 + Response 200 (application/json)
-    + Attributes (array[User search results])
+    + Attributes (array[Child search result])
 
 
 ## Subscriptions [/search/instance/{id}/listener]
@@ -924,7 +1126,7 @@ All subscriptions from search instances are also available to be used across all
 ### User result received [POST /search/instance/{id}/listener/search_user_result]
 
 + Response 200 (application/json)
-    + Attributes (User search result)
+    + Attributes (Child search result)
 
 
 
@@ -1016,6 +1218,32 @@ Required permission: *admin*
     + Attributes
         + session (Session)
 
+## Data Structures
+
+### Session
+
++ id: 143743423 (number) - Session ID (this is not the auth token)
++ ip: [::1] - Last IP address used for the connection (IPv4/IPv6)
++ last_activity: 6236 - Milliseconds since last session activity
++ type: secure (enum[string])
+  + basic_http
+  + plain
+  + secure
++ user (Web user) - Web user account used for authentication
+
+
+# Group Settings
+
+
+## Data Structures
+
+### Connectivity mode (enum[number])
+
++ `-1` - Disabled
++ 0 - Active mode (no router or manual router configuration)
++ 1 - Active mode with NAT-PMP / UPnP (let the client configure my router)
++ 2 - Passive mode (last resort - has serious limitations)
+
 
 # Group Share
 
@@ -1104,6 +1332,18 @@ Get local paths for file/folder name/path or a TTH value.
         + /home/airdcpp/share/Ubuntu/CD1/
         + /mnt/disk2/share/Ubuntu/CD1/
 
+### Search files [POST /share/search]
+
+Search for shared files.
+
++ Request (application/json)
+    + Attributes (object, required)
+        + query (Search query, required)
+        + share_profile (number, optional) - Items will be searched for from whole share if no profile is specified.
+
++ Response 200 (application/json)
+    + Attributes (array[Share item])
+
 
 ## Subscriptions [/share/listener]
 
@@ -1134,6 +1374,19 @@ Fired when share refresh (partial or full refresh) has been completed.
 + Response 200 (application/json)
     + Attributes 
         + path: /home/airdcpp/share/Videos/secret/
+
+## Data Structures
+
+### Share item
+
++ id: 427 (number)
++ name: Ubuntu 14.04
++ virtual_path: /Linux/Ubuntu 14.04/
++ real_paths: /home/airdcpp/share/Linux/Ubuntu 14.04/ (array)
++ type (Item type)
++ time: 1483611358 (number) - Modification date
++ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
++ size: 62523525626 (number) - Size in bytes
 
 
 
@@ -1218,6 +1471,17 @@ Required permission: *settings_edit*
 + Response 200 (application/json)
     + Attributes (Share profile)
 
+## Data structures
+
+### Share profile
+
++ id: 7453466 (number)
++ name: Videos only
++ str: `Videos only (default)`
++ `default`: true (boolean) - Specifies whether this is the default share profile
++ size: 74655272532 (number) - Total size of shared files in this profile in bytes
++ files: 24643 (number) - Total number of shared files in this profile
+
 
 
 # Group Share roots
@@ -1280,6 +1544,26 @@ Required permission: *admin*
 
 + Response 200 (application/json)
     + Attributes (Away state)
+
+## Data Structures
+
+### Away state
+
++ id (enum[string])
+    + off - Away mode is not enabled
+    + idle - Idle away mode is enabled
+    + manual - Manual away mode is enabled
+
+### System info
+
++ cid: 76NLOTOBZVTWXOHIWKCXB27W46ULOI7EAUZUTTI - An unique application identifier
++ run_wizard: false - Whether the initial configuration wizard was run
++ hostname: web-demo - System hostname
++ path_separator: / - System's native path separator character
++ platform: other (enum[string])
+  + windows
+  + osx
+  + other
 
 
 # Group Transfers
@@ -1344,6 +1628,16 @@ Required permission: *settings_edit*
 + Response 200 (application/json)
     + Attributes (User)
 
+# Group Web users
+
+## Data Structures
+
+### Web user
+
++ username: user1
++ permissions: search, transfers, events_view, queue_view (array[string]) - List of permissions assigned for the user. Note: 'admin' permission gives access to all API methods.
++ active_sessions: 1 (number)
++ last_login: 412412456 (number) - Time of the last successful login
 
 
 # Group Viewed files
@@ -1474,31 +1768,38 @@ Fired when the file is ready for viewing
     + Attributes (View file)
 
 
+## Data Structures
+
+### View file
+
++ id: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
++ name: Ubuntu 14.04.nfo
++ size: 9552 (number) - Size in bytes
++ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
++ text: false (boolean) - Is the file viewed as text
++ time_finished: 0 (number) - Time when the item was finished downloading (0 = not finished)
++ state (Downloadable item state)
++ type (File type)
++ read: false (boolean) - Has the file been marked as read
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## Data Structures
 
-### Directory download item (Download params)
-
-+ id: 427 (number)
-+ list_path: /Linux/Ubuntu/Ubuntu 14.04/
-+ user (Hinted user)
-
-### Download params
-
-+ target_name: Ubuntu (required)
-+ target_directory: /home/airdcpp/share/ (required)
-+ priority (Priority ID, optional) - Bundle priority. Auto priority will be used if not specified.
-
-### Search instance
-
-+ id: 0 (number)
-+ expiration: 600 (number) - Time in milliseconds until the instance expires
-
 ### Search query
 
 + pattern: Ubuntu - Search string. All words must be found from the full file/directory path (partial match)
-+ file_type (File content)
++ file_type (File content ID)
     + any
     + tth
     + directory
@@ -1506,44 +1807,27 @@ Fired when the file is ready for viewing
 + extensions: iso, img - Allowed file extensions (files only)
 + min_size: 50000000 - Minimum file size (files only)
 + max_size: 100000000 - Maximum file size (files only)
-+ excluded: server, iot - List of strings that should not be found from the file name (partial match)
++ excluded: server, iot - List of strings that should not be found from the file/directory path (partial match)
 
-### Grouped search result
+### Download params (object)
 
-Grouped search result
++ target_name: Ubuntu (required)
++ target_directory: /home/airdcpp/share/ (required)
++ priority (Priority ID, optional) - Bundle priority. Auto priority will be used if not specified.
 
-+ id: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
-+ name: dir
-+ relevance: 1.34 (number) - Calculated item relevance based on the result name and number of hits
-+ hits: 4 (number) - Number of users (child users) from who the item was found
-+ user (Hinted user) - Base user from who the result name and path were picked from
-+ type (Item type)
-+ path: /home/airdcpp/share/dir/
-+ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
-+ dupe (Dupe)
-+ time: 1483611358 (number) - File creation/modification date. The oldest found date is shown for parent results. Not available for NMDC results.
-+ slots (Slot count) - Accummulated slot counts from users
-+ connection: 42500000 (number) - Accummulated connection speed from users, bytes per second
-+ size: 62523525626 (number) - Size in bytes (not available for NMDC directory results)
+### Downloadable item state
 
-### User search result
++ id (enum[string])
+    + download_failed
+    + download_pending
+    + downloading
+    + downloaded
++ str: `Downloading (45.4%)`
 
-+ id: 427 (number)
-+ path: /home/airdcpp/share/dir/
-+ user (Hinted user)
-+ slots (Slot count)
-+ time: 1483611358 (number) - File creation/modification date.
-+ connection: 12500000 (number)
-+ ip
-    + country_id: NL - Netherlands
-    + ip: 2a00:1a48:1261::168
-    + str: NL - Netherlands (2a00:1a48:1261::168)
+### Encryption
 
-### Slot count
-
-+ free: 2 (number)
-+ total: 11 (number)
-+ str: 2/11
++ str: `TLSv1.2 / ECDHE-RSA-AES128-GCM-SHA256` - TLS version and cipher
++ trusted: false (boolean) - Indicates whether there's a matching keyprint set for the hub
 
 ### Dupe
 
@@ -1557,90 +1841,6 @@ Grouped search result
     + share_queue
 + paths: /home/airdcpp/share/dir/, /mnt/disk2/dir/ - An array of local paths for this item
 
-### Hash database status
-
-+ maintenance_running: false (boolean)
-+ file_index_size: 2143207 (number)
-+ hash_store_size: 446720235 (number)
-
-
-### View file
-
-+ id: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
-+ name: Ubuntu 14.04.nfo
-+ size: 9552 (number) - Size in bytes
-+ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
-+ text: false (boolean) - Is the file viewed as text
-+ time_finished: 0 (number) - Time when the item was finished downloading (0 = not finished)
-+ state (Downloadable item state)
-+ type (File type)
-+ read: false - Has the file been marked as read
-
-### Downloadable item state
-
-+ id (enum[string])
-    + download_failed
-    + download_pending
-    + downloading
-    + downloaded
-+ str: `Downloading (45.4%)`
-
-### Queue bundle add info
-
-+ id: 83425443 (number) - Bundle ID
-+ merged: true (boolean) - Indicates whether this is a new bundle or was the queued item merged into an existing one
-
-### Queue directory bundle add info
-
-+ files_queued: 14 (number) - Number of new files that were queued successfully
-+ files_updated: 34 (number) - Number of existing files that were possibly updated (new source was added)
-+ files_failed: 1 (number) - Number of files that could not be queued
-+ error: `A file with different TTH root already exists in the queue (affected file(s): Ubuntu 14.04.nfo)`
-+ bundle (Queue bundle add info) 
-
-### Queue item base
-
-+ size: 62523525626 (number) - Size in bytes
-+ downloaded_bytes: 4521124 (number)
-+ priority (Priority)
-+ time_added: 65235235 (number)
-+ time_finished: 0 (number) - Time when the item was finished (0 = not finished)
-+ speed: 5234324 (number) - Current download speed, bytes per second
-+ seconds_left: 632576 - Seconds left based on the current download speed
-+ sources (Queue source info)
-
-### Queue bundle (Queue item base)
-
-+ id: 83425443
-+ name: Ubuntu
-+ target: /home/airdcpp/share/Ubuntu/
-+ type (Item type)
-
-### Queue file (Queue item base)
-
-+ id: 23425443
-+ name: Ubuntu 14.04.iso
-+ target: /home/airdcpp/share/Ubuntu/Ubuntu 14.04.iso
-+ type (File type)
-+ bundle: 83425443 (number) - Bundle (0 = no bundle)
-+ status
-    + str: `Running (42.3%)`
-    + finished: false
-+ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
-
-### Queue bundle source
-
-+ user (Hinted user)
-+ last_speed: 57453654 - Last known total speed from the user, bytes per second
-+ files: 53 - Bundle files remaining from this source
-+ size: 734234563 - Total number of bytes remaining from this source
-
-### Queue source info
-
-+ online: 2 (number) - Number of sources online
-+ total: 3 (number) - Total number of item sources
-+ str: 2/3 online
-
 ### Priority ID (enum[number])
 
 + `-1` - `Paused (forced)`
@@ -1651,11 +1851,6 @@ Grouped search result
 + 4 - High
 + 5 - Highest
 
-### Priority
-
-+ id (Priority ID)
-+ str: Paused
-+ auto: false (boolean) - Auto priority state
 
 
 ### Item type (enum)
@@ -1667,10 +1862,10 @@ Grouped search result
 
 + id: file
 + str: iso
-+ content_type (File content)
++ content_type (File content ID)
     + other
 
-### File content (enum[string])
+### File content ID (enum[string])
 
 + audio
 + compressed
@@ -1682,23 +1877,20 @@ Grouped search result
 ### Folder type
 
 + id: directory
-+ str: 2 folders, 49 files
-+ files: 49
-+ directories: 2
++ str: `2 folders, 49 files`
++ files: 49 (number)
++ directories: 2 (number)
 
 
-### Away state
 
-+ id (enum[string])
-    + off - Away mode is not enabled
-    + idle - Idle away mode is enabled
-    + manual - Manual away mode is enabled
+
+
 
 ### Unread info
 
-+ user: 2 - Number of unread user messages
-+ bot: 12 - Number of unread bot messages
-+ status: 0 - Number of unread status messages
++ user: 2 (number) - Number of unread user messages
++ bot: 12 (number) - Number of unread bot messages
++ status: 0 (number) - Number of unread status messages
 
 ### Chat message request
 
@@ -1740,76 +1932,13 @@ Grouped search result
 + warning
 + error
 
-### Connectivity mode (enum[number])
 
-+ `-1` - Disabled
-+ 0 - Active mode (no router or manual router configuration)
-+ 1 - Active mode with NAT-PMP / UPnP (let the client configure my router)
-+ 2 - Passive mode (last resort - has serious limitations)
-
-### Favorite hub base
-
-+ name: Demo hub
-+ hub_description: Demo hub for AirDC++ Web Client
-+ hub_url: adcs://myhub.com:6423
-+ auto_connect: true - Automatically connect to this hub on startup
-+ nick: Developer - User nick (defaults to global value if not set)
-+ user_description: Just writing scripts - User description (defaults to global value if not set)
-+ nmdc_encoding: CP1252 - Iconv codepage to use for text conversion (NMDC hubs only, defaults to global value if not set)
-+ connection_mode_v4 (Connectivity mode) - IPv4 connectivity mode (defaults to global value if not set)
-+ connection_mode_v6 (Connectivity mode) - IPv6 connectivity mode (defaults to global value if not set)
-+ connection_ip_v4: 89.255.248.35 - IPv4 address (defaults to global value if not set)
-+ connection_ip_v6: 2a00:1a48:1261::168 - IPv6 address (defaults to global value if not set)
-
-### Favorite hub (Favorite hub base)
-
-+ id: 64723743 (number)
-+ connect_state (object)
-    + id: connected (enum[string])
-        + connecting
-        + connected
-        + disconnected
-    + str: Connected
-    + current_hub_id: 5 - Current hub session ID (0 = no session)
-+ share_profile (Share profile basic) - Share profile to use (ADC hubs only, defaults to global value if not set)
-+ has_password: true (boolean) - Specifies whether a password has been saved for this entry
-
-### Favorite hub request (Favorite hub base)
-
-+ share_profile: 7436564 (number)  - Share profile to use (ADC hubs only, defaults to global value if not set)
-+ password: mystrongpassword
-
-### Hub
-
-+ id: 5 (number)
-+ hub_url: adcs://myhub.com:6423
-+ connect_state (object)
-    + id: connected (enum[string])
-        + connecting
-        + password
-        + connected
-        + keyprint_mismatch
-        + disconnected
-        + redirect
-    + encryption (Encryption, optional) - Available only for ADCS hubs after the connection has been established
-+ identity (object)
-    + name: Demo hub
-    + description: Demo hub for AirDC++ Web Client
-+ share_profile (Share profile)
-+ favorite_hub: 64723743 (number) - Favorite hub ID (0 = no favorite hub)
-+ unread_messages (Unread info)
-+ total_messages: 54
-
-### Hub counts
-
-+ share_size: 832572352 (number)
-+ user_count: 3 (number)
 
 ### User
 
 + cid: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA
 + nicks: `[Developer, [100]Developer]` 
-+ hub_names: [Demo hub, Dev hub]
++ hub_names: `[Demo hub, Dev hub]`
 + hub_urls: adcs://myhub.com:6423, adc://devhub.com:1234
 + flags (array[User flag])
 
@@ -1840,17 +1969,17 @@ Grouped search result
 + email: ""
 + share_size: 728128900 (number) - Share size (bytes)
 + upload_speed: 12500000 (number) - Upload speed (bytes/second)
-+ download_speed: 12500000 (number) - Download speed (bytes/second)
-+ file_count: 29 - Total number of files shared by the user
++ download_speed: 12500000 (number) - Download speed (bytes/second, ADC users only)
++ file_count: 29 (number) - Total number of files shared by the user (ADC users only)
 + description: Demo share
 + tag: `<AirDC++w 1.3.1-44-g616c,M:P-,H:0/0/1,S:19>`
 
 ### User flag (enum[string])
 
 + me - The user is me
-+ bot - The user is a bot
-+ ascs - The user supports advanced searching extension
-+ ccpm - The user supports encrypted client-to-client private messaging
++ bot - The user is a bot (ADC users only)
++ ascs - The user supports advanced searching extension (ADC users only)
++ ccpm - The user supports encrypted client-to-client private messaging (ADC users only)
 + ignored - Messages from this user are ignored
 + favorite - The user has been marked as favorite
 + nmdc - NMDC user
@@ -1863,57 +1992,3 @@ Grouped search result
 + hidden - The user is not visible in userlist
 + noconnect - It's not possible to establish transfer/CCPM connections to this user
 + passive - The user has passive connectivity mode configured
-
-### IP
-
-+ country_id: NL - Netherlands
-+ ip: 89.255.248.35
-+ str: NL - Netherlands (89.255.248.35)
-
-### Share profile
-
-+ id: 7453466 (number)
-+ name: Videos only
-+ str: Videos only (default)
-+ `default`: true (boolean) - Specifies whether this is the default share profile
-+ size: 74655272532 (number) - Total size of shared files in this profile in bytes
-+ files: 24643 - Total number of shared files in this profile
-
-### Share profile basic
-
-+ id: 7453466 (number)
-+ str: Videos only (default)
-
-### Encryption
-
-+ str: `TLSv1.2 / ECDHE-RSA-AES128-GCM-SHA256` - TLS version and cipher
-+ trusted: false (boolean) - Indicates whether there's a matching keyprint set for the hub
-
-### Session
-
-+ id: 143743423 (number) - Session ID (this is not the auth token)
-+ ip: [::1] - Last IP address used for the connection (IPv4/IPv6)
-+ last_activity: 6236 - Milliseconds since last session activity
-+ type: secure (enum[string])
-  + basic_http
-  + plain
-  + secure
-+ user (Web user) - Web user account used for authentication
-
-### System info
-
-+ cid: 76NLOTOBZVTWXOHIWKCXB27W46ULOI7EAUZUTTI - An unique application identifier
-+ run_wizard: false - Whether the initial configuration wizard was run
-+ hostname: web-demo - System hostname
-+ path_separator: / - System's native path separator character
-+ platform: other (enum[string])
-  + windows
-  + osx
-  + other
-
-### Web user
-
-+ username: user1
-+ permissions: search, transfers, events_view, queue_view (array[string]) - List of permissions assigned for the user. Note: 'admin' permission gives access to all API methods.
-+ active_sessions: 1 (number)
-+ last_login: 412412456 (number) - Time of the last successful login
