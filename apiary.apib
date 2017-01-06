@@ -353,6 +353,8 @@ A single hasher has finished.
 
 ### Hash statistics [POST /hash/listener/hash_statistics]
 
+Only the properties that have changed since the last event are sent.
+
 + Response 200 (application/json)
     + Attributes
         + hash_speed: 4367623 (number) - Total current hashing speed, bytes per second
@@ -670,13 +672,201 @@ Only the user ID and possibly changed fields are sent
     + Attributes (Hub user)
 
 
+
+
 # Group Private chat
 
-TODO
+
+//Hub API provides methods for communicating with hubs
+
+## Private chat sessions [/private_chat/sessions]
+
+### Get a list of all private chat sessions [GET]
+
+Required permission: *private_chat_view*
+
++ Response 200 (application/json)
+    + Attributes (array[Private chat])
+
+## Private chat session [/private_chat/session]
+
+### Create session [POST]
+
+Create a new API session by providing the web user credentials.
+
+Required permission: *private_chat_edit*
+
++ Request (application/json)
+    + Attributes
+        + user (Hinted user base)
++ Response 200 (application/json)
+    + Attributes (Private chat)
+
+### Get session [GET /private_chat/session/{session_id}]
+
+Required permission: *private_chat_view*
+
+Get a single session by ID.
+
++ Request (application/json)
+
++ Response 200 (application/json)
+    + Attributes (Private chat)
+
+### Remove session [DELETE /private_chat/session/{session_id}]
+
+Required permission: *private_chat_edit*
+
++ Response 204
+
+## Miscellaneous [/private_chat]
+
+### Send chat message [POST /private_chat/message]
+
+Send private chat message message to a specific user. This should generally be used for announcement-like messages only as private chat sessions are more suitable for bidirectional chatting.
+
+Required permission: *private_chat_send*
+
++ Request (application/json)
+    + Attributes 
+        + message (Chat message request)
+        + user (Hinted user base)
+        + echo: false (boolean) - Echo the sent message back to me. This will always cause a new private chat session to be created and allows the message to be logged. Note that a private chat session will also be created if the other users replies to your message (or sends an away message).
+            + Default: false
+
++ Response 204
+
+
+## Subscriptions [/private_chat/listener]
+
+Required permission: *private_chat_view*
+
+All subscriptions from private chat entities are also available to be used across all sessions (add them with */private_chat/listener/event_name*).
+
+### Private chat session created [POST /private_chat/listener/private_chat_created]
+
++ Response 200 (application/json)
+
+    + Attributes (Private chat)
+
+### Private chat session removed [POST /private_chat/listener/private_chat_removed]
+
++ Response 200 (application/json)
+    + Attributes (Private chat)
+
+
+## Data Structures
+
+### Private chat
+
++ id: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA
++ user (Hinted user)
++ ccpm_state (object)
+    + id: connected (enum[string])
+        + connecting
+        + connected
+        + disconnected
+    + str: Connected
+    + encryption (Encryption, optional) - Available only with connected CCPM connections
++ unread_messages (Unread info)
++ total_messages: 54 (number)
+
+
 
 # Group Private chat sessions
 
-TODO
+## Methods [/private_chat/session/{id}]
+
+### Get messages [GET /private_chat/session/{session_id}/messages/{max_count}]
+
+Required permission: *private_chat_view*
+
++ Parameters
+    + max_count: 0 - Maximum number of messages to return (0 = unlimited)
+
++ Response 200 (application/json)
+    + Attributes (array)
+        + (object)
+            + chat_message (Chat message)
+        + (object)
+            + status_message (Status message)
+
+### Send chat message [POST /private_chat/session/{session_id}/message]
+
+Send private message to the user.
+
+Required permission: *private_chat_send*
+
++ Request (application/json)
+    + Attributes (Chat message request)
+
++ Response 204
+
+### Send status message [POST /private_chat/session/{session_id}/status]
+
+Send a status message that is only shown locally in this chat session.
+
+Required permission: *private_chat_edit*
+
++ Request (application/json)
+    + Attributes (Status message request)
+
++ Response 204
+
+### Clear message cache [POST /private_chat/session/{session_id}/clear]
+
+Required permission: *private_chat_edit*
+
++ Response 204
+
+### Set all messages as read [POST /private_chat/session/{session_id}/read]
+
+Required permission: *private_chat_view*
+
++ Response 204
+
+### Initiate CCPM connection [POST /private_chat/session/{session_id}/ccpm]
+
+Establish an encrypted client-to-client private messaging channel. CCPM is available only with users having the *ccpm* flag.
+
+Required permission: *private_chat_edit*
+
++ Response 204
+
+### Disconnect CCPM connection [DELETE /private_chat/session/{session_id}/ccpm]
+
+Disconnect encrypted client-to-client private messaging channel. Messages will be delivered through the hub after the channel has been disconnected.
+
+Required permission: *private_chat_edit*
+
++ Response 204
+
+
+## Subscriptions [/private_chat/session/{id}/listener]
+
+Required permission: *private_chat_view*
+
+All subscriptions from private chat entities are also available to be used across all sessions (add them with */private_chat/listener/event_name*).
+
+### Session updated [POST /private_chat/session/{id}/listener/private_chat_updated]
+
++ Response 200 (application/json)
+    + Attributes
+        + session (Private chat)
+
+### Chat message received [POST /private_chat/session/{id}/listener/private_chat_message]
+
++ Response 200 (application/json)
+
+    + Attributes (Chat message)
+        
+### Status message received [POST /private_chat/session/{id}/listener/private_chat_status]
+
++ Response 200 (application/json)
+    + Attributes (Status message)
+
+
+
 
 # Group Queue
 
@@ -881,7 +1071,7 @@ You may also use the following listeners for specific types of events:
 + time_added: 65235235 (number)
 + time_finished: 0 (number) - Time when the item was finished (0 = not finished)
 + speed: 5234324 (number) - Current download speed, bytes per second
-+ seconds_left: 632576 - Seconds left based on the current download speed
++ seconds_left: 632576 (number) - Seconds left based on the current download speed
 + sources (Queue source info)
 
 ### Queue bundle (Queue item base)
@@ -890,6 +1080,23 @@ You may also use the following listeners for specific types of events:
 + name: Ubuntu
 + target: /home/airdcpp/share/Ubuntu/
 + type (Item type)
++ status
+    + id: queued (enum[string])
+         + new - Not added in queue yet
+         + queued - Queued
+         + recheck
+         + downloaded
+         + moved
+         + download_failed
+         + scan_failed
+         + finished
+         + hashing
+         + hash_failed
+         + hashed
+         + shared
+    + failed: false (boolean) - Whether the bundle is in an error state
+    + finished: false (boolean) - Whether the bundle has finished downloading
+    + str: `Running (42.3%)`
 
 ### Queue file (Queue item base)
 
@@ -900,7 +1107,7 @@ You may also use the following listeners for specific types of events:
 + bundle: 83425443 (number) - Bundle (0 = no bundle)
 + status
     + str: `Running (42.3%)`
-    + finished: false
+    + finished: false (boolean)
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
 
 ### Queue bundle source
@@ -1023,10 +1230,7 @@ All subscriptions from search instances are also available to be used across all
 + slots (Slot count)
 + time: 1483611358 (number) - File creation/modification date.
 + connection: 12500000 (number)  - Connection speed, bytes per second
-+ ip
-    + country_id: NL - Netherlands
-    + ip: 2a00:1a48:1261::168
-    + str: NL - Netherlands (2a00:1a48:1261::168)
++ ip (IP)
 
 ### Slot count
 
@@ -1568,7 +1772,136 @@ Required permission: *admin*
 
 # Group Transfers
 
-TODO
+Tranfer API manages download and upload connections.
+
+
+## Transfers [/transfers/transfers]
+
+### Get transfers [GET]
+
+Required permission: *transfers*
+
++ Response 200 (application/json)
+    + Attributes (array[Transfer item])
+
+
+## Transfer [/transfers/transfer]
+
+### Get transfer [GET /transfers/transfer/{id}]
+
+Required permission: *transfers*
+
++ Response 200 (application/json)
+    + Attributes (Transfer item)
+
+### Disconnect transfer [POST /transfers/transfer/{id}/disconnect]
+
+Disconnect a running transfer.
+
+Required permission: *transfers*
+
++ Response 204
+
+### Force connect [POST /transfers/transfer/{id}/force]
+
+Attempt to establish connection instantly. Has no effect for running transfers.
+
+Required permission: *transfers*
+
++ Response 204
+
+
+## Generic methods [/transfers]
+
+### Get transferred bytes [POST /transfers/tranferred_bytes]
+
++ Response 200 (application/json)
+    + Attributes
+        + session_downloaded: 5325235 (number)
+        + session_uploaded 6768544233 (number)
+        + start_total_downloaded: 5543652344 (number)
+        + start_total_uploaded: 6433254263622 (number)
+    
+
+## Subscriptions [/transfers/listener]
+
+Required permission: *transfers*
+
+### Transfer added [POST /transfers/listener/transfer_added]
+
+Only the values that have changed after the last event are sent.
+
++ Response 200 (application/json)
+    + Attributes (Transfer item)
+
+### Transfer updated [POST /transfers/listener/transfer_updated]
+
+Only the updated properties are sent.
+
++ Response 200 (application/json)
+    + Attributes (Transfer item)
+
+### Transfer removed [POST /transfers/listener/transfer_removed]
+
++ Response 200 (application/json)
+    + Attributes (Transfer item)
+
+### Transfer statistics [POST /transfers/listener/transfer_statistics]
+
+Only the values that have changed after the last event are sent.
+
++ Response 200 (application/json)
+    + Attributes
+        + speed_down: 0 (number)
+        + speed_up: 754324 (number)
+        + limit_down: 0 (number)
+        + limit_up: 0 (number)
+        + upload_bundles: 1 (number)
+        + download_bundles: 0 (number)
+        + uploads: 2 (number)
+        + downloads: 0 (number)
+        + session_downloaded: 5325235 (number)
+        + session_uploaded 6768544233 (number)
+
+
+## Data Structures
+
+### Transfer item
+
++ id: 83425443
++ name: Ubuntu 14.04.iso - Local file name
++ target: /home/airdcpp/share/Ubuntu/Ubuntu 14.04.iso - Local file path
++ download: true (boolean) - Whether it's a download (false = upload)
++ type (File type) - Content type 'filelist' is also used here
++ size: 62523525626 (number) - Size in bytes
++ bytes_transferred: 4521124 (number)
++ time_started: 65235235 (number)
++ speed: 5234324 (number) - Current transfer speed, bytes per second
++ seconds_left: 632576 (number) - Seconds left based on the current transfer speed
++ encryption (Encryption)
++ ip (IP)
++ user (Hinted user)
++ status
+    + id (enum[string])
+        + waiting
+        + finished
+        + running
+        + failed
+    + str: `Running (42.3%)`
+    + finished: false (boolean)
++ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
++ flags (array[Transfer flag])
+
+### Transfer flag (enum[string])
+
++ M - MCN
++ S - Encryption, trusted certificate
++ U - Encryption, untrusted certificate
++ P - Partial bundle/file sharing
++ T - TTH validation is enabled (downloads only)
++ Z - Compressed file transfer
++ C - Chunked file transfer
+
 
 # Group Users
 
@@ -1628,6 +1961,8 @@ Required permission: *settings_edit*
 + Response 200 (application/json)
     + Attributes (User)
 
+
+
 # Group Web users
 
 ## Data Structures
@@ -1635,9 +1970,36 @@ Required permission: *settings_edit*
 ### Web user
 
 + username: user1
-+ permissions: search, transfers, events_view, queue_view (array[string]) - List of permissions assigned for the user. Note: 'admin' permission gives access to all API methods.
++ permissions (array[Web permission]) - List of permissions assigned for the user. Note: 'admin' permission gives access to all API methods.
 + active_sessions: 1 (number)
 + last_login: 412412456 (number) - Time of the last successful login
+
+### Web permission (enum[string])
+
++ admin - This permission gives access to all API features and not other permissions will be listed
++ download
++ search
++ transfers
++ favorite_hubs_view
++ favorite_hubs_edit
++ events_view
++ events_edit
++ filelists_view
++ filelists_edit
++ filesystem_view
++ filesystem_edit
++ hubs_view
++ hubs_edit
++ hubs_send
++ private_chat_view
++ private_chat_edit
++ private_chat_send
++ queue_edit
++ queue_view
++ settings_view
++ settings_edit
++ view_file_view
++ view_file_edit
 
 
 # Group Viewed files
@@ -1961,10 +2323,7 @@ Fired when the file is ready for viewing
     + country_id: NL - Netherlands
     + ip: 89.255.248.35
     + str: NL - Netherlands (89.255.248.35)
-+ ip6 (object) - IPv6 address
-    + country_id: NL - Netherlands
-    + ip: 2a00:1a48:1261::168
-    + str: NL - Netherlands (2a00:1a48:1261::168)
++ ip6 (IP) - IPv6 address
 + nick: Share
 + email: ""
 + share_size: 728128900 (number) - Share size (bytes)
@@ -1973,6 +2332,12 @@ Fired when the file is ready for viewing
 + file_count: 29 (number) - Total number of files shared by the user (ADC users only)
 + description: Demo share
 + tag: `<AirDC++w 1.3.1-44-g616c,M:P-,H:0/0/1,S:19>`
+
+### IP
+
++ country_id: NL - Netherlands
++ ip: 2a00:1a48:1261::168
++ str: NL - Netherlands (2a00:1a48:1261::168)
 
 ### User flag (enum[string])
 
