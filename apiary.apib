@@ -122,11 +122,6 @@ Required permission: *favorite_hubs_view*
 + share_profile: 7436564 (number)  - Share profile to use (ADC hubs only, defaults to global value if not set)
 + password: mystrongpassword
 
-### Share profile basic
-
-+ id: 7453466 (number)
-+ str: `Videos only (default)`
-
 
 # Group Events
 
@@ -196,10 +191,148 @@ Required permission: *events_view*
 
 # Group Filelists
 
-TODO
+
+## Filelist sessions [/filelists/sessions]
+
+### Get filelist sessions [GET]
+
+Get a list of all filelist sessions.
+
+Required permission: *filelists_view*
+
++ Response 200 (application/json)
+    + Attributes (array[Filelist])
+
+## Filelist session [/filelists/session]
+
+### Create session [POST]
+
+Queue filelist from an user.
+
+Required permission: *filelists_edit*
+
++ Request (application/json)
+    + Attributes
+        + user (Hinted user, required)
+        + list_path: /Share/Ubuntu/ (optional) - Initial filelist directory to load. Filelist root is loaded, if not specified.
+            + Default: /
++ Response 200 (application/json)
+    + Attributes (Filelist)
+
+### Get session [GET /filelists/session/{session_id}]
+
+Required permission: *filelists_view*
+
+Get a single session by ID.
+
++ Request (application/json)
+
++ Response 200 (application/json)
+    + Attributes (Filelist)
+
+### Remove session [DELETE /filelists/session/{session_id}]
+
+Required permission: *filelists_edit*
+
++ Response 204
+
+
+## Directory downloads [/filelists]
+
+### Get directory downloads [GET /filelists/directory_downloads]
+
+Get a list of all directory downloads.
+
+Required permission: *download*
+
++ Response 200 (application/json)
+    + Attributes (array[Directory download item])
+
+
+### Create directory download [POST /filelists/directory_download]
+
+Required permission: *download*
+
++ Request (application/json)
+    + Attributes (Download params)
+        + user (Hinted user, required)
+        + list_path: /Share/Ubuntu/ (required)
++ Response 200 (application/json)
+    + Attributes (Directory download item)
+
+### Remove directory download [DELETE /filelists/directory_download/{download_id}]
+
+Required permission: *download*
+
++ Response 204
+
+
+## Subscriptions [/filelists/listener]
+
+Required permission: *filelists_view*
+
+All subscriptions from filelist entities are also available to be used across all sessions (add them with */filelists/listener/event_name*).
+
+### Filelist session created [POST /filelists/listener/filelist_created]
+
++ Response 200 (application/json)
+
+    + Attributes (Filelist)
+
+### Filelist session removed [POST /filelists/listener/filelist_removed]
+
++ Response 200 (application/json)
+    + Attributes (Filelist)
+
+### Directory download added [POST /filelists/listener/filelist_directory_download_added]
+
++ Response 200 (application/json)
+    + Attributes (Directory download item)
+
+### Directory download removed [POST /filelists/listener/filelist_directory_download_removed]
+
++ Response 200 (application/json)
+    + Attributes (Directory download item)
+
+### Directory download processed [POST /filelists/listener/filelist_directory_download_processed]
+
++ Response 200 (application/json)
+    + Attributes 
+        + directory_download (Directory download item)
+        + result (Queue directory bundle add info)
+
+### Directory download failed [POST /filelists/listener/filelist_directory_download_failed]
+
++ Response 200 (application/json)
+    + Attributes (Directory download item)
+        + directory_download (Directory download item)
+        + error: The directory is empty
 
 ## Data Structures
 
+### Filelist
+
++ id: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA
++ user (Hinted user)
++ location (Filelist item) - Information about the current location
++ share_profile (Share profile basic) - Only available for own filelist
++ state (Downloadable item state)
++ read: false (boolean) - Has the filelist been marked as read
++ total_files: 53356 (number)
++ total_size: 221767274 (number)
+
+
+### Filelist item
+
++ id: 32 (number)
++ name: Ubuntu 14.04
++ type (Item type)
++ path: /home/airdcpp/share/Ubuntu/Ubuntu 14.04/ - Path in remote user's share
++ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
++ dupe (Dupe)
++ time: 1483611358 (number) - File creation/modification date (not always available)
++ size: 62523525626 (number) - Size in bytes (not always available for directories)
++ complete: true (boolean) - Whether the directory content has been downloaded
 
 
 ### Directory download item (Download params)
@@ -212,7 +345,55 @@ TODO
 
 # Group Filelist entities
 
-TODO
+## Methods [/filelists/session/{session_id}]
+
+### Get directory content [GET /filelists/session/{session_id}/items]
+
+Get a list of all files and directories inside the current filelist location. If the directory content has not yet been loaded, an error will be returned.
+
+Required permission: *filelists_view*
+
++ Response 200 (application/json)
+    + Attributes (array[Filelist item])
+    
++ Response 503
+
+        Content of this directory is not yet available
+
+
+### Change directory [POST /filelists/session/{session_id}/directory]
+
+Change the current filelist directory.
+
+Required permission: *filelists_view*
+
++ Request (application/json)
+    + Attributes
+        + list_path: /Share/Ubuntu/ (required)
+        + reload: false (boolean) - Force reloading of all existing content
+            + Default: false
++ Response 204
+
+### Set filelist as read [POST /filelists/session/{session_id}/read]
+
+Required permission: *filelists_view*
+
++ Response 204
+
+
+## Subscriptions [/filelists/session/{session_id}/listener]
+
+Required permission: *filelists_view*
+
+All subscriptions from filelist entities are also available to be used across all sessions (add them with */filelists/listener/event_name*).
+
+### Filelist session updated [POST /filelists/listener/filelist_updated]
+
++ Response 200 (application/json)
+    + Attributes (Filelist)
+
+
+
 
 # Group Filesystem
 
@@ -392,7 +573,7 @@ Required permission: *hubs_view*
 
 ### Create session [POST]
 
-Create a new API session by providing the web user credentials.
+Create a new hub session.
 
 Required permission: *hubs_edit*
 
@@ -400,8 +581,7 @@ Required permission: *hubs_edit*
     + Attributes
         + hub_url: adcs://myhub.com:6423 (required) - Full URL of the hub to connect to
 + Response 200 (application/json)
-    + Attributes
-        + id: 5 (number)
+    + Attributes (Hub)
 
 ### Get session [GET /hubs/session/{session_id}]
 
@@ -420,6 +600,7 @@ Required permission: *hubs_edit*
 
 + Response 204
 
+
 ## Miscellaneous [/hubs]
 
 ### Search nicks [POST /hubs/search_nicks]
@@ -434,7 +615,6 @@ Search users from all hubs with nick matching the provided pattern. The most rel
             + Default: true
 
 + Response 200 (application/json)
-
     + Attributes (array[Hub user])
 
 ### Stats [GET /hubs/stats]
@@ -1253,11 +1433,13 @@ Required permission: *search*
 + Request (application/json)
     + Attributes 
         + query (Search query, required)
+        + manual: false (boolean, optional) - Manual searches will be added in the search queue before automated ones to minimize waiting time for the user
+            + Default: false
         + hub_urls: adcs://myhub.com:6423, mynmdchub.com (optional) - A list of hub URLs where the search should be sent to. Search will be sent to all connected hubs if this field is not provided.
 
 + Response 200 (application/json)
     + Attributes
-        + queue_time: 5000 - Current queue time for this search in milliseconds
+        + queue_time: 5000 - Current queue time for this search in milliseconds. Given that this is not a manual search, higher priority searches that are queued after this one may increase the waiting time even more.
         + search_id: 643345 - An individual search ID for this query
         + sent: 3 - Number of hubs for which the search was queued
 
@@ -1293,6 +1475,7 @@ Required permission: *download*
 
 + Request (application/json)
     + Attributes (Download params)
+        + target_name: Ubuntu (optional) - Name of the search result will be used if not specified
 
 + Response 200 (application/json)
     + Attributes
@@ -1686,11 +1869,121 @@ Required permission: *settings_edit*
 + size: 74655272532 (number) - Total size of shared files in this profile in bytes
 + files: 24643 (number) - Total number of shared files in this profile
 
+### Share profile basic
+
++ id: 7453466 (number)
++ str: `Videos only (default)`
 
 
 # Group Share roots
 
-TODO
+
+
+## Share roots [/share_roots/roots]
+
+### List share roots [GET]
+
+Get a list of all shared root directories.
+
+Required permission: *settings_view*
+
++ Response 200 (application/json)
+    + Attributes (array[Share root])
+
+
+## Share root [/share_roots/root]
+
+### Create share root [POST]
+
+Required permission: *settings_edit*
+
++ Request (application/json)
+    + Attributes (Share root request)
+        + path: /home/airdcpp/share/Linux/Ubuntu 14.04/ (required) - Local directory path
+    
++ Response 200 (application/json)
+    + Attributes (Share root)
+
+### Update share root [PATCH /share_roots/root/{root_id}]
+
+Update the specified fields of a share root
+
+Required permission: *settings_edit*
+
++ Request (application/json)
+    + Attributes (Share root request)
+    
++ Response 200 (application/json)
+    + Attributes (Share root)
+
+### Get share root [GET /share_roots/root/{root_id}]
+
+Required permission: *settings_view*
+
+Get a single root by ID.
+
++ Request (application/json)
+
++ Response 200 (application/json)
+
+    + Attributes (Share root)
+    
+### Remove share root [DELETE /share_roots/root/{root_id}]
+
+Required permission: *settings_edit*
+
++ Response 204
+
+
+## Subscriptions [/share_roots/listener]
+
+Required permission: *settings_view*
+    
+### Share root created [POST /share_roots/listener/share_root_created]
+
++ Response 200 (application/json)
+    + Attributes (Share root)
+
+### Share root updated [POST /share_roots/listener/share_root_updated]
+
+Only the updated properties are sent.
+
++ Response 200 (application/json)
+    + Attributes (Share root)
+
+### Share root created [POST /share_roots/listener/share_root_removed]
+
++ Response 200 (application/json)
+    + Attributes (Share root)
+
+## Data Structures
+
+
+### Share root request
+
++ virtual_name: Ubuntu 14.04 (optional) - Directory name that is shown in the filelist. Multiple roots may be added with the same virtual name and they will be merged in filelist. If no virtual name is specified, it will be determined automatically from the path.
++ incoming: true (boolean, optional) - Set this root as incoming that can be configured to use a different refresh interval.
+    + Default: false
++ profiles: 13, 5314 (array, optional) - List of share profiles to use for this root. If no share profile is specified, the default one will be added.
+
+### Share root
+
++ id: 427 (number)
++ path: /home/airdcpp/share/Linux/Ubuntu 14.04/ - Local directory path
++ virtual_name: Ubuntu 14.04 - Name to show in filelist
++ incoming: true (boolean) - Incoming roots can be configured to use a different refresh interval.
+    + Default: false
++ profiles (array[Share profile basic])  - List of share profiles configured for this root.
++ type (Folder type)
++ size: 62523525626 (number) - Size in bytes
++ last_refresh_time: 1483611458 (number) - Time of last refresh
++ status
+    + id (enum[string])
+        + normal
+        + refresh_pending
+        + refresh_running
+    + str: Normal
+
 
 # Group System
 
@@ -2174,7 +2467,7 @@ Fired when the file is ready for viewing
 ### Download params (object)
 
 + target_name: Ubuntu (required)
-+ target_directory: /home/airdcpp/share/ (required)
++ target_directory: /home/airdcpp/share/ - Destination path where the bundle will be created. If no path is provided, the default download directory will be used.
 + priority (Priority ID, optional) - Bundle priority. Auto priority will be used if not specified.
 
 ### Downloadable item state
@@ -2183,6 +2476,7 @@ Fired when the file is ready for viewing
     + download_failed
     + download_pending
     + downloading
+    + loading
     + downloaded
 + str: `Downloading (45.4%)`
 
@@ -2335,7 +2629,7 @@ Fired when the file is ready for viewing
 
 ### IP
 
-+ country_id: NL - Netherlands
++ country: NL - Netherlands
 + ip: 2a00:1a48:1261::168
 + str: NL - Netherlands (2a00:1a48:1261::168)
 
