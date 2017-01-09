@@ -6,9 +6,91 @@ WORK IN PROGRESS
 
 This documentation isn't compatible with the current stable versions of AirDC++/AirDC++ Web client
 
+
+
 # Group Favorite directories
 
-TODO
+
+## Favorite directories [/favorite_directories/directories]
+
+### List favorite directories [GET]
+
+Get a list of all favorite directories.
+
+Required permission: *settings_view*
+
++ Response 200 (application/json)
+    + Attributes (array[Favorite directory])
+
+### Grouped directories [GET /favorite_directories/grouped_paths]
+
++ Response 200 (application/json)
+    + Attributes (array[Grouped path])
+
+## Favorite directory [/favorite_directories/directory]
+
+### Create favorite directory [POST]
+
+Required permission: *settings_edit*
+
++ Request (application/json)
+    + Attributes
+        + path: /home/airdcpp/share/Linux/ (required) - Directory path
+        + name: Linux (optional) - Virtual display name for the directory. Multiple paths can be added with the same name. Name will be determined from the path if not specified.
+    
++ Response 200 (application/json)
+    + Attributes (Favorite directory)
+
+### Update favorite directory [PATCH /favorite_directories/directory/{directory_id}]
+
+Update the specified fields of a favorite directory.
+
+Required permission: *settings_edit*
+
++ Request (application/json)
+    + Attributes
+        + name: Linux - Virtual display name for the directory. Multiple paths can be added with the same name.
+    
++ Response 200 (application/json)
+    + Attributes (Favorite directory)
+
+### Get favorite directory [GET /favorite_directories/directory/{directory_id}]
+
+Required permission: *settings_view*
+
+Get a single directory by ID.
+
++ Request (application/json)
+
++ Response 200 (application/json)
+    + Attributes (Favorite directory)
+
+### Remove favorite directory [DELETE /favorite_directories/directory/{directory_id}]
+
+Required permission: *settings_edit*
+
++ Response 204
+
+
+## Subscriptions [/favorite_directories/listener]
+
+Required permission: *settings_view*
+
+### Favorite directories updated [POST /favorite_hubs/listener/favorite_hub_updated]
+
++ Response 200 (application/json)
+    + Attributes (array[Favorite directory])
+
+## Data Structures
+
+### Favorite directory
+
++ id: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
++ name: Linux - Virtual display name for the directory. Multiple paths can be added with the same name.
++ path: /home/airdcpp/share/Linux/ - Directory path
+
+
+
 
 # Group Favorite hubs
 
@@ -73,7 +155,7 @@ Required permission: *favorite_hubs_edit*
 
 Required permission: *favorite_hubs_view*
     
-### Favorite hub created [POST /hubs/listener/favorite_hub_created]
+### Favorite hub created [POST /favorite_hubs/listener/favorite_hub_created]
 
 + Response 200 (application/json)
     + Attributes (Favorite hub)
@@ -170,7 +252,7 @@ Required permission: *events_edit*
 Required permission: *events_view*
 
 + Response 200 (application/json)
-    + Attributes (Unread info)
+    + Attributes (Log message info)
 
 
 ## Subscriptions [/events/listener]
@@ -180,12 +262,13 @@ Required permission: *events_view*
 ### Message counts updated [POST /events/listener/event_counts]
 
 + Response 200 (application/json)
-    + Attributes (Unread info)
+    + Attributes (Log message info)
 
 ### Message posted [POST /events/listener/event_message]
 
 + Response 200 (application/json)
     + Attributes (Status message)
+
 
 
 
@@ -205,7 +288,7 @@ Required permission: *filelists_view*
 
 ## Filelist session [/filelists/session]
 
-### Create session [POST]
+### Create remote filelist session [POST]
 
 Queue filelist from an user.
 
@@ -219,11 +302,23 @@ Required permission: *filelists_edit*
 + Response 200 (application/json)
     + Attributes (Filelist)
 
+### Create local filelist session [POST /filelists/session/me]
+
+Browse own share.
+
+Required permission: *filelists_edit*
+
++ Request (application/json)
+    + Attributes
+        + share_profile: 643 (number, optional) - ID of the share profile to browse. Default profile is used if not specified.
++ Response 200 (application/json)
+    + Attributes (Filelist)
+
 ### Get session [GET /filelists/session/{session_id}]
 
 Required permission: *filelists_view*
 
-Get a single session by ID.
+Get a single filelist session by ID.
 
 + Request (application/json)
 
@@ -237,9 +332,9 @@ Required permission: *filelists_edit*
 + Response 204
 
 
-## Directory downloads [/filelists]
+## Directory downloads [/filelists/directory_downloads]
 
-### Get directory downloads [GET /filelists/directory_downloads]
+### Get directory downloads [GET]
 
 Get a list of all directory downloads.
 
@@ -250,6 +345,8 @@ Required permission: *download*
 
 
 ### Create directory download [POST /filelists/directory_download]
+
+Queue all content inside the specified location. Recursive partial filelist will be downloaded from ADC users and full list is used with NMDC users.
 
 Required permission: *download*
 
@@ -264,6 +361,36 @@ Required permission: *download*
 
 Required permission: *download*
 
++ Response 204
+
+
+## Miscellaneous [/filelists]
+
+### Match queue [POST /filelists/match_queue]
+
+Match queue and add the user as source for matching files.
+
+Required permission: *queue_edit*
+
++ Request (application/json)
+    + Attributes
+        + user (Hinted user, required)
+        + list_path: /Share/Ubuntu/ (optional) - Directory to match from ADC (recursive partial list is used). Full filelist is always matched from NMDC users.
+            + Default: /
++ Response 204
+
+
+### Find NFO [POST /filelists/find_nfo]
+
+Find a file with .nfo extension from the specified directory and open it for viewing. This method can only be used
+with ADC users as recursive partial filelist is used.
+
+Required permission: *view_files_edit*
+
++ Request (application/json)
+    + Attributes
+        + user (Hinted user, required)
+        + list_path: /Share/Ubuntu/ (optional) - Directory to search the files from. Root ('/') is not allowed.
 + Response 204
 
 
@@ -370,7 +497,7 @@ Required permission: *filelists_view*
 + Request (application/json)
     + Attributes
         + list_path: /Share/Ubuntu/ (required)
-        + reload: false (boolean) - Force reloading of all existing content
+        + reload: false (boolean) - Force reloading of all existing content. This has no effect with full filelists.
             + Default: false
 + Response 204
 
@@ -611,6 +738,7 @@ Search users from all hubs with nick matching the provided pattern. The most rel
     + Attributes
         + pattern: Share (required)
         + max_results: 5 (number, required)
+        + hub_urls: adcs://myhub.com:6423, mynmdchub.com (array) - A list of hub URLs where the users will be searched from. Defaults to all connected hubs.
         + ignore_prefixes: true (optional) - Ignore nick prefixes (eg. [0.5], [10]) when comparing match relevancies
             + Default: true
 
@@ -694,8 +822,7 @@ All subscriptions from hub entities are also available to be used across all ses
     + description: Demo hub for AirDC++ Web Client
 + share_profile (Share profile)
 + favorite_hub: 64723743 (number) - Favorite hub ID (0 = no favorite hub)
-+ unread_messages (Unread info)
-+ total_messages: 54 (number)
++ messages (Chat message info)
 
 ### Hub counts
 
@@ -948,8 +1075,7 @@ All subscriptions from private chat entities are also available to be used acros
         + disconnected
     + str: Connected
     + encryption (Encryption, optional) - Available only with connected CCPM connections
-+ unread_messages (Unread info)
-+ total_messages: 54 (number)
++ messages (Chat message info)
 
 
 
@@ -1669,14 +1795,8 @@ Required permission: *share_edit*
 
 ### Grouped share roots [GET /share/grouped_root_paths]
 
-Required permission: *share_edit*
-
 + Response 200 (application/json)
-
-    + Attributes (array[object])
-        + (object)
-            + name: Videos
-            + paths: /home/airdcpp/share/Videos/, /mnt/disk2/share/Videos/ (array[string])
+    + Attributes (array[Grouped path])
 
 ### Refresh whole share [POST /share/refresh]
 
@@ -1968,7 +2088,7 @@ Only the updated properties are sent.
 
 ### Share root
 
-+ id: 427 (number)
++ id: 76NLOTOBZVTWXOHIWKCXB27W46ULOI7EAUZUTTI
 + path: /home/airdcpp/share/Linux/Ubuntu 14.04/ - Local directory path
 + virtual_name: Ubuntu 14.04 - Name to show in filelist
 + incoming: true (boolean) - Incoming roots can be configured to use a different refresh interval.
@@ -2258,6 +2378,84 @@ Required permission: *settings_edit*
 
 # Group Web users
 
+## Web users [/web_users/users]
+
+### List web users [GET]
+
+Get a list of web users
+
+Required permission: *admin*
+
++ Response 200 (application/json)
+    + Attributes (array[Web user])
+
+
+## Web user [/web_users/user]
+
+### Create web user [POST]
+
+Required permission: *admin*
+
++ Request (application/json)
+    + Attributes
+        + username: user1
+        + password: userpassword
+        + permissions (array[Web permission]) - List of permissions assigned for the user. Note: 'admin' permission gives access to all API methods.
+    
++ Response 200 (application/json)
+    + Attributes (Web user)
+
+### Update web user [PATCH /web_users/user/{user_id}]
+
+Update the specified fields of a web user
+
+Required permission: *admin*
+
++ Request (application/json)
+    + Attributes
+        + password: userpassword
+        + permissions (array[Web permission]) - List of permissions assigned for the user. Note: 'admin' permission gives access to all API methods.
+    
++ Response 200 (application/json)
+    + Attributes (Web user)
+
+### Get web user [GET /web_users/user/{user_id}]
+
+Required permission: *admin*
+
+Get a single user by ID.
+
++ Request (application/json)
+
++ Response 200 (application/json)
+    + Attributes (Web user)
+
+### Remove web user [DELETE /web_users/user/{user_id}]
+
+Required permission: *admin*
+
++ Response 204
+
+
+## Subscriptions [/web_users/listener]
+
+Required permission: *admin*
+    
+### Web user created [POST /web_users/listener/web_user_added]
+
++ Response 200 (application/json)
+    + Attributes (Web user)
+
+### Web user updated [POST /web_users/listener/web_user_updated]
+
++ Response 200 (application/json)
+    + Attributes (Web user)
+
+### Web user removed [POST /web_users/listener/web_user_removed]
+
++ Response 200 (application/json)
+    + Attributes (Web user)
+
 ## Data Structures
 
 ### Web user
@@ -2293,6 +2491,7 @@ Required permission: *settings_edit*
 + settings_edit
 + view_file_view
 + view_file_edit
+
 
 
 # Group Viewed files
@@ -2451,6 +2650,11 @@ Fired when the file is ready for viewing
 
 ## Data Structures
 
+### Grouped path
+
++ name: Videos
++ paths: /home/airdcpp/share/Videos/, /mnt/disk2/share/Videos/ (array[string])
+
 ### Search query
 
 + pattern: Ubuntu - Search string. All words must be found from the full file/directory path (partial match)
@@ -2540,13 +2744,27 @@ Fired when the file is ready for viewing
 
 
 
+### Chat message info
 
++ total_count: 100 (number)
++ unread_counts (Unread chat info)
 
-### Unread info
+### Log message info
+
++ total_count: 100 (number)
++ unread_counts (Unread log info)
+
+### Unread chat info
 
 + user: 2 (number) - Number of unread user messages
 + bot: 12 (number) - Number of unread bot messages
 + status: 0 (number) - Number of unread status messages
+
+### Unread log info
+
++ info: 6 (number)
++ warning: 3 (number)
++ error: 1 (number)
 
 ### Chat message request
 
