@@ -22,14 +22,14 @@ Required permission: *settings_view*
 + Response 200 (application/json)
     + Attributes (array[Favorite directory])
 
-### Grouped directories [GET /favorite_directories/grouped_paths]
+### Get grouped paths [GET /favorite_directories/grouped_paths]
 
 + Response 200 (application/json)
     + Attributes (array[Grouped path])
 
 ## Favorite directory [/favorite_directories/directory]
 
-### Create favorite directory [POST]
+### Create favorite directory [POST /favorite_directories/directory]
 
 Required permission: *settings_edit*
 
@@ -445,6 +445,7 @@ All subscriptions from filelist entities are also available to be used across al
 + share_profile (Share profile basic) - Only available for own filelist
 + state (Downloadable item state)
 + read: false (boolean) - Has the filelist been marked as read
++ partial_list: true (boolean)
 + total_files: 53356 (number)
 + total_size: 221767274 (number)
 
@@ -474,7 +475,7 @@ All subscriptions from filelist entities are also available to be used across al
 
 ## Methods [/filelists/session/{session_id}]
 
-### Get directory content [GET /filelists/session/{session_id}/items]
+### Get directory content [GET /filelists/session/{session_id}/items/{start}/{count}]
 
 Get a list of all files and directories inside the current filelist location. If the directory content has not yet been loaded, an error will be returned.
 
@@ -497,7 +498,7 @@ Required permission: *filelists_view*
 + Request (application/json)
     + Attributes
         + list_path: /Share/Ubuntu/ (required)
-        + reload: false (boolean) - Force reloading of all existing content. This has no effect with full filelists.
+        + reload: false (boolean, optional) - Force reloading of all existing content. This has no effect with full filelists.
             + Default: false
 + Response 204
 
@@ -600,7 +601,7 @@ Required permission: *settings_edit*
 
 + Request (application/json)
     + Attributes
-        + verify: true (boolean) - Verify integrity of the databases. This will remove corrupted hash data entries.
+        + verify: true (boolean, required) - Verify integrity of the databases. This will remove corrupted hash data entries.
 
 + Response 204
 
@@ -730,20 +731,16 @@ Required permission: *hubs_edit*
 
 ## Miscellaneous [/hubs]
 
-### Search nicks [POST /hubs/search_nicks]
+### Find session by URL [POST /hubs/find_by_url]
 
-Search users from all hubs with nick matching the provided pattern. The most relevant match is returned first.
+Get a single hub session by URL (exact match).
 
 + Request (application/json)
     + Attributes
-        + pattern: Share (required)
-        + max_results: 5 (number, required)
-        + hub_urls: adcs://myhub.com:6423, mynmdchub.com (array) - A list of hub URLs where the users will be searched from. Defaults to all connected hubs.
-        + ignore_prefixes: true (optional) - Ignore nick prefixes (eg. [0.5], [10]) when comparing match relevancies
-            + Default: true
+        + hub_url: adcs://myhub.com:6423 (required)
 
 + Response 200 (application/json)
-    + Attributes (array[Hub user])
+    + Attributes (Hub)
 
 ### Stats [GET /hubs/stats]
 
@@ -759,8 +756,8 @@ Required permission: *hubs_send*
 
 + Request (application/json)
     + Attributes 
-        + message (Chat message request)
-        + hub_urls: adcs://myhub.com:6423, mynmdchub.com (array) - A list of hub URLs where the message should be sent to. The message will be sent to all connected hubs if this field is not provided.
+        + message (Chat message request, required)
+        + hub_urls: adcs://myhub.com:6423, mynmdchub.com (array, optional) - A list of hub URLs where the message should be sent to. The message will be sent to all connected hubs if this field is not provided.
 
 + Response 200 (application/json)
     + Attributes
@@ -774,8 +771,8 @@ Required permission: *hubs_edit*
 
 + Request (application/json)
     + Attributes 
-        + message (Status message request)
-        + hub_urls: adcs://myhub.com:6423, mynmdchub.com (array) - A list of hub URLs where the message should be shown. The message will be shown in all hubs if this field is not provided.
+        + message (Status message request, required)
+        + hub_urls: adcs://myhub.com:6423, mynmdchub.com (array, optional) - A list of hub URLs where the message should be shown. The message will be shown in all hubs if this field is not provided.
 
 + Response 200 (application/json)
 
@@ -792,14 +789,12 @@ All subscriptions from hub entities are also available to be used across all ses
 
 + Response 200 (application/json)
 
-    + Attributes
-        + session (Hub)
+    + Attributes (Hub)
 
 ### Hub session removed [POST /hubs/listener/hub_removed]
 
 + Response 200 (application/json)
-    + Attributes
-        + session (Hub)
+    + Attributes (Hub)
 
 
 ## Data Structures
@@ -810,19 +805,22 @@ All subscriptions from hub entities are also available to be used across all ses
 + hub_url: adcs://myhub.com:6423
 + connect_state (object)
     + id: connected (enum[string])
-        + connecting
-        + password
+        + connecting - Connecting to the hub in processed
+        + password - Password was requested by the hub and there is no saved one. The 'password' can be used to post one.
         + connected
-        + keyprint_mismatch
+        + keyprint_mismatch - Keyprint specified in the hub URL doesn't match the actual hub certificate keyprint
         + disconnected
-        + redirect
-    + encryption (Encryption, optional) - Available only for ADCS hubs after the connection has been established
+        + redirect - Redirect was requested to another hub (see state data)
+    + str: Connected
+    + data - Possible state-related data
+        + hub_url: mynmdchub.com - Redirect url ('redirect' state only)
 + identity (object)
     + name: Demo hub
     + description: Demo hub for AirDC++ Web Client
 + share_profile (Share profile)
 + favorite_hub: 64723743 (number) - Favorite hub ID (0 = no favorite hub)
-+ messages (Chat message info)
++ message_counts (Chat message info)
++ encryption (Encryption, optional) - Available only for connected ADCS hubs
 
 ### Hub counts
 
@@ -833,6 +831,22 @@ All subscriptions from hub entities are also available to be used across all ses
 # Group Hub sessions
 
 ## Methods [/hubs/session/{id}]
+
+### Get users [GET /hubs/session/{session_id}/users/{start}/{count}]
+
+Required permission: *hubs_view*
+
++ Response 200 (application/json)
+    + Attributes (array[Hub user])
+
+### Get user [GET /hubs/session/{session_id}/user/{cid}]
+
+Get user information by CID.
+
+Required permission: *hubs_view*
+
++ Response 200 (application/json)
+    + Attributes (Hub user)
 
 ### Get messages [GET /hubs/session/{session_id}/messages/{max_count}]
 
@@ -939,8 +953,7 @@ All subscriptions from hub entities are also available to be used across all ses
 ### Session updated [POST /hubs/session/{id}/listener/hub_updated]
 
 + Response 200 (application/json)
-    + Attributes
-        + session (Hub)
+    + Attributes (Hub)
 
 ### User/share counts updated [POST /hubs/session/{id}/listener/hub_counts_updated]
 
@@ -950,9 +963,8 @@ All subscriptions from hub entities are also available to be used across all ses
 ### Chat message received [POST /hubs/session/{id}/listener/hub_message]
 
 + Response 200 (application/json)
-
     + Attributes (Chat message)
-        
+
 ### Status message received [POST /hubs/session/{id}/listener/hub_status]
 
 + Response 200 (application/json)
@@ -961,17 +973,14 @@ All subscriptions from hub entities are also available to be used across all ses
 ### Hub user connected [POST /hubs/session/{id}/listener/hub_user_connected]
 
 + Response 200 (application/json)
-
     + Attributes (Hub user)
-    
+
 ### Hub user updated [POST /hubs/session/{id}/listener/hub_user_updated]
 
 Only the user ID and possibly changed fields are sent 
 
 + Response 200 (application/json)
-    + Attributes
-        + id: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA (required)
-        + share_size: 722128900 (number)
+    + Attributes (Hub user)
 
 ### Hub user disconnected [POST /hubs/session/{id}/listener/hub_user_disconnected]
 
@@ -1005,7 +1014,7 @@ Required permission: *private_chat_edit*
 
 + Request (application/json)
     + Attributes
-        + user (Hinted user base)
+        + user (Hinted user base, required)
 + Response 200 (application/json)
     + Attributes (Private chat)
 
@@ -1036,9 +1045,9 @@ Required permission: *private_chat_send*
 
 + Request (application/json)
     + Attributes 
-        + message (Chat message request)
-        + user (Hinted user base)
-        + echo: false (boolean) - Echo the sent message back to me. This will always cause a new private chat session to be created and allows the message to be logged. Note that a private chat session will also be created if the other users replies to your message (or sends an away message).
+        + message (Chat message request, required)
+        + user (Hinted user base, required)
+        + echo: false (boolean, optional) - Echo the sent message back to me. This will always cause a new private chat session to be created and allows the message to be logged. Note that a private chat session will also be created if the other users replies to your message (or sends an away message).
             + Default: false
 
 + Response 204
@@ -1075,7 +1084,7 @@ All subscriptions from private chat entities are also available to be used acros
         + disconnected
     + str: Connected
     + encryption (Encryption, optional) - Available only with connected CCPM connections
-+ messages (Chat message info)
++ message_counts (Chat message info)
 
 
 
@@ -1203,7 +1212,7 @@ Change the priority of all queued bundles.
 
 + Request (application/json)
     + Attributes
-        + priority (Priority ID, required)
+        + priority (Queue priority ID, required)
 
 + Response 204
 
@@ -1217,7 +1226,7 @@ Required permission: *queue_edit*
     + Attributes
         + target_name: Ubuntu 16.04.iso (required)
         + target_directory: /home/airdcpp/share/Ubuntu/ (required)
-        + priority (Priority ID, optional)
+        + priority (Queue priority ID, optional)
         + size: 576345234 (number) - File size in bytes (required)
         + time: 42421412 - Original file creation/modify time (optional)
         + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required)
@@ -1237,7 +1246,7 @@ Required permission: *queue_edit*
         + time: 42421412 - Original directory creation/modify time (optional)
         + files (array)
             + name: `CD1/Ubuntu 16.04.iso` (required) - File name that may also contain subdirectories relative to the main bundle path
-            + priority (Priority ID, optional) - File priority
+            + priority (Queue priority ID, optional) - File priority
             + size: 576345234 - File size in bytes (number, required)
             + time: 42421412 - Original file creation/modify time (optional)
             + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required)
@@ -1258,7 +1267,7 @@ Required permission: *queue_edit*
 
 + Request (application/json)
     + Attributes
-        + priority (Priority ID, optional)
+        + priority (Queue priority ID, optional)
         + auto_priority: false (optional)
 
 + Response 200 (application/json)
@@ -1293,7 +1302,9 @@ Required permission: *queue_view*
 
 Required permission: *queue_edit*
 
-+ Response 204
++ Response 200 (application/json)
+    + Attributes
+        + count: 4 (number) - Number of files from which the source was removed
 
 ### Search bundle for alternates [POST /queue/bundle/{id}/search]
 
@@ -1323,7 +1334,25 @@ Get local paths for file/folder name/path or a TTH value.
         + (object)
             + name: Videos
             + paths: /home/airdcpp/share/Videos/, /mnt/disk2/share/Videos/ (array[string])
-    
+
+### Remove source [DELETE /queue/source/{cid}]
+
+Remove source from all queued files.
+
+Required permission: *queue_edit*
+
++ Response 200 (application/json)
+    + Attributes
+        + count: 4 (number) - Number of files from which the source was removed
+
+### Remove file by path [DELETE /queue/remove_file]
+
+Remove source from all queued files.
+
+Required permission: *queue_edit*
+
++ Response 204
+
 
 ## Subscriptions [/queue/listener]
 
@@ -1373,7 +1402,7 @@ You may also use the following listeners for specific types of events:
 
 + size: 62523525626 (number) - Size in bytes
 + downloaded_bytes: 4521124 (number)
-+ priority (Priority)
++ priority (Queue priority)
 + time_added: 65235235 (number)
 + time_finished: 0 (number) - Time when the item was finished (0 = not finished)
 + speed: 5234324 (number) - Current download speed, bytes per second
@@ -1429,9 +1458,9 @@ You may also use the following listeners for specific types of events:
 + total: 3 (number) - Total number of item sources
 + str: 2/3 online
 
-### Priority
+### Queue priority
 
-+ id (Priority ID)
++ id (Queue priority ID)
 + str: Paused
 + auto: false (boolean) - Auto priority state
 
@@ -1462,8 +1491,8 @@ Required permission: *search*
 
 + Request (application/json)
     + Attributes
-        + expiration: 5 (optional) - Time in minutes after which the instance will be removed automatically (0 = no expiration)
-            + Default: 5
+        + expiration_minutes: 30 (optional) - Time in minutes after which the instance will be removed automatically (0 = no expiration)
+            + Default: 30
 + Response 200 (application/json)
     + Attributes (Search instance)
 
@@ -1552,15 +1581,15 @@ All subscriptions from search instances are also available to be used across all
 
 ### Perform hub search [POST /search/instance/{instance_id}/hub_search]
 
-Search files from all or separately specified hubs.
+Search files from all connected (or separately specified) hubs.
 
 Required permission: *search*
 
 + Request (application/json)
     + Attributes 
         + query (Search query, required)
-        + manual: false (boolean, optional) - Manual searches will be added in the search queue before automated ones to minimize waiting time for the user
-            + Default: false
+        + priority (Priority ID, optional) - Priority in the outgoing search queue. Priorities above 'Normal' shouldn't be used for background searches to avoid delaying manual searches performed from the UI. Defaults to 'Low'.
+            + Default: 2
         + hub_urls: adcs://myhub.com:6423, mynmdchub.com (optional) - A list of hub URLs where the search should be sent to. Search will be sent to all connected hubs if this field is not provided.
 
 + Response 200 (application/json)
@@ -1662,8 +1691,9 @@ Create a new API session by providing the web user credentials.
 + Response 200 (application/json)
     + Attributes
         + token: `25793d1e-6d48-407c-9c27-a9dcbd2e1188` - Authorization token
-        + system (System info) - Generic information about the system that the application is running on
-        + session (Session) - Session information
+        + system_info (System info) - Generic information about the system that the application is running on
+        + user (Web user) - Current web user
+        + wizard_pending: false - Whether completion of the initial configuration wizard is pending
 
 ### Remove session [DELETE]
 
@@ -1914,15 +1944,17 @@ Required permission: *settings_edit*
 
 + Request (application/json)
     + Attributes
-        + name: Video only - Name of the profile
+        + name: Video only (required) - Name of the profile
 
 + Response 200 (application/json)
     + Attributes (Share profile)
 
 ### Get share profile [GET /share_profiles/profile/{profile_id}]
 
-+ Parameters
-    + profile_id: 7453466 (optional) - Share profile ID. The default share profile will be returned returned if no ID is supplied.
++ Response 200 (application/json)
+    + Attributes (Share profile)
+
+### Get default share profile [GET /share_profiles/profile/default]
 
 + Response 200 (application/json)
     + Attributes (Share profile)
@@ -2129,11 +2161,9 @@ Only the updated properties are sent.
 + Response 200 (application/json)
     + Attributes
         + server_threads: 4 (number) - Number of configured web server threads
-        + client_started: 6338924325 (number) - Time when the application was started
-        + client_version: AirDC++w 1.4.1 - Full application version
         + active_session: 2 (number)
 
-    
+
 ### Get system info [GET /system/system_info]
 
 Get generic information about the application and the system it's running on
@@ -2174,9 +2204,10 @@ Required permission: *admin*
 ### System info
 
 + cid: 76NLOTOBZVTWXOHIWKCXB27W46ULOI7EAUZUTTI - An unique application identifier
-+ run_wizard: false - Whether the initial configuration wizard was run
 + hostname: web-demo - System hostname
 + path_separator: / - System's native path separator character
++ client_version: `AirDC++w 2.0.0 x86_64` - Full application version string
++ client_started: 1483972366 - Time when the application was started
 + platform: other (enum[string])
   + windows
   + osx
@@ -2340,9 +2371,35 @@ Required permission: *settings_edit*
 Required permission: *settings_edit*
 
 + Response 204
-    
+
+
+## Miscellaneous [/users]
+
+### Get user [GET /users/user/{cid}]
+
+Get user by CID.
+
++ Response 200 (application/json)
+    + Attributes (User)
+
+### Search nicks [POST /users]
+
+Search users with nick matching the provided pattern. The most relevant match is returned first.
+
++ Request (application/json)
+    + Attributes
+        + pattern: Share (required)
+        + max_results: 5 (number, required)
+        + hub_urls: adcs://myhub.com:6423, mynmdchub.com (array, optional) - A list of hub URLs where the users will be searched from. Defaults to all connected hubs.
+        + ignore_prefixes: true (boolean, optional) - Ignore nick prefixes (eg. [0.5], [10]) when comparing match relevancies
+            + Default: true
+
++ Response 200 (application/json)
+    + Attributes (array[Hub user])
 
 ## Subscriptions [/users/listener]
+
+Subscriptions related to connect state changes are tracked globally on per-user basis and sent users are not bound to any hub. If you want to track hub level user connect state changes, you should use the Hub API listeners instead.
 
 ### User connected [POST /users/listener/user_connected]
 
@@ -2354,8 +2411,7 @@ Required permission: *settings_edit*
 ### User updated [POST /users/listener/user_updated]
 
 + Response 200 (application/json)
-    + Attributes
-        + Attributes (User)
+    + Attributes (User)
 
 ### User disconnected [POST /users/listener/user_disconnected]
 
@@ -2398,9 +2454,9 @@ Required permission: *admin*
 
 + Request (application/json)
     + Attributes
-        + username: user1
-        + password: userpassword
-        + permissions (array[Web permission]) - List of permissions assigned for the user. Note: 'admin' permission gives access to all API methods.
+        + username: user1 (required)
+        + password: userpassword (required)
+        + permissions (array[Web permission], required) - List of permissions assigned for the user. Note: 'admin' permission gives access to all API methods.
     
 + Response 200 (application/json)
     + Attributes (Web user)
@@ -2534,11 +2590,12 @@ Required permission: *view_files_edit*
 
 + Request (application/json)
     + Attributes
-        + name: Ubuntu 14.04.nfo
-        + size: 9552 (number) - Size in bytes
-        + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
-        + text: false (boolean) - Is the file viewed as text
-        + user (Hinted user base)
+        + name: Ubuntu 14.04.nfo (required) - File name (title)
+        + size: 9552 (number, required) - Size in bytes
+        + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required) - File TTH
+        + text: false (boolean, optional) - Is the file viewed as text
+            + Default: false
+        + user (Hinted user base, required)
 + Response 200 (application/json)
     + Attributes (View file)
 
@@ -2550,7 +2607,8 @@ Required permission: *view_files_edit*
 
 + Request (application/json)
     + Attributes
-        + text: false (boolean) - Is the file viewed as text
+        + text: false (boolean, optional) - Is the file viewed as text
+            + Default: false
 + Response 200 (application/json)
     + Attributes (View file)
 
@@ -2629,18 +2687,13 @@ Fired when the file is ready for viewing
 + id: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
 + name: Ubuntu 14.04.nfo
 + size: 9552 (number) - Size in bytes
++ type (File type)
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
 + text: false (boolean) - Is the file viewed as text
-+ time_finished: 0 (number) - Time when the item was finished downloading (0 = not finished)
-+ state (Downloadable item state)
-+ type (File type)
++ time_opened: 1483277168 (number) - Time when the file was opened for viewing
 + read: false (boolean) - Has the file been marked as read
-
-
-
-
-
-
++ download_state (Downloadable item state) - Current download state of the remote user file. Not available for local files.
++ content_ready: true (boolean) - Whether the file content is ready to be viewed
 
 
 
@@ -2672,7 +2725,7 @@ Fired when the file is ready for viewing
 
 + target_name: Ubuntu (required)
 + target_directory: /home/airdcpp/share/ - Destination path where the bundle will be created. If no path is provided, the default download directory will be used.
-+ priority (Priority ID, optional) - Bundle priority. Auto priority will be used if not specified.
++ priority (Queue priority ID, optional) - Bundle priority. Auto priority will be used if not specified.
 
 ### Downloadable item state
 
@@ -2683,6 +2736,7 @@ Fired when the file is ready for viewing
     + loading
     + downloaded
 + str: `Downloading (45.4%)`
++ time_finished: 0 (number) - Time when the item finished downloading (0 = not finished)
 
 ### Encryption
 
@@ -2703,6 +2757,14 @@ Fired when the file is ready for viewing
 
 ### Priority ID (enum[number])
 
++ 1 - Lowest
++ 2 - Low
++ 3 - Normal
++ 4 - High
++ 5 - Highest
+
+### Queue priority ID (enum[number])
+
 + `-1` - `Paused (forced)`
 + 0 - Paused
 + 1 - Lowest
@@ -2710,8 +2772,6 @@ Fired when the file is ready for viewing
 + 3 - Normal
 + 4 - High
 + 5 - Highest
-
-
 
 ### Item type (enum)
 
