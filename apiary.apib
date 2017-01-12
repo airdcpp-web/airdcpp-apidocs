@@ -15,7 +15,7 @@ This documentation isn't compatible with the current stable versions of AirDC++/
 
 ### List favorite directories [GET]
 
-Get a list of all favorite directories.
+Get a list of all favorite directories.G
 
 Required permission: *settings_view*
 
@@ -681,6 +681,94 @@ Only the properties that have changed since the last event are sent.
 + hash_store_size: 446720235 (number) - Size of the hash store database on disk (bytes)
 
 
+# Group History
+
+History API allows storing and receiving various types of recently used data.
+
+## Strings [/histories/strings/{history_type}]
+
+Stores lists of plain strings for different input types.
+
+The following history types are available:
+
++ search_pattern - Previously used search patterns
++ search_excluded - Previously used excluded words for searching
++ download_target - Previously used download paths
+
+
+### Get strings [GET]
+
++ Parameters
+    + history_type
+    
++ Response 200 (application/json)
+    + Attributes (array[string])
+        + ubuntu
+        + videos
+        + linux
+
+### Add string [PATCH /histories/string/{history_type}]
+
+Add a new string in the specified string array.
+
++ Parameters
+    + history_type
+
++ Request (application/json)
+    + Attributes
+        + string: ubuntu
+    
++ Response 204
+
+
+### Clear strings [DELETE]
+
+Clear the specified history array.
+
+Required permission: *settings_edit*
+
++ Parameters
+    + history_type
+    
++ Response 204
+
+
+## Hubs [/histories/hubs]
+
+### Get hubs [GET /histories/hubs/{max_count}]
+
+Required permission: *hubs_view*
+
++ Parameters
+    + max_count: 0 - Maximum number of most recent hubs to return (0 = unlimited)
+    
++ Response 200 (application/json)
+    + Attributes (array[History hub])
+
+### Search hubs [POST /histories/hubs/search]
+
+Search hubs with hub name matching the provided pattern. The most relevant match is returned first.
+
+Required permission: *hubs_view*
+
++ Request (application/json)
+    + Attributes
+        + pattern: Demo (required)
+        + max_results: 5 (number, required)
+    
++ Response 200 (application/json)
+    + Attributes (array[History hub])
+
+
+## Data Structures
+
+### History hub
+
++ name: Demo hub
++ hub_url: adcs://myhub.com:6423
++ description: Demo hub for AirDC++ Web Client
+
+
 
 # Group Hubs
 
@@ -755,13 +843,12 @@ Send a public chat message message to specified hubs.
 Required permission: *hubs_send*
 
 + Request (application/json)
-    + Attributes 
-        + message (Chat message request, required)
+    + Attributes (Chat message request, required)
         + hub_urls: adcs://myhub.com:6423, mynmdchub.com (array, optional) - A list of hub URLs where the message should be sent to. The message will be sent to all connected hubs if this field is not provided.
 
 + Response 200 (application/json)
     + Attributes
-        + sent: 1 (number) - Number of messages that were sent successfully. Message won't be sent to URLs without a corresponding hub session or hubs that are not in a connected state.
+        + sent: 1 (number) - Number of messages that were sent successfully. Message won't be sent to hubs that are not in 'connected' state.
 
 ### Send status message [POST /hubs/status]
 
@@ -770,14 +857,13 @@ Send a status message message that is only shown locally in specified hubs.
 Required permission: *hubs_edit*
 
 + Request (application/json)
-    + Attributes 
-        + message (Status message request, required)
+    + Attributes (Status message request, required)
         + hub_urls: adcs://myhub.com:6423, mynmdchub.com (array, optional) - A list of hub URLs where the message should be shown. The message will be shown in all hubs if this field is not provided.
 
 + Response 200 (application/json)
 
     + Attributes
-        + sent: 1 (number) - Number of messages that were sent successfully. Message won't be sent to URLs without a corresponding hub session.
+        + sent: 1 (number) - Number of messages that were sent successfully.
 
 ## Subscriptions [/hubs/listener]
 
@@ -853,7 +939,7 @@ Required permission: *hubs_view*
 Required permission: *hubs_view*
 
 + Parameters
-    + max_count: 0 - Maximum number of messages to return (0 = unlimited)
+    + max_count: 0 - Maximum number of most recent messages to return (0 = unlimited)
 
 + Response 200 (application/json)
     + Attributes (array)
@@ -1044,8 +1130,7 @@ Send private chat message message to a specific user. This should generally be u
 Required permission: *private_chat_send*
 
 + Request (application/json)
-    + Attributes 
-        + message (Chat message request, required)
+    + Attributes (Chat message request, required)
         + user (Hinted user base, required)
         + echo: false (boolean, optional) - Echo the sent message back to me. This will always cause a new private chat session to be created and allows the message to be logged. Note that a private chat session will also be created if the other users replies to your message (or sends an away message).
             + Default: false
@@ -1097,7 +1182,7 @@ All subscriptions from private chat entities are also available to be used acros
 Required permission: *private_chat_view*
 
 + Parameters
-    + max_count: 0 - Maximum number of messages to return (0 = unlimited)
+    + max_count: 0 - Maximum number of most recent messages to return (0 = unlimited)
 
 + Response 200 (application/json)
     + Attributes (array)
@@ -1106,7 +1191,7 @@ Required permission: *private_chat_view*
         + (object)
             + status_message (Status message)
 
-### Send chat message [POST /private_chat/session/{session_id}/message]
+### Send chat message [POST /private_chat/session/{session_id}/chat_message]
 
 Send private message to the user.
 
@@ -1223,14 +1308,13 @@ Change the priority of all queued bundles.
 Required permission: *queue_edit*
 
 + Request (application/json)
-    + Attributes
-        + target_name: Ubuntu 16.04.iso (required)
-        + target_directory: /home/airdcpp/share/Ubuntu/ (required)
+    + Attributes (Download params)
         + priority (Queue priority ID, optional)
-        + size: 576345234 (number) - File size in bytes (required)
-        + time: 42421412 - Original file creation/modify time (optional)
+        + size: 576345234 (number, required) - File size in bytes
+        + time: 1483611358 (number, optional) - Original file creation/modify time
         + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required)
-        + user (Hinted user base, optional)
+        + user (Hinted user base, optional) - Possible source user for this file
+        + target_name: Ubuntu 16.04.iso (required)
 
 + Response 200 (application/json)
     + Attributes (Queue bundle add info)
@@ -1243,13 +1327,14 @@ Required permission: *queue_edit*
 
 + Request (application/json)
     + Attributes (Download params)
-        + time: 42421412 - Original directory creation/modify time (optional)
+        + time: 1483611358 - Original directory creation/modify time (optional)
         + files (array)
-            + name: `CD1/Ubuntu 16.04.iso` (required) - File name that may also contain subdirectories relative to the main bundle path
-            + priority (Queue priority ID, optional) - File priority
-            + size: 576345234 - File size in bytes (number, required)
-            + time: 42421412 - Original file creation/modify time (optional)
-            + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required)
+            + (object)
+                + name: `CD1/Ubuntu 16.04.iso` (required) - File name that may also contain subdirectories relative to the main bundle path
+                + priority (Queue priority ID, optional) - File priority
+                + size: 576345234 (number, required) - File size in bytes
+                + time: 42421412 (number, optional) - Original file creation/modify time (REMOVE)
+                + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required)
 
 + Response 200 (application/json)
     + Attributes (Queue directory bundle add info)
@@ -1308,7 +1393,7 @@ Required permission: *queue_edit*
 
 ### Search bundle for alternates [POST /queue/bundle/{id}/search]
 
-Searches individual bundle files for alternatives. The number of files to search for depends on the bundle structure.
+Searches individual bundle files for alternate sources. The number of files to search for depends on the bundle structure.
 
 Required permission: *queue_edit*
 
@@ -1330,10 +1415,9 @@ Get local paths for file/folder name/path or a TTH value.
             + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
 
 + Response 200 (application/json)
-    + Attributes (array[object])
-        + (object)
-            + name: Videos
-            + paths: /home/airdcpp/share/Videos/, /mnt/disk2/share/Videos/ (array[string])
+    + Attributes (array[string])
+        + /home/airdcpp/share/Ubuntu/CD1/
+        + /mnt/disk2/share/Videos/Ubuntu/CD1/
 
 ### Remove source [DELETE /queue/source/{cid}]
 
@@ -1351,36 +1435,63 @@ Remove source from all queued files.
 
 Required permission: *queue_edit*
 
++ Request (application/json)
+    + Attributes
+        + target: /share/Ubuntu/Ubuntu 14.04.iso
+        + remove_finished: false (boolean, optional) - Remove possible finished file
+            + Default: false
+
 + Response 204
 
 
-## Subscriptions [/queue/listener]
+## Bundle subscriptions [/queue/listener/queue_bundle]
 
-### Bundle added [POST /queue/listener/bundle_added]
-
-+ Response 200 (application/json)
-
-    + Attributes (Queue bundle)
-    
-### Bundle updated [POST /queue/listener/bundle_updated]
-
-You may also use the following listeners for specific types of events:
-
-- bundle_content - bundle content was changed
-- bundle_priority - bundle priority was changed
-- bundle_sources  - bundle sources were changed
-- bundle_status - bundle status was changed
-- bundle_tick - download progress was changed
+### Bundle added [POST /queue/listener/queue_bundle_added]
 
 + Response 200 (application/json)
-
     + Attributes (Queue bundle)
-    
-### Bundle removed [POST /queue/listener/bundle_removed]
+
+### Bundle updated [POST /queue/listener/queue_bundle_updated]
+
+Only the updated properties may be sent.
+
+This subscription generates a large number of updates, especially if there are bundles running. You may also use the following listeners for specific types of events:
+
+- queue_bundle_content - bundle content was changed
+- queue_bundle_priority - bundle priority was changed
+- queue_bundle_sources  - bundle sources were changed
+- queue_bundle_status - bundle status was changed
+- queue_bundle_tick - download progress was changed
 
 + Response 200 (application/json)
-
     + Attributes (Queue bundle)
+
+### Bundle removed [POST /queue/listener/queue_bundle_removed]
+
++ Response 200 (application/json)
+    + Attributes (Queue bundle)
+
+
+## File subscriptions [/queue/listener/queue_file]
+
+Subscriptions for individual queued files.
+
+### File added [POST /queue/listener/file_added]
+
++ Response 200 (application/json)
+    + Attributes (Queue file)
+
+### File updated [POST /queue/listener/file_updated]
+
+Only the updated properties may be sent.
+
++ Response 200 (application/json)
+    + Attributes (Queue file)
+
+### File removed [POST /queue/listener/file_removed]
+
++ Response 200 (application/json)
+    + Attributes (Queue file)
 
 
 ## Data Structures
@@ -1469,8 +1580,79 @@ You may also use the following listeners for specific types of events:
 
 # Group Searching
 
+**Introduction**
 
-Hub API provides methods for communicating with hubs
+1. Create a new search instance that will collect results
+2. Post the search
+
+Hubs will then forward the search query to all connected users
+
+3. Let the results to arrive for a while
+4. Fetch them
+
+
+
+```javascript
+
+// Create a new search instance
+const instance = await api.post('search/instance')
+
+// Post the search
+const searchInfo = await api.post(`search/instance/${instance.id}/hub_search`, {
+  query: {
+    pattern: pattern,
+  },
+})
+
+// Collect the results for 10 seconds before fetcing them
+setTimeout(async _ => {
+  // Fetch five most relevant results
+  const results = await api.get(`search/instance/${instance.id}/results/0/5`)
+
+  // .... do something with them
+}, searchInfo.queue_time + 10000)
+
+```
+
+**Performance**
+
+
+
+**Search queues**
+
+Because of the performance considerations listed in the earlier sections, hubs will generally limit the amount of searches that users may perform
+and spamming the hub with a large number of searches may cause the user to get kicked out. 
+
+Searches performed by the client will originate from many different sources (manual searches, searches for alternate queue sources and API scripts...)
+
+In order to preven
+
+
+Here's a snippet of a subscription-based search function for [airdcpp-apisocket](https://github.com/airdcpp-web/airdcpp-apisocket-js):
+
+```javascript
+
+// Create a new search instance
+const instance = await socket.post('search/instance')
+
+// Add listener for the 'searches sent' event before performing the actual search
+socket.addSocketListener(`search/instance/${instance.id}`, 'search_hub_searches_sent', searchInfo => {
+  // Collect the results for 10 seconds before fetching them
+  setTimeout(_ => fetchResults(instance), 10000);
+})
+
+// Perform the search
+socket.post(`search/instance/${instance.id}/hub_search`, {
+  query: {
+    pattern: pattern,
+  },
+  priority: 1, // Lowest (1-5)
+})
+
+```
+
+
+
 
 ## Search instances [/search/instances]
 
@@ -1491,8 +1673,8 @@ Required permission: *search*
 
 + Request (application/json)
     + Attributes
-        + expiration_minutes: 30 (optional) - Time in minutes after which the instance will be removed automatically (0 = no expiration)
-            + Default: 30
+        + expiration_minutes: 60 (number, optional) - Time in minutes after which the instance will be removed automatically (0 = no expiration). Counted from the instance creation.
+            + Default: 60
 + Response 200 (application/json)
     + Attributes (Search instance)
 
@@ -1539,7 +1721,12 @@ All subscriptions from search instances are also available to be used across all
 ### Search instance
 
 + id: 0 (number)
-+ expiration: 600 (number) - Time in milliseconds until the instance expires
++ expires_in: 60000 (number) - Time in milliseconds until the instance expires
++ current_search_id: 643345 - ID of the previously sent search
++ queue_time: 0 - Current queue time in milliseconds for the previously sent search (hub searches only)
++ queued_count: 0 - Number of hub searches that haven't been sent yet (hub searches only)
++ result_count: 3153 - Number of received results
++ searches_sent_ago: 47243 - Milliseconds ellapsed since the previous search was sent
 
 ### Grouped search result
 
@@ -1596,7 +1783,7 @@ Required permission: *search*
     + Attributes
         + queue_time: 5000 - Current queue time for this search in milliseconds. Given that this is not a manual search, higher priority searches that are queued after this one may increase the waiting time even more.
         + search_id: 643345 - An individual search ID for this query
-        + sent: 3 - Number of hubs for which the search was queued
+        + queued_count: 3 - Number of hubs for which the search was queued
 
 ### Perform user search [POST /search/instance/{instance_id}/user_search]
 
@@ -1654,6 +1841,15 @@ Required permission: *search*
 Required permission: *search*
 
 All subscriptions from search instances are also available to be used across all instances (add them with */search/listener/event_name*).
+
+### Hub searches sent [POST /search/instance/{id}/listener/search_hub_searches_sent]
+
+Fired after all queued searches were sent.
+
++ Response 200 (application/json)
+    + Attributes
+        + sent: 4 (number) - Number of searches that were sent (this may also be 0 if all hubs were closed)
+        + search_id: 643345 - ID of the search that was sent
 
 ### Parent result added [POST /search/instance/{id}/listener/search_result_added]
 
