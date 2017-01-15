@@ -15,7 +15,7 @@ This documentation isn't compatible with the current stable versions of AirDC++/
 
 ### List favorite directories [GET]
 
-Get a list of all favorite directories.G
+Get a list of all favorite directories.
 
 Required permission: *settings_view*
 
@@ -454,12 +454,12 @@ All subscriptions from filelist entities are also available to be used across al
 
 + id: 32 (number)
 + name: Ubuntu 14.04
-+ type (Item type)
++ type (Item type) - Directory content information (files and directories) is available from certain users only 
 + path: /home/airdcpp/share/Ubuntu/Ubuntu 14.04/ - Path in remote user's share
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
 + dupe (Dupe)
-+ time: 1483611358 (number) - File creation/modification date (not always available)
-+ size: 62523525626 (number) - Size in bytes (not always available for directories)
++ time: 1483611358 (number) - File creation/modification date (available from certain users only)
++ size: 62523525626 (number) - Size in bytes (directory sizes are available from certain users only)
 + complete: true (boolean) - Whether the directory content has been downloaded
 
 
@@ -551,9 +551,7 @@ Get a listing of items inside the supplied path
     + Attributes (array)
         + (object)
             + name: myfile1
-            + type: file (enum[string])
-                + file
-                + directory
+            + type (Item type) - Directory content information is not available here
             + size: 6382343 (number) - Size in bytes (available for files only)
 
 ### Get disk space information [POST /filesystem/disk_info]
@@ -1279,11 +1277,11 @@ Required permission: *queue_view*
 + Response 200 (application/json)
     + Attributes (array[Queue bundle])
 
-### Remove finished bundles [POST /queue/bundles/remove_finished]
+### Remove completed bundles [POST /queue/bundles/remove_completed]
 
 Required permission: *queue_edit*
 
-Remove all bundles that have finished downloading.
+Remove all bundles that have finished downloading and verified successfully.
 
 + Response 200 (application/json)
     + Attributes
@@ -1401,6 +1399,19 @@ Required permission: *queue_edit*
     + Attributes
         + sent: 4 (number) - Number of individual bundle files that were searched for
 
+### Share a failed bundle [POST /queue/bundle/{id}/share]
+
+Attempt to add a failed bundle in share. This may used only for bundle that are in 'completion_validation_error' state.
+
+Required permission: *queue_edit*
+
++ Request (application/json)
+    + Attributes
+        + skip_validation: false (boolean, optional) - Skip all validation hooks for completed bundles ('force')
+            + Default: false
+
++ Response 204
+
 
 ## Generic methods [/queue]
 
@@ -1453,15 +1464,44 @@ Required permission: *queue_edit*
 
 ### Bundle updated [POST /queue/listener/queue_bundle_updated]
 
-Only the updated properties may be sent.
+Only the updated properties are sent.
 
-This subscription generates a large number of updates, especially if there are bundles running. You may also use the following listeners for specific types of events:
+This subscription generates a large number of event messages. If you are interested in specific types of updates only, you should generally use the other subscriptions listed below.
 
-- queue_bundle_content - bundle content was changed
-- queue_bundle_priority - bundle priority was changed
-- queue_bundle_sources  - bundle sources were changed
-- queue_bundle_status - bundle status was changed
-- queue_bundle_tick - download progress was changed
++ Response 200 (application/json)
+    + Attributes (Queue bundle)
+
+### Bundle status changed [POST /queue/listener/queue_bundle_status]
+
+Bundle status ID was changed.
+
++ Response 200 (application/json)
+    + Attributes (Queue bundle)
+
+### Bundle priority updated [POST /queue/listener/queue_bundle_priority]
+
+Bundle priority was changed.
+
++ Response 200 (application/json)
+    + Attributes (Queue bundle)
+
+### Bundle download progress [POST /queue/listener/queue_bundle_tick]
+
+Fired about once per second while there are downloads running.
+
++ Response 200 (application/json)
+    + Attributes (Queue bundle)
+
+### Bundle content updated [POST /queue/listener/queue_bundle_content]
+
+Bundle files were added or removed (directory bundles only).
+
++ Response 200 (application/json)
+    + Attributes (Queue bundle)
+
+### Bundle sources updated [POST /queue/listener/queue_bundle_sources]
+
+Bundle sources were updated.
 
 + Response 200 (application/json)
     + Attributes (Queue bundle)
@@ -1483,7 +1523,37 @@ Subscriptions for individual queued files.
 
 ### File updated [POST /queue/listener/file_updated]
 
-Only the updated properties may be sent.
+Only the updated properties are sent.
+
+This subscription generates a large number of event messages. If you are interested in specific types of updates only, you should generally use the other subscriptions listed below.
+
++ Response 200 (application/json)
+    + Attributes (Queue file)
+
+### File priority updated [POST /queue/listener/queue_file_priority]
+
+File priority was changed.
+
++ Response 200 (application/json)
+    + Attributes (Queue file)
+
+### File download progress [POST /queue/listener/queue_file_tick]
+
+Fired about once per second while there are downloads running.
+
++ Response 200 (application/json)
+    + Attributes (Queue file)
+
+### File sources updated [POST /queue/listener/queue_file_sources]
+
+File sources were updated.
+
++ Response 200 (application/json)
+    + Attributes (Queue file)
+
+### File status changed [POST /queue/listener/queue_file_status]
+
+Generic update event for other file status updates.
 
 + Response 200 (application/json)
     + Attributes (Queue file)
@@ -1530,19 +1600,22 @@ Only the updated properties may be sent.
     + id: queued (enum[string])
          + new - Not added in queue yet
          + queued - Queued
+         + download_error - Download can't be continued because of a fatal error (such as there is no available disk space)
          + recheck
-         + downloaded
-         + moved
-         + download_failed
-         + scan_failed
-         + finished
-         + hashing
-         + hash_failed
-         + hashed
-         + shared
+         + downloaded - All files have completed downloading
+         + completion_validation_running - The bundle is being validated by custom completion hooks
+         + completion_validation_error - An error was triggered by a custom completion hook. See the field 'hook_error' for more detailed information
+         + completed - All completion hooks have completed successfully
+         + shared - The bundle has been added in share
     + failed: false (boolean) - Whether the bundle is in an error state
-    + finished: false (boolean) - Whether the bundle has finished downloading
+    + downloaded: false (boolean) - All files have finished downloaded (states 'downloaded' and above)
+    + completed: false (boolean) - All files have finished downloaded and the content was verified (states 'completed' and 'shared')
     + str: `Running (42.3%)`
+    + hook_error
+        + hook_id: share_scanner
+        + hook_name: Share scanner
+        + error_id: files_missing
+        + str: 42 missing files
 
 ### Queue file (Queue item base)
 
@@ -1553,7 +1626,8 @@ Only the updated properties may be sent.
 + bundle: 83425443 (number) - Bundle (0 = no bundle)
 + status
     + str: `Running (42.3%)`
-    + finished: false (boolean)
+    + downloaded: false (boolean) - All file segments have finished downloading
+    + completed: false (boolean) - All file segments have finished downloading and the item has been renamed to use its final name (and possibly verified)
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
 
 ### Queue bundle source
@@ -1735,11 +1809,11 @@ All subscriptions from search instances are also available to be used across all
 + relevance: 1.34 (number) - Calculated item relevance based on the result name and number of hits
 + hits: 4 (number) - Number of users (child users) from who the item was found
 + user (Hinted user) - Base user from who the result name and path were picked from
-+ type (Item type)
++ type (Item type) - Directory content information (files and directories) is available from certain ADC users only
 + path: /home/airdcpp/share/dir/ - Path in remote user's share
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
 + dupe (Dupe)
-+ time: 1483611358 (number) - File creation/modification date. The oldest found date is shown for parent results. Not available for NMDC results.
++ time: 1483611358 (number) - File creation/modification date. The oldest found date is shown for parent results. Available from certain ADC users only.
 + slots (Slot count) - Accummulated slot counts from users
 + connection: 42500000 (number) - Accummulated connection speed from users, bytes per second
 + size: 62523525626 (number) - Size in bytes (not available for NMDC directory results)
@@ -1750,7 +1824,7 @@ All subscriptions from search instances are also available to be used across all
 + path: /Linux/Ubuntu 14.04/ - Path in remote user's share
 + user (Hinted user)
 + slots (Slot count)
-+ time: 1483611358 (number) - File creation/modification date.
++ time: 1483611358 (number) - File creation/modification date. Available from certain ADC users only.
 + connection: 12500000 (number)  - Connection speed, bytes per second
 + ip (IP)
 
@@ -1971,10 +2045,91 @@ Required permission: *admin*
 + user (Web user) - Web user account used for authentication
 
 
+
+
 # Group Settings
 
+Settings API can be used for viewing and managing of web server and core application settings.
+
+## Settings [/settings]
+
+### Get setting values [POST /settings/items/get]
+
++ Request (application/json)
+    + Attributes (array[string])
+        + keys: download_limit_main, upload_limit_main (array[string]) - Array of setting keys
+
++ Response 200 (application/json)
+    + Attributes (array[string, boolean, number])
+        + 100 (number)
+        + 0 (number)
+
+### Set setting values [POST /settings/items/set]
+
+Required permission: *settings_edit*
+
++ Request (application/json)
+    + Attributes (object)
+    
+        Key-value listing of setting keys and their new values
+    
+        + download_limit_main: 0 (number)
+        + upload_limit_main: 250 (number)
+
++ Response 204
+
+
+### Reset setting values [POST /settings/items/reset]
+
+Reset the specified settings to use their default values.
+
+Required permission: *settings_edit*
+
++ Request (application/json)
+    + Attributes (array[string])
+        + keys: download_limit_main, upload_limit_main (array[string]) - Array of setting keys
+
++ Response 204
+
+
+### Get setting information [POST /settings/items/infos]
+
+Get more detailed information about the specified setting items.
+
++ Request (application/json)
+    + Attributes
+        + keys: download_limit_main, upload_limit_main (array[string]) - Array of setting keys
+
++ Response 200 (application/json)
+    + Attributes (array[Setting item info])
+            
 
 ## Data Structures
+
+### Setting item info
+
++ key: download_limit_main
++ title: Download limit - Localized setting title
++ unit: KiB/s - Localized unit strings
++ value: 10 (Setting value) - Current setting value
++ auto: false (boolean) - Whether the current setting value is automatically determined by the application
++ values (array) - Possible value listing for enum-type settings
+    + (object)
+        + value
+        + text
++ type (enum[string]) - Possible additional type hints
+    + 
+    + file_path
+    + directory_path
+    + long_text
+
+### Setting value (enum)
+
++ (string)
++ (number)
++ (boolean)
+
+
 
 ### Connectivity mode (enum[number])
 
@@ -1982,6 +2137,8 @@ Required permission: *admin*
 + 0 - Active mode (no router or manual router configuration)
 + 1 - Active mode with NAT-PMP / UPnP (let the client configure my router)
 + 2 - Passive mode (last resort - has serious limitations)
+
+
 
 
 # Group Share
@@ -2412,8 +2569,9 @@ Required permission: *admin*
 
 # Group Transfers
 
-Tranfer API manages download and upload connections.
+Tranfer API manages download and upload connections. In addition to regular file transfers, filelist and TTH tranfers are listed as well.
 
+Transfer items represent individual transfer connections that may be reused to transfer multiple different files (or file chunks).
 
 ## Transfers [/transfers/transfers]
 
@@ -2436,7 +2594,7 @@ Required permission: *transfers*
 
 ### Disconnect transfer [POST /transfers/transfer/{id}/disconnect]
 
-Disconnect a running transfer.
+Disconnect a running transfer. Note that the transfer connection is often re-established afterwards.
 
 Required permission: *transfers*
 
@@ -2444,7 +2602,7 @@ Required permission: *transfers*
 
 ### Force connect [POST /transfers/transfer/{id}/force]
 
-Attempt to establish connection instantly. Has no effect for running transfers.
+Attempt to establish connection instantly. This has no effect for running transfers.
 
 Required permission: *transfers*
 
@@ -2465,11 +2623,11 @@ Required permission: *transfers*
 
 ## Subscriptions [/transfers/listener]
 
-Required permission: *transfers*
+Required permission: *transfers* // CHECK
 
 ### Transfer added [POST /transfers/listener/transfer_added]
 
-Only the values that have changed after the last event are sent.
+A new transfer connection was added.
 
 + Response 200 (application/json)
     + Attributes (Transfer item)
@@ -2477,6 +2635,29 @@ Only the values that have changed after the last event are sent.
 ### Transfer updated [POST /transfers/listener/transfer_updated]
 
 Only the updated properties are sent.
+
+This subscription generates a large number of event messages. If you are interested in specific types of updates only, you should generally use the other subscriptions listed below.
+
++ Response 200 (application/json)
+    + Attributes (Transfer item)
+
+### Transfer starting [POST /transfers/listener/transfer_starting]
+
+Transferring of a new file chunk transfer was started.
+
++ Response 200 (application/json)
+    + Attributes (Transfer item)
+
+### Transfer completed [POST /transfers/listener/transfer_completed]
+
+The current file chunk transfer was completed successfully.
+
++ Response 200 (application/json)
+    + Attributes (Transfer item)
+
+### Transfer failed [POST /transfers/listener/transfer_failed]
+
+Transfer failed (such as connection was closed or there are no slots available)
 
 + Response 200 (application/json)
     + Attributes (Transfer item)
