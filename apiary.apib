@@ -11,7 +11,7 @@ This documentation isn't compatible with the current stable versions of AirDC++/
 # Group Favorite directories
 
 
-## Favorite directories [/favorite_directories/directories]
+## Favorite directories [/favorite_directories]
 
 ### List favorite directories [GET]
 
@@ -27,9 +27,7 @@ Required permission: *settings_view*
 + Response 200 (application/json)
     + Attributes (array[Grouped path])
 
-## Favorite directory [/favorite_directories/directory]
-
-### Create favorite directory [POST /favorite_directories/directory]
+### Create favorite directory [POST]
 
 Required permission: *settings_edit*
 
@@ -41,7 +39,9 @@ Required permission: *settings_edit*
 + Response 200 (application/json)
     + Attributes (Favorite directory)
 
-### Update favorite directory [PATCH /favorite_directories/directory/{directory_id}]
+## Favorite directory [/favorite_directories/{directory_id}]
+
+### Update favorite directory [PATCH]
 
 Update the specified fields of a favorite directory.
 
@@ -54,7 +54,7 @@ Required permission: *settings_edit*
 + Response 200 (application/json)
     + Attributes (Favorite directory)
 
-### Get favorite directory [GET /favorite_directories/directory/{directory_id}]
+### Get favorite directory [GET]
 
 Required permission: *settings_view*
 
@@ -65,7 +65,7 @@ Get a single directory by ID.
 + Response 200 (application/json)
     + Attributes (Favorite directory)
 
-### Remove favorite directory [DELETE /favorite_directories/directory/{directory_id}]
+### Remove favorite directory [DELETE]
 
 Required permission: *settings_edit*
 
@@ -96,9 +96,9 @@ Required permission: *settings_view*
 
 Favorite hubs allow storing commonly used hubs that can be opened automatically on application startup. Various settings, such as user identification info and connectivity, can be customized on per-hub basis.
 
-## Favorite hubs [/favorite_hubs/hubs/{start}/{count}]
+## Favorite hubs [/favorite_hubs]
 
-### List favorite hubs [GET]
+### List favorite hubs [GET /favorite_hubs/{start}/{count}]
 
 Get a list of favorite hubs
 
@@ -106,9 +106,6 @@ Required permission: *favorite_hubs_view*
 
 + Response 200 (application/json)
     + Attributes (array[Favorite hub])
-
-
-## Favorite hub [/favorite_hubs/hub]
 
 ### Create favorite hub [POST]
 
@@ -120,7 +117,9 @@ Required permission: *favorite_hubs_edit*
 + Response 200 (application/json)
     + Attributes (Favorite hub)
 
-### Update favorite hub [PATCH /favorite_hubs/hub/{hub_id}]
+## Favorite hub [/favorite_hubs/{hub_id}]
+
+### Update favorite hub [PATCH]
 
 Update the specified fields of a favorite hub
 
@@ -132,7 +131,7 @@ Required permission: *favorite_hubs_edit*
 + Response 200 (application/json)
     + Attributes (Favorite hub)
 
-### Get favorite hub [GET /favorite_hubs/hub/{hub_id}]
+### Get favorite hub [GET]
 
 Required permission: *favorite_hubs_view*
 
@@ -144,7 +143,7 @@ Get a single hub by ID.
 
     + Attributes (Favorite hub)
     
-### Remove favorite hub [DELETE /favorite_hubs/hub/{hub_id}]
+### Remove favorite hub [DELETE]
 
 Required permission: *favorite_hubs_edit*
 
@@ -165,7 +164,7 @@ Required permission: *favorite_hubs_view*
 + Response 200 (application/json)
     + Attributes (Favorite hub)
 
-### Favorite hub created [POST /hubs/listener/favorite_hub_removed]
+### Favorite hub created [POST /favorite_hubs/listener/favorite_hub_removed]
 
 + Response 200 (application/json)
     + Attributes (Favorite hub)
@@ -212,7 +211,7 @@ some entities, such as hubs, provide similar methods for showing information loc
 
 ## Methods [/events]
 
-### Get messages [GET /events/messages/{max_count}]
+### Get events [GET /events/{max_count}]
 
 Get the latest event message. Returned messages are be sorted from oldest to newest.
 
@@ -224,7 +223,7 @@ Required permission: *events_view*
 + Response 200 (application/json)
     + Attributes (array[Status message])
 
-### Send event message [POST /events/message]
+### Add event [POST /events]
 
 Send a new event message.
 
@@ -235,19 +234,19 @@ Required permission: *events_edit*
 
 + Response 204
 
-### Clear message cache [POST /events/clear]
+### Clear event cache [DELETE /events]
 
 Required permission: *events_edit*
 
 + Response 204
 
-### Set all messages as read [POST /events/read]
+### Set all events as read [POST /events/read]
 
 Required permission: *events_edit*
 
 + Response 204
 
-### Get message counts [GET /events/counts]
+### Get event counts [GET /events/counts]
 
 Required permission: *events_view*
 
@@ -259,12 +258,12 @@ Required permission: *events_view*
 
 Required permission: *events_view*
 
-### Message counts updated [POST /events/listener/event_counts]
+### Event counts updated [POST /events/listener/event_counts]
 
 + Response 200 (application/json)
     + Attributes (Log message info)
 
-### Message posted [POST /events/listener/event_message]
+### Event added [POST /events/listener/event_message]
 
 + Response 200 (application/json)
     + Attributes (Status message)
@@ -286,8 +285,6 @@ Required permission: *filelists_view*
 + Response 200 (application/json)
     + Attributes (array[Filelist])
 
-## Filelist session [/filelists/session]
-
 ### Create remote filelist session [POST]
 
 Queue filelist from an user.
@@ -302,7 +299,7 @@ Required permission: *filelists_edit*
 + Response 200 (application/json)
     + Attributes (Filelist)
 
-### Create local filelist session [POST /filelists/session/me]
+### Create local filelist session [POST /filelists/sessions/self]
 
 Browse own share.
 
@@ -314,7 +311,9 @@ Required permission: *filelists_edit*
 + Response 200 (application/json)
     + Attributes (Filelist)
 
-### Get session [GET /filelists/session/{session_id}]
+## Filelist session [/filelists/sessions/{session_id}]
+
+### Get session [GET]
 
 Required permission: *filelists_view*
 
@@ -325,7 +324,7 @@ Get a single filelist session by ID.
 + Response 200 (application/json)
     + Attributes (Filelist)
 
-### Remove session [DELETE /filelists/session/{session_id}]
+### Remove session [DELETE]
 
 Required permission: *filelists_edit*
 
@@ -344,7 +343,7 @@ Required permission: *download*
     + Attributes (array[Directory download item])
 
 
-### Create directory download [POST /filelists/directory_download]
+### Create directory download [POST]
 
 Queue all content inside the specified location. Recursive partial filelist will be downloaded from ADC users and full list is used with NMDC users.
 
@@ -357,7 +356,10 @@ Required permission: *download*
 + Response 200 (application/json)
     + Attributes (Directory download item)
 
-### Remove directory download [DELETE /filelists/directory_download/{download_id}]
+
+## Directory download [/filelists/directory_downloads/{download_id}]
+
+### Remove directory download [DELETE]
 
 Required permission: *download*
 
@@ -473,9 +475,9 @@ All subscriptions from filelist entities are also available to be used across al
 
 # Group Filelist entities
 
-## Methods [/filelists/session/{session_id}]
+## Methods [/filelists/sessions/{session_id}/items]
 
-### Get directory content [GET /filelists/session/{session_id}/items/{start}/{count}]
+### Get directory content [GET /filelists/sessions/{session_id}/items/{start}/{count}]
 
 Get a list of all files and directories inside the current filelist location. If the directory content has not yet been loaded, an error will be returned.
 
@@ -489,7 +491,7 @@ Required permission: *filelists_view*
         Content of this directory is not yet available
 
 
-### Change directory [POST /filelists/session/{session_id}/directory]
+### Change directory [POST /filelists/sessions/{session_id}/directory]
 
 Change the current filelist directory.
 
@@ -502,14 +504,14 @@ Required permission: *filelists_view*
             + Default: false
 + Response 204
 
-### Set filelist as read [POST /filelists/session/{session_id}/read]
+### Set filelist as read [POST /filelists/sessions/{session_id}/read]
 
 Required permission: *filelists_view*
 
 + Response 204
 
 
-## Subscriptions [/filelists/session/{session_id}/listener]
+## Subscriptions [/filelists/sessions/{session_id}/listener]
 
 Required permission: *filelists_view*
 
@@ -705,7 +707,7 @@ The following history types are available:
         + videos
         + linux
 
-### Add string [PATCH /histories/string/{history_type}]
+### Add string [PATCH /histories/strings/{history_type}]
 
 Add a new string in the specified string array.
 
@@ -772,18 +774,16 @@ Required permission: *hubs_view*
 
 Hub API provides methods for communicating with hubs
 
-## Hub sessions [/hubs/sessions]
+## Sessions [/hubs/sessions]
 
 ### Get a list of all hub sessions [GET]
 
-Get a list of web server session
+Get a list of all open sessions.
 
 Required permission: *hubs_view*
 
 + Response 200 (application/json)
     + Attributes (array[Hub])
-
-## Hub session [/hubs/session]
 
 ### Create session [POST]
 
@@ -797,7 +797,9 @@ Required permission: *hubs_edit*
 + Response 200 (application/json)
     + Attributes (Hub)
 
-### Get session [GET /hubs/session/{session_id}]
+## Session [/hubs/sessions/{session_id}]
+
+### Get session [GET]
 
 Required permission: *hubs_view*
 
@@ -808,7 +810,7 @@ Get a single session by ID.
 + Response 200 (application/json)
     + Attributes (Hub)
 
-### Remove session [DELETE /hubs/session/{session_id}]
+### Remove session [DELETE]
 
 Required permission: *hubs_edit*
 
@@ -834,7 +836,7 @@ Return various statistics about the connected hubs and their users
 
 + Response 200 (application/json)
 
-### Send chat message [POST /hubs/message]
+### Send chat message [POST /hubs/chat_message]
 
 Send a public chat message message to specified hubs.
 
@@ -848,7 +850,7 @@ Required permission: *hubs_send*
     + Attributes
         + sent: 1 (number) - Number of messages that were sent successfully. Message won't be sent to hubs that are not in 'connected' state.
 
-### Send status message [POST /hubs/status]
+### Send status message [POST /hubs/status_message]
 
 Send a status message message that is only shown locally in specified hubs.
 
@@ -914,25 +916,9 @@ All subscriptions from hub entities are also available to be used across all ses
 
 # Group Hub sessions
 
-## Methods [/hubs/session/{id}]
+## Messages [/hubs/sessions/{session_id}/messages]
 
-### Get users [GET /hubs/session/{session_id}/users/{start}/{count}]
-
-Required permission: *hubs_view*
-
-+ Response 200 (application/json)
-    + Attributes (array[Hub user])
-
-### Get user [GET /hubs/session/{session_id}/user/{cid}]
-
-Get user information by CID.
-
-Required permission: *hubs_view*
-
-+ Response 200 (application/json)
-    + Attributes (Hub user)
-
-### Get messages [GET /hubs/session/{session_id}/messages/{max_count}]
+### Get messages [GET /hubs/sessions/{session_id}/messages/{max_count}]
 
 Required permission: *hubs_view*
 
@@ -946,7 +932,19 @@ Required permission: *hubs_view*
         + (object)
             + status_message (Status message)
 
-### Send chat message [POST /hubs/session/{session_id}/message]
+### Clear message cache [DELETE]
+
+Required permission: *hubs_edit*
+
++ Response 204
+
+### Set all messages as read [POST /hubs/sessions/{session_id}/messages/read]
+
+Required permission: *hubs_view*
+
++ Response 204
+
+### Send chat message [POST /hubs/sessions/{session_id}/chat_message]
 
 Send a public chat message to this hub.
 
@@ -957,7 +955,7 @@ Required permission: *hubs_send*
 
 + Response 204
 
-### Send status message [POST /hubs/session/{session_id}/status]
+### Send status message [POST /hubs/sessions/{session_id}/status_message]
 
 Send a status message message that is only shown locally in this hub.
 
@@ -968,20 +966,33 @@ Required permission: *hubs_edit*
 
 + Response 204
 
-### Clear message cache [POST /hubs/session/{session_id}/clear]
 
-Required permission: *hubs_edit*
+## Users [/hubs/sessions/{session_id}/users]
 
-+ Response 204
 
-### Set all messages as read [POST /hubs/session/{session_id}/read]
+### Get users [GET /hubs/sessions/{session_id}/users/{start}/{count}]
+
+Get a list of users that are currently online in this hub.
 
 Required permission: *hubs_view*
 
-+ Response 204
++ Response 200 (application/json)
+    + Attributes (array[Hub user])
+
+### Get user [GET /hubs/sessions/{session_id}/users/{cid}]
+
+Get user information by CID.
+
+Required permission: *hubs_view*
+
++ Response 200 (application/json)
+    + Attributes (Hub user)
 
 
-### Send password [POST /hubs/session/{session_id}/password]
+## Miscellaneous [/hubs/sessions/{session_id}/]
+
+
+### Send password [POST /hubs/sessions/{session_id}/password]
 
 Set the hub password. This should be used only when the hub is in *password* state. The password will be reused during the session lifetime in case the application gets disconnected from the hub.
 
@@ -993,7 +1004,7 @@ Required permission: *hubs_edit*
 
 + Response 204
 
-### Follow redirect [POST /hubs/session/{session_id}/redirect]
+### Follow redirect [POST /hubs/sessions/{session_id}/redirect]
 
 Follow the redirection requested by the hub. This should be used only when the hub is in *redirect* state. 
 
@@ -1001,7 +1012,7 @@ Required permission: *hubs_edit*
 
 + Response 204
 
-### Reconnect [POST /hubs/session/{session_id}/reconnect]
+### Reconnect [POST /hubs/sessions/{session_id}/reconnect]
 
 Reconnect to the hub.
 
@@ -1009,7 +1020,7 @@ Required permission: *hubs_edit*
 
 + Response 204
 
-### Favorite [POST /hubs/session/{session_id}/favorite]
+### Favorite [POST /hubs/sessions/{session_id}/favorite]
 
 Save the hub in favorites.
 
@@ -1018,7 +1029,7 @@ Required permission: *hubs_edit*
 + Response 200 (application/json)
     + Attributes (Favorite hub)
 
-### Get user and share counts [GET /hubs/session/{session_id}/counts]
+### Get user and share counts [GET /hubs/sessions/{session_id}/counts]
 
 Get the current user and share counts.
 
@@ -1028,45 +1039,45 @@ Required permission: *hubs_edit*
     + Attributes (Hub counts)
 
 
-## Subscriptions [/hubs/session/{id}/listener]
+## Subscriptions [/hubs/sessions/{id}/listener]
 
 Required permission: *hubs_view*
 
 All subscriptions from hub entities are also available to be used across all sessions (add them with */hubs/listener/event_name*).
 
-### Session updated [POST /hubs/session/{id}/listener/hub_updated]
+### Session updated [POST /hubs/sessions/{id}/listener/hub_updated]
 
 + Response 200 (application/json)
     + Attributes (Hub)
 
-### User/share counts updated [POST /hubs/session/{id}/listener/hub_counts_updated]
+### User/share counts updated [POST /hubs/sessions/{id}/listener/hub_counts_updated]
 
 + Response 200 (application/json)
     + Attributes (Hub counts)
 
-### Chat message received [POST /hubs/session/{id}/listener/hub_message]
+### Chat message received [POST /hubs/sessions/{id}/listener/hub_message]
 
 + Response 200 (application/json)
     + Attributes (Chat message)
 
-### Status message received [POST /hubs/session/{id}/listener/hub_status]
+### Status message received [POST /hubs/sessions/{id}/listener/hub_status]
 
 + Response 200 (application/json)
     + Attributes (Status message)
 
-### Hub user connected [POST /hubs/session/{id}/listener/hub_user_connected]
+### Hub user connected [POST /hubs/sessions/{id}/listener/hub_user_connected]
 
 + Response 200 (application/json)
     + Attributes (Hub user)
 
-### Hub user updated [POST /hubs/session/{id}/listener/hub_user_updated]
+### Hub user updated [POST /hubs/sessions/{id}/listener/hub_user_updated]
 
 Only the user ID and possibly changed fields are sent 
 
 + Response 200 (application/json)
     + Attributes (Hub user)
 
-### Hub user disconnected [POST /hubs/session/{id}/listener/hub_user_disconnected]
+### Hub user disconnected [POST /hubs/sessions/{id}/listener/hub_user_disconnected]
 
 + Response 200 (application/json)
     + Attributes (Hub user)
@@ -1076,9 +1087,6 @@ Only the user ID and possibly changed fields are sent
 
 # Group Private chat
 
-
-//Hub API provides methods for communicating with hubs
-
 ## Private chat sessions [/private_chat/sessions]
 
 ### Get a list of all private chat sessions [GET]
@@ -1087,8 +1095,6 @@ Required permission: *private_chat_view*
 
 + Response 200 (application/json)
     + Attributes (array[Private chat])
-
-## Private chat session [/private_chat/session]
 
 ### Create session [POST]
 
@@ -1102,7 +1108,9 @@ Required permission: *private_chat_edit*
 + Response 200 (application/json)
     + Attributes (Private chat)
 
-### Get session [GET /private_chat/session/{session_id}]
+## Private chat session [/private_chat/sessions/{session_id}]
+
+### Get session [GET]
 
 Required permission: *private_chat_view*
 
@@ -1113,7 +1121,7 @@ Get a single session by ID.
 + Response 200 (application/json)
     + Attributes (Private chat)
 
-### Remove session [DELETE /private_chat/session/{session_id}]
+### Remove session [DELETE]
 
 Required permission: *private_chat_edit*
 
@@ -1121,7 +1129,7 @@ Required permission: *private_chat_edit*
 
 ## Miscellaneous [/private_chat]
 
-### Send chat message [POST /private_chat/message]
+### Send chat message [POST /private_chat/chat_message]
 
 Send private chat message message to a specific user. This should generally be used for announcement-like messages only as private chat sessions are more suitable for bidirectional chatting.
 
@@ -1173,9 +1181,9 @@ All subscriptions from private chat entities are also available to be used acros
 
 # Group Private chat sessions
 
-## Methods [/private_chat/session/{id}]
+## Methods [/private_chat/sessions/{session_id}/]
 
-### Get messages [GET /private_chat/session/{session_id}/messages/{max_count}]
+### Get messages [GET /private_chat/sessions/{session_id}/messages/{max_count}]
 
 Required permission: *private_chat_view*
 
@@ -1189,7 +1197,7 @@ Required permission: *private_chat_view*
         + (object)
             + status_message (Status message)
 
-### Send chat message [POST /private_chat/session/{session_id}/chat_message]
+### Send chat message [POST /private_chat/sessions/{session_id}/chat_message]
 
 Send private message to the user.
 
@@ -1200,7 +1208,7 @@ Required permission: *private_chat_send*
 
 + Response 204
 
-### Send status message [POST /private_chat/session/{session_id}/status]
+### Send status message [POST /private_chat/sessions/{session_id}/status_message]
 
 Send a status message that is only shown locally in this chat session.
 
@@ -1211,19 +1219,19 @@ Required permission: *private_chat_edit*
 
 + Response 204
 
-### Clear message cache [POST /private_chat/session/{session_id}/clear]
+### Clear message cache [POST /private_chat/sessions/{session_id}/clear]
 
 Required permission: *private_chat_edit*
 
 + Response 204
 
-### Set all messages as read [POST /private_chat/session/{session_id}/read]
+### Set all messages as read [POST /private_chat/sessions/{session_id}/read]
 
 Required permission: *private_chat_view*
 
 + Response 204
 
-### Initiate CCPM connection [POST /private_chat/session/{session_id}/ccpm]
+### Initiate CCPM connection [POST /private_chat/sessions/{session_id}/ccpm]
 
 Establish an encrypted client-to-client private messaging channel. CCPM is available only with users having the *ccpm* flag.
 
@@ -1231,7 +1239,7 @@ Required permission: *private_chat_edit*
 
 + Response 204
 
-### Disconnect CCPM connection [DELETE /private_chat/session/{session_id}/ccpm]
+### Disconnect CCPM connection [DELETE /private_chat/sessions/{session_id}/ccpm]
 
 Disconnect encrypted client-to-client private messaging channel. Messages will be delivered through the hub after the channel has been disconnected.
 
@@ -1240,25 +1248,25 @@ Required permission: *private_chat_edit*
 + Response 204
 
 
-## Subscriptions [/private_chat/session/{id}/listener]
+## Subscriptions [/private_chat/sessions/{id}/listener]
 
 Required permission: *private_chat_view*
 
 All subscriptions from private chat entities are also available to be used across all sessions (add them with */private_chat/listener/event_name*).
 
-### Session updated [POST /private_chat/session/{id}/listener/private_chat_updated]
+### Session updated [POST /private_chat/sessions/{id}/listener/private_chat_updated]
 
 + Response 200 (application/json)
     + Attributes
         + session (Private chat)
 
-### Chat message received [POST /private_chat/session/{id}/listener/private_chat_message]
+### Chat message received [POST /private_chat/sessions/{id}/listener/private_chat_message]
 
 + Response 200 (application/json)
 
     + Attributes (Chat message)
         
-### Status message received [POST /private_chat/session/{id}/listener/private_chat_status]
+### Status message received [POST /private_chat/sessions/{id}/listener/private_chat_status]
 
 + Response 200 (application/json)
     + Attributes (Status message)
@@ -1268,9 +1276,9 @@ All subscriptions from private chat entities are also available to be used acros
 
 # Group Queue
 
-## Bundles [/queue/bundles/{start}/{count}]
+## Bundles [/queue/bundles]
 
-### Get bundles [GET]
+### Get bundles [GET /queue/bundles/{start}/{count}]
 
 Required permission: *queue_view*
 
@@ -1299,9 +1307,7 @@ Change the priority of all queued bundles.
 
 + Response 204
 
-## Bundle [/queue/bundle]
-
-### Create file bundle [POST /queue/bundle/file]
+### Create file bundle [POST /queue/bundles/file]
 
 Required permission: *queue_edit*
 
@@ -1317,7 +1323,7 @@ Required permission: *queue_edit*
 + Response 200 (application/json)
     + Attributes (Queue bundle add info)
 
-### Create directory bundle [POST /queue/bundle/directory]
+### Create directory bundle [POST /queue/bundles/directory]
 
 Note: this method is generally meant for importing content from external sources into queue. When queueing directories from other users, you should generally use the respective API methods in Filelist and Search APIs.
 
@@ -1337,14 +1343,16 @@ Required permission: *queue_edit*
 + Response 200 (application/json)
     + Attributes (Queue directory bundle add info)
 
-### Get bundle [GET /queue/bundle/{id}]
+## Bundle [/queue/bundles/{id}]
+
+### Get bundle [GET]
 
 Required permission: *queue_view*
 
 + Response 200 (application/json)
     + Attributes (Queue bundle)
 
-### Update bundle properties [PATCH /queue/bundle/{id}]
+### Update bundle properties [PATCH]
 
 Required permission: *queue_edit*
 
@@ -1356,7 +1364,7 @@ Required permission: *queue_edit*
 + Response 200 (application/json)
     + Attributes (Queue bundle)
 
-### Remove bundle [POST /queue/bundle/{id}/remove]
+### Remove bundle [POST /queue/bundles/{id}/remove]
 
 Required permission: *queue_edit*
 
@@ -1367,21 +1375,21 @@ Required permission: *queue_edit*
 
 + Response 204
 
-### Get bundles [GET /queue/bundle/{id}/files/{start}/{count}]
+### Get bundle files [GET /queue/bundles/{id}/files/{start}/{count}]
 
 Required permission: *queue_view*
 
 + Response 200 (application/json)
     + Attributes (array[Queue file])
 
-### Get bundle sources [GET /queue/bundle/{id}/sources]
+### Get bundle sources [GET /queue/bundles/{id}/sources]
 
 Required permission: *queue_view*
 
 + Response 200 (application/json)
     + Attributes (array[Queue bundle source])
 
-### Remove bundle source [DELETE /queue/bundle/{id}/source/{cid}]
+### Remove bundle source [DELETE /queue/bundles/{id}/sources/{cid}]
 
 Required permission: *queue_edit*
 
@@ -1389,7 +1397,7 @@ Required permission: *queue_edit*
     + Attributes
         + count: 4 (number) - Number of files from which the source was removed
 
-### Search bundle for alternates [POST /queue/bundle/{id}/search]
+### Search bundle for alternates [POST /queue/bundles/{id}/search]
 
 Searches individual bundle files for alternate sources. The number of files to search for depends on the bundle structure.
 
@@ -1399,7 +1407,7 @@ Required permission: *queue_edit*
     + Attributes
         + sent: 4 (number) - Number of individual bundle files that were searched for
 
-### Share a failed bundle [POST /queue/bundle/{id}/share]
+### Share a failed bundle [POST /queue/bundles/{id}/share]
 
 Attempt to add a failed bundle in share. This may used only for bundle that are in 'completion_validation_error' state.
 
@@ -1430,7 +1438,7 @@ Get local paths for file/folder name/path or a TTH value.
         + /home/airdcpp/share/Ubuntu/CD1/
         + /mnt/disk2/share/Videos/Ubuntu/CD1/
 
-### Remove source [DELETE /queue/source/{cid}]
+### Remove source [DELETE /queue/sources/{cid}]
 
 Remove source from all queued files.
 
@@ -1739,7 +1747,7 @@ Required permission: *search*
 
 
 
-## Search instance [/search/instance]
+## Search instance [/search/instances/]
 
 ### Create instance [POST]
 
@@ -1752,7 +1760,7 @@ Required permission: *search*
 + Response 200 (application/json)
     + Attributes (Search instance)
 
-### Get instance [GET /search/instance/{instance_id}]
+### Get instance [GET /search/instances/{instance_id}]
 
 Required permission: *search*
 
@@ -1763,7 +1771,7 @@ Get a single instance by ID.
 + Response 200 (application/json)
     + Attributes (Search instance)
 
-### Remove instance [DELETE /search/instance/{instance_id}]
+### Remove instance [DELETE /search/instances/{instance_id}]
 
 Required permission: *search*
 
@@ -1838,7 +1846,7 @@ All subscriptions from search instances are also available to be used across all
 
 # Group Search instances
 
-## Methods [/search/instance/{instance_id}]
+## Search [/search/instance/{instance_id}]
 
 ### Perform hub search [POST /search/instance/{instance_id}/hub_search]
 
@@ -1874,6 +1882,8 @@ Required permission: *search*
 
 + Response 204
 
+## Results [/search/instance/{instance_id}/results]
+
 ### Get results [GET /search/instance/{instance_id}/results/{start}/{max_count}]
 
 Get results for the previously posted search query.
@@ -1883,7 +1893,7 @@ Required permission: *search*
 + Response 200 (application/json)
     + Attributes (array[Grouped search results])
 
-### Download result [POST /search/instance/{instance_id}/result/{result_id}/download]
+### Download result [POST /search/instance/{instance_id}/results/{result_id}/download]
 
 Queue the specified result. If there is a large number of users sharing the same item, the application will pick the fastest ones automatically.
 
@@ -1900,7 +1910,7 @@ Required permission: *download*
             + directory_downloads (array[Directory download item]) - Response for directory downloads
 
 
-### Get child user results [GET /search/instance/{instance_id}/result/{result_id}/children]
+### Get child user results [GET /search/instance/{instance_id}/results/{result_id}/children]
 
 Get a list of individual user results.
 
@@ -1946,7 +1956,7 @@ Fired after all queued searches were sent.
 
 Session API provides methods for authentication and generic session management
 
-## Session [/session/auth]
+## Authentication [/sessions/authorize]
 
 ### Create session [POST]
 
@@ -1965,20 +1975,7 @@ Create a new API session by providing the web user credentials.
         + user (Web user) - Current web user
         + wizard_pending: false - Whether completion of the initial configuration wizard is pending
 
-### Remove session [DELETE]
-
-Invalidate the current session
-
-+ Response 204
-
-### Get current session [GET /session/session]
-
-Get the current session entity
-
-+ Response 200 (application/json)
-    + Attributes (Session)
-
-### Socket [POST /session/socket]
+### Socket [POST /sessions/socket]
 
 Associate socket with an existing session.
 
@@ -1988,8 +1985,22 @@ Associate socket with an existing session.
 
 + Response 204
 
+## Current session [/sessions/self]
 
-### Activity [POST /session/activity]
+### Remove current session [DELETE]
+
+Invalidate the current session
+
++ Response 204
+
+### Get current session [GET]
+
+Get the current session entity
+
++ Response 200 (application/json)
+    + Attributes (Session)
+
+### Activity [POST /sessions/activity]
 
 Notify the application about user activity or ensure that HTTP session won't expire.
 
@@ -2004,28 +2015,49 @@ Notify the application about user activity or ensure that HTTP session won't exp
 + Response 204
 
 
-## Sessions [/session/sessions]
+## Sessions [/sessions]
         
 ### Get sessions [GET]
 
-Get a list of web server session
+Get a list of current web server sessionsURL 
 
 Required permission: *admin*
 
 + Response 200 (application/json)
     + Attributes (array[Session])
 
-## Subscriptions [/session/listener]
+
+## Session [/sessions/{session_id}]
+
+### Remove session [DELETE]
+
+Invalidate a session by ID
 
 Required permission: *admin*
 
-### Session created [POST /session/listener/session_created]
++ Response 204
+
+### Get session [GET]
+
+Get a session by ID
+
+Required permission: *admin*
+
++ Response 200 (application/json)
+    + Attributes (Session)
+
+
+## Subscriptions [/sessions/listener]
+
+Required permission: *admin*
+
+### Session created [POST /sessions/listener/session_created]
 
 + Response 200
     + Attributes
         + session (Session)
 
-### Session removed [POST /session/listener/session_removed]
+### Session removed [POST /sessions/listener/session_removed]
 
 + Response 200 (application/json)
     + Attributes
@@ -2053,7 +2085,7 @@ Settings API can be used for viewing and managing of web server and core applica
 
 ## Settings [/settings]
 
-### Get setting values [POST /settings/items/get]
+### Get setting values [POST /settings/get]
 
 + Request (application/json)
     + Attributes (array[string])
@@ -2064,7 +2096,7 @@ Settings API can be used for viewing and managing of web server and core applica
         + 100 (number)
         + 0 (number)
 
-### Set setting values [POST /settings/items/set]
+### Set setting values [POST /settings/set]
 
 Required permission: *settings_edit*
 
@@ -2079,7 +2111,7 @@ Required permission: *settings_edit*
 + Response 204
 
 
-### Reset setting values [POST /settings/items/reset]
+### Reset setting values [POST /settings/reset]
 
 Reset the specified settings to use their default values.
 
@@ -2092,7 +2124,7 @@ Required permission: *settings_edit*
 + Response 204
 
 
-### Get setting information [POST /settings/items/infos]
+### Get setting information [POST /settings/infos]
 
 Get more detailed information about the specified setting items.
 
@@ -2154,7 +2186,7 @@ Required permission: *share_view*
         + /home/airdcpp/share/Videos/secret/
         + /mnt/disk2/share/Videos/secret/
 
-### Add excluded path [POST /share/exclude/add]
+### Add excluded path [POST /share/excludes/add]
 
 Required permission: *share_edit*
 
@@ -2164,7 +2196,7 @@ Required permission: *share_edit*
 
 + Response 204
 
-### Remove excluded path [POST /share/exclude/remove]
+### Remove excluded path [POST /share/excludes/remove]
 
 Required permission: *share_edit*
 
@@ -2284,14 +2316,14 @@ Fired when share refresh (partial or full refresh) has been completed.
 
 Share profiles can be used to share different content in ADC hubs (hub preferences are configured from favorite hubs). NMDC hubs will always use the default share profile.
 
-## Profiles [/share_profiles/profiles]
+## Profiles [/share_profiles]
 
 ### List share profiles [GET]
 
 + Response 200 (application/json)
     + Attributes (array[Share profile])
 
-### Add share profile [POST /share_profiles/profile]
+### Add share profile [POST]
 
 Required permission: *settings_edit*
 
@@ -2302,17 +2334,19 @@ Required permission: *settings_edit*
 + Response 200 (application/json)
     + Attributes (Share profile)
 
-### Get share profile [GET /share_profiles/profile/{profile_id}]
+## Profile [/share_profiles/{profile_id}]
+
+### Get share profile [GET]
 
 + Response 200 (application/json)
     + Attributes (Share profile)
 
-### Get default share profile [GET /share_profiles/profile/default]
+### Get default share profile [GET /share_profiles/default]
 
 + Response 200 (application/json)
     + Attributes (Share profile)
 
-### Update share profile [PATCH /share_profiles/profile/{profile_id}]
+### Update share profile [PATCH]
 
 Required permission: *settings_edit*
 
@@ -2326,7 +2360,7 @@ Required permission: *settings_edit*
 + Response 200 (application/json)
     + Attributes (Share profile)
 
-### Set default share profile [POST /share_profiles/profile/{profile_id}/default]
+### Set default share profile [POST /share_profiles/{profile_id}/default]
 
 Set this profile as default. 
 
@@ -2334,7 +2368,7 @@ Required permission: *settings_edit*
 
 + Response 204
 
-### Remove share profile [DELETE /share_profiles/profile/{profile_id}]
+### Remove share profile [DELETE]
 
 Note that the current default profile can't be removed (you must set a new default profile first).
 
@@ -2384,7 +2418,7 @@ Required permission: *settings_edit*
 
 
 
-## Share roots [/share_roots/roots]
+## Share roots [/share_roots]
 
 ### List share roots [GET]
 
@@ -2394,9 +2428,6 @@ Required permission: *settings_view*
 
 + Response 200 (application/json)
     + Attributes (array[Share root])
-
-
-## Share root [/share_roots/root]
 
 ### Create share root [POST]
 
@@ -2409,7 +2440,9 @@ Required permission: *settings_edit*
 + Response 200 (application/json)
     + Attributes (Share root)
 
-### Update share root [PATCH /share_roots/root/{root_id}]
+## Share root [/share_roots/{root_id}]
+
+### Update share root [PATCH]
 
 Update the specified fields of a share root
 
@@ -2421,7 +2454,7 @@ Required permission: *settings_edit*
 + Response 200 (application/json)
     + Attributes (Share root)
 
-### Get share root [GET /share_roots/root/{root_id}]
+### Get share root [GET]
 
 Required permission: *settings_view*
 
@@ -2433,7 +2466,7 @@ Get a single root by ID.
 
     + Attributes (Share root)
     
-### Remove share root [DELETE /share_roots/root/{root_id}]
+### Remove share root [DELETE]
 
 Required permission: *settings_edit*
 
@@ -2573,7 +2606,7 @@ Tranfer API manages download and upload connections. In addition to regular file
 
 Transfer items represent individual transfer connections that may be reused to transfer multiple different files (or file chunks).
 
-## Transfers [/transfers/transfers]
+## Transfers [/transfers]
 
 ### Get transfers [GET]
 
@@ -2583,16 +2616,16 @@ Required permission: *transfers*
     + Attributes (array[Transfer item])
 
 
-## Transfer [/transfers/transfer]
+## Transfer [/transfers/{id}]
 
-### Get transfer [GET /transfers/transfer/{id}]
+### Get transfer [GET]
 
 Required permission: *transfers*
 
 + Response 200 (application/json)
     + Attributes (Transfer item)
 
-### Disconnect transfer [POST /transfers/transfer/{id}/disconnect]
+### Disconnect transfer [POST /transfers/{id}/disconnect]
 
 Disconnect a running transfer. Note that the transfer connection is often re-established afterwards.
 
@@ -2600,7 +2633,7 @@ Required permission: *transfers*
 
 + Response 204
 
-### Force connect [POST /transfers/transfer/{id}/force]
+### Force connect [POST /transfers/{id}/force]
 
 Attempt to establish connection instantly. This has no effect for running transfers.
 
@@ -2609,7 +2642,7 @@ Required permission: *transfers*
 + Response 204
 
 
-## Generic methods [/transfers]
+## Generic methods [/transfers/stats]
 
 ### Get transferred bytes [POST /transfers/tranferred_bytes]
 
@@ -2811,7 +2844,7 @@ Subscriptions related to connect state changes are tracked globally on per-user 
 
 # Group Web users
 
-## Web users [/web_users/users]
+## Web users [/web_users]
 
 ### List web users [GET]
 
@@ -2821,9 +2854,6 @@ Required permission: *admin*
 
 + Response 200 (application/json)
     + Attributes (array[Web user])
-
-
-## Web user [/web_users/user]
 
 ### Create web user [POST]
 
@@ -2838,7 +2868,9 @@ Required permission: *admin*
 + Response 200 (application/json)
     + Attributes (Web user)
 
-### Update web user [PATCH /web_users/user/{user_id}]
+## Web user [/web_users/{user_id}]
+
+### Update web user [PATCH]
 
 Update the specified fields of a web user
 
@@ -2852,7 +2884,7 @@ Required permission: *admin*
 + Response 200 (application/json)
     + Attributes (Web user)
 
-### Get web user [GET /web_users/user/{user_id}]
+### Get web user [GET]
 
 Required permission: *admin*
 
@@ -2863,7 +2895,7 @@ Get a single user by ID.
 + Response 200 (application/json)
     + Attributes (Web user)
 
-### Remove web user [DELETE /web_users/user/{user_id}]
+### Remove web user [DELETE]
 
 Required permission: *admin*
 
@@ -2957,8 +2989,6 @@ Required permission: *view_files_view*
 + Response 200 (application/json)
     + Attributes (array[View file])
 
-## View file [/view_files/session]
-
 ### Open file from remote user [POST]
 
 Open a new file from remote user. 
@@ -2976,11 +3006,14 @@ Required permission: *view_files_edit*
 + Response 200 (application/json)
     + Attributes (View file)
 
-### Open local file [POST /view_files/session/{tth}]
+### Open local file [POST /view_files/sessions/{tth}]
 
 Open a file that exists in share. 
 
 Required permission: *view_files_edit*
+
++ Parameters
+    + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - TTH of the local file (it must be found from the share)
 
 + Request (application/json)
     + Attributes
@@ -2989,7 +3022,9 @@ Required permission: *view_files_edit*
 + Response 200 (application/json)
     + Attributes (View file)
 
-### Get file [GET /view_files/session/{file_id}]
+## View file [/view_files/sessions/{file_id}]
+
+### Get file [GET]
 
 Required permission: *view_files_view*
 
@@ -2998,19 +3033,19 @@ Required permission: *view_files_view*
 + Response 200 (application/json)
     + Attributes (View file)
 
-### Remove session [DELETE /view_files/session/{file_id}]
+### Close file [DELETE]
 
 Required permission: *view_files_edit*
 
 + Response 204
 
-### Set the file as read [POST /view_files/session/{file_id}/read]
+### Set the file as read [POST /view_files/sessions/{file_id}/read]
 
 Required permission: *view_files_view*
 
 + Response 204
 
-### Get the content as text [GET /view_files/session/{file_id}/text]
+### Get the content as text [GET /view_files/sessions/{file_id}/text]
 
 Receive the content of the file as text. Using this method with files larger than 1 MB will return an error.
 
@@ -3025,17 +3060,15 @@ Required permission: *view_files_view*
 
 ## Subscriptions [/view_files/listener]
 
-Required permission: *hubs_view*
+Required permission: *view_files_view*
 
-All subscriptions from hub entities are also available to be used across all sessions (add them with */hubs/listener/event_name*).
-
-### File added [POST /hubs/listener/view_file_added]
+### File added [POST /view_files/listener/view_file_added]
 
 + Response 200 (application/json)
 
     + Attributes (View file)
 
-### File updated [POST /hubs/listener/view_file_updated]
+### File updated [POST /view_files/listener/view_file_updated]
 
 Download state was updated
 
@@ -3043,7 +3076,7 @@ Download state was updated
 
     + Attributes (View file)
 
-### File finished [POST /hubs/listener/view_file_finished]
+### File finished [POST /view_files/listener/view_file_finished]
 
 Fired when the file is ready for viewing
 
@@ -3051,7 +3084,7 @@ Fired when the file is ready for viewing
 
     + Attributes (View file)
 
-### File removed [POST /hubs/listener/view_file_removed]
+### File removed [POST /view_files/listener/view_file_removed]
 
 + Response 200 (application/json)
     + Attributes (View file)
@@ -3290,7 +3323,7 @@ Fired when the file is ready for viewing
 
 ### User flag (enum[string])
 
-+ me - The user is me
++ self - The user is me
 + bot - The user is a bot (ADC users only)
 + ascs - The user supports advanced searching extension (ADC users only)
 + ccpm - The user supports encrypted client-to-client private messaging (ADC users only)
