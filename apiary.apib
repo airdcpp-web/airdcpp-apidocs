@@ -4,7 +4,221 @@ FORMAT: 1A
 
 WORK IN PROGRESS
 
-This documentation isn't compatible with the current stable versions of AirDC++/AirDC++ Web client
+This documentation isn't compatible with the current stable versions of AirDC++/AirDC++ Web Client
+
+
+Missing information, typos or other errors? You can help with improving the documentation by [editing it on Github](https://github.com/airdcpp-web/airdcpp-apidocs). 
+
+
+## Communicating via HTTP
+
+Using HTTP to communicate with the API is often the easiest solution for performing simple tasks.
+
+### Basic authentication
+
+The application supports [cookie-based basic HTTP authentication](https://en.wikipedia.org/wiki/Basic_access_authentication#Client_side) for API requests.
+
+An example for refreshing the whole share with [curl](https://curl.haxx.se):
+
+`curl -H "Content-Type: application/json" -X POST -u myusername:mypassword http://localhost:5600/api/v1/share/refresh`
+
+
+### Session-based authentication
+
+Creating an unique session should generally be done only if you are going to use HTTP calls in conjuction with WebSockets.
+
+Authentication happens through [Session API's authentication method](/#reference/sessions/authentication/create-session). Once you have sent the user credentials, you will receive the session token in the response message:
+
+```json
+    ....
+    "auth_token": "25793d1e-6d48-407c-9c27-a9dcbd2e1188"
+    ...
+```
+
+The token should be sent in the `Authorization` HTTP header when making requests:
+
+```Authorization: 25793d1e-6d48-407c-9c27-a9dcbd2e1188```
+
+
+## WebSockets
+
+If your use case is simple, such as initiating share refreshes for directories downloaded from external sources, plain HTTP calls will be totally sufficient.
+
+However, since the application is heavily based on bidirectional communication and long running operations (chatting, file transfers, share refreshes...), writing
+of certain implementations will become significantly easier when the application is able to push information about new events to API consumers directly.
+
+WebSockets are beneficial especially if at least one of the following conditions is met:
+
+- There is an existing socket connector available for your scripting language
+- Minimal latencies are important (such bidirectional chatting)
+- You are developing a more complex integration
+
+WebSockets may be used in conjunction with regular HTTP request or the sockets may also be used exclusively for all API communication.
+
+Note that this section is used as a reference for low-level socket communication. Socket connectors, such as airdcpp-apisocket-js, will have their own abstactions for API communication.
+
+
+### Connecting and authenticating WebSockets
+
+You should use the following URL format when establishing WebSocket connections:
+
+Unencrypted: `ws://<address>:<http port>/api/v1/`
+Encrypted: `wss://<address>:<https port>/api/v1/`
+
+WebSockets require an [unique session created via the Session API](/#introduction/http-calls/session-based-authentication) (basic HTTP authentication isn't sufficient).
+
+
+#### Associating socket with an existing session
+
+If only want to use WebSockets for receiving event messages and continue using regular HTTP calls for requests, you may associate the socket with an existing session instead:
+
+```json
+{
+    "method": "POST",
+    "path": "/sessions/socket",
+    "callback_id": 1,
+    "data": { 
+        "authorization": "046f477f-3f09-45b6-8582-889d5fee0de7"
+    }
+}
+```
+
+Response: 
+
+```json
+{
+    "code": 204,
+    "callback_id": 1
+}
+```
+
+#### Authentication through the socket
+
+To create a new session directly via the socket, send the following message:
+
+```json
+{
+    "method": "POST",
+    "path": "/sessions/authorize",
+    "callback_id": 1,
+    "data": { 
+        "username": "myusername",
+        "password": "mypassword"
+    }
+}
+```
+
+[Authentication method API reference](/#reference/sessions/authentication/create-session)
+
+
+### API requests via WebSocket
+
+You may use WebSockets exclusively for all API communication. The message structure emulates regular HTTP requests:
+
+**Request**
+
+```json
+{
+    "method": "POST",
+    "path": "/hubs/chat_message",
+    "callback_id": 1,
+    "data": { 
+        "text": "Sent through WebSocket",
+        "hub_urls": [ "adcs://myhub.com:4252" ]
+    }
+}
+```
+
+`callback_id` is an unique identifier (positive integer) for the request that you can use for identifying the correct response message. 
+Responses may not be delivered in the same order as the requests were sent. Requests sent without `callback_id` will be processed but no responses are sent.
+
+**Example response (success)**
+
+```json
+{
+    "code": 200,
+    "callback_id": 1,
+    "data": { 
+        "sent": 4
+    }
+}
+```
+
+**Example response (error)**
+
+```json
+{
+    "code": 403,
+    "callback_id": 1,
+    "error": { 
+        "message": "The permission hubs_send is required for using this method"
+    }
+}
+```
+
+
+### Event subscriptions
+
+#### Generic subscriptions
+
+The format for adding generic subscriptions is
+
+`POST /<section>/listener/<subscription name>`
+
+Such as:
+
+`POST /system/listener/away_state`
+
+An example event message for this event would be: 
+
+```json
+{
+    "event": "away_state"
+    "data": { 
+        "id": "idle"
+    }
+}
+```
+
+The subscription may be removed with
+
+`DELETE /system/listener/away_state`
+
+Note that all added subscriptions will be reset when the socket gets disconnected.
+
+Due to limitations of the current documentation framework, event messages are described as regular responses in the API reference section.
+Demonstrated example responses will contain the `data` field content only instead of showing the full socket messages with event names and possible IDs.
+
+#### Entity-based subscriptions
+
+You may add subscriptions for certain individual entities (such as hubs and filelists):
+
+`POST /hubs/sessions/0/listener/hub_status_message`
+
+In such cases event messages will also contain the entitity identifier for which the event was triggered:
+
+```json
+{
+    "event": "hub_status_message",
+    "id": 0,
+    "data": {
+        "text": "Connecting to adcs://myhub.com:5231 ...",
+        "severity": "info"
+    }
+}
+```
+
+If you want to receive the event across all entities managing the subscriptions individually for each entity can become cumbersome. That's why the same listeners may also always be added without binding them to any specific entities:
+
+`POST /hubs/listener/hub_status_message`
+
+The resulting event message will be the same as described earlier (entity IDs are still included for identification purposes).
+
+
+
+
+
+
 
 
 
@@ -1276,6 +1490,19 @@ All subscriptions from private chat entities are also available to be used acros
 
 # Group Queue
 
+The download queue in AirDC++ is organized in bundles. A single bundle generally represents the item that was originally queued and it may be either a file or a directory. 
+
+The download order of queued bundles is determined based on their priorities.
+
+### Directory bundles
+
+The content of a queued directory bundle is not static. You may queue new files/directories inside existing bundles and they will be merged into it based on the target path. Existing items may also be removed.
+
+Each file inside a directory bundle also has its own priority, that it being used to determine the file download order inside that particular bundle.
+
+It's beneficial to keep the content size (file and directory count) of a single bundle reasonable. When queuing new directories, you should avoid creating individual bundles containing hundreds of directories. Queueing directories that can be assumed to be found from other users with about the same tree structure will make adding of alternative sources easier and ensure smoother application performance.
+
+
 ## Bundles [/queue/bundles]
 
 ### Get bundles [GET /queue/bundles/{start}/{count}]
@@ -1337,7 +1564,6 @@ Required permission: *queue_edit*
                 + name: `CD1/Ubuntu 16.04.iso` (required) - File name that may also contain subdirectories relative to the main bundle path
                 + priority (Queue priority ID, optional) - File priority
                 + size: 576345234 (number, required) - File size in bytes
-                + time: 42421412 (number, optional) - Original file creation/modify time (REMOVE)
                 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required)
 
 + Response 200 (application/json)
@@ -1399,13 +1625,14 @@ Required permission: *queue_edit*
 
 ### Search bundle for alternates [POST /queue/bundles/{id}/search]
 
-Searches individual bundle files for alternate sources. The number of files to search for depends on the bundle structure.
+**File bundles**: the file TTH will be searched for.
+**Directory bundles**: 1-4 random bundle files are searched for. The number of files to search for depends on the bundle directory structure.
 
 Required permission: *queue_edit*
 
 + Response 200 (application/json)
     + Attributes
-        + sent: 4 (number) - Number of individual bundle files that were searched for
+        + sent: 4 (number) - Number of bundle files that were searched for
 
 ### Share a failed bundle [POST /queue/bundles/{id}/share]
 
@@ -1662,69 +1889,91 @@ Generic update event for other file status updates.
 
 # Group Searching
 
-**Introduction**
 
-1. Create a new search instance that will collect results
-2. Post the search
+## Introduction
 
-Hubs will then forward the search query to all connected users
+Search matching in Direct Connect is a distibuted operation: search queries are sent to other hub users who match will match them against their own shared items. If you are in active connectivity
+mode, they will send the possible search results directly to you via UDP (passive results are sent via hubs instead).
 
-3. Let the results to arrive for a while
-4. Fetch them
+This also means that you can't simply just post a search and receive the results instantly as part of the response. Instead, you'll need to create a search instance for the search that will 
+take care of collecting results of that particular search and keeps them available to be fetched later.
 
-
+Basic code example for searching:
 
 ```javascript
 
 // Create a new search instance
-const instance = await api.post('search/instance')
+const instance = await api.post('search/instances')
 
 // Post the search
-const searchInfo = await api.post(`search/instance/${instance.id}/hub_search`, {
+const searchInfo = await api.post(`search/instances/${instance.id}/hub_search`, {
   query: {
     pattern: pattern,
   },
 })
 
 // Collect the results for 10 seconds before fetcing them
-setTimeout(async _ => {
-  // Fetch five most relevant results
-  const results = await api.get(`search/instance/${instance.id}/results/0/5`)
+await sleep(10000)
 
-  // .... do something with them
-}, searchInfo.queue_time + 10000)
+// Fetch the five most relevant results
+const results = await api.get(`search/instances/${instance.id}/results/0/5`)
+
+// .... do something with them
 
 ```
 
-**Performance**
+(there are some caveats in the example that are explained later)
+
+## Performance considerations
+
+### Effect to hubs
+
+When searching for "Ubuntu 14.04" with "iso" file extension in an ADC hub, the resulting protocol message that is being forwareded to all users by the hub would look similar to this:
+
+`BSCH CLEF TO3/903088317 ANubuntu AN14.04 EXiso`
+
+In a hub with 5000 users, the total amount of uncompressed data to be sent by the hub would be 230 kilobytes. If the searching user is in passive mode, all search forwarded replies would increase the total data amount even more.
+
+### Effect to other users
+
+There's a huge variation of share sizes among the users. The only metrics that matters in terms of search matching performance is user's total file/directory count. Matching a share with 10000 files won't be a big deal,
+but the total matching time will be totally different with 5 million files.
+
+TTH searches are generally cheap since clients maintain an index of shared files by their TTH values from which the searches are matched from. 
+
+When performing text searches with partial matching, no such index exists. Various clients use [bloom filters](https://en.wikipedia.org/wiki/Bloom_filter) to cheaply filter out text searches that are guaranteened not to match 
+any shared items, that will work quite well especially with longer seach terms. If an average length of a shared item is 43 characters (43 bytes for ASCII-only names), the total amount of text to match with 5 million shared files
+would be 215 megabytes (given that the whole share needs to matched).
 
 
+## Search queues
 
-**Search queues**
+Because of the performance considerations listed in the earlier section, hubs will generally limit the amount of searches that users may perform and spamming the hub with a large number of searches may cause the user 
+to get kicked out. 
 
-Because of the performance considerations listed in the earlier sections, hubs will generally limit the amount of searches that users may perform
-and spamming the hub with a large number of searches may cause the user to get kicked out. 
+Searches performed by the client will originate from many different sources (manual searches, searches for alternate queue sources and API scripts...). In order to prevent a large number of searches being sent within a short amount of time, 
+the application will maintain queues for outgoing searches on per-hub basis.
 
-Searches performed by the client will originate from many different sources (manual searches, searches for alternate queue sources and API scripts...)
+The position of a search in the search queue is determined by its priority, which allows minimizing the waiting times for more urgent searches (such as manual ones made from the UI).
+Since higher priority searches may be added in queue before the existing ones, the actual time when the search will be sent is not known at the time when it's being queued.
 
-In order to preven
-
-
-Here's a snippet of a subscription-based search function for [airdcpp-apisocket](https://github.com/airdcpp-web/airdcpp-apisocket-js):
+When using Websockets, there's a 'search_hub_searches_sent' that will be fired after the search has been sent to all hubs. Here's a snippet of a subscription-based search function for [airdcpp-apisocket](https://github.com/airdcpp-web/airdcpp-apisocket-js):
 
 ```javascript
 
 // Create a new search instance
-const instance = await socket.post('search/instance')
+const instance = await socket.post('search/instances')
 
 // Add listener for the 'searches sent' event before performing the actual search
-socket.addSocketListener(`search/instance/${instance.id}`, 'search_hub_searches_sent', searchInfo => {
-  // Collect the results for 10 seconds before fetching them
-  setTimeout(_ => fetchResults(instance), 10000);
+socket.addListener(`search/instances/${instance.id}`, 'search_hub_searches_sent', searchInfo => {
+  // Collect the results for 5 seconds before fetching them
+  await sleep(5000)
+  
+  // .... fetch and do something with them
 })
 
 // Perform the search
-socket.post(`search/instance/${instance.id}/hub_search`, {
+socket.post(`search/instances/${instance.id}/hub_search`, {
   query: {
     pattern: pattern,
   },
@@ -1733,7 +1982,12 @@ socket.post(`search/instance/${instance.id}/hub_search`, {
 
 ```
 
+[Complete example](https://github.com/airdcpp-web/airdcpp-apisocket-js/blob/api-v1/examples/AutoDownloader.js)
 
+HTTP users may also check the search instance object to see the current queue time or time ellapsed from the search.
+
+Note that the application may also choose reject new searches in order to prevent the search queue from growing indefinitely. Therefore, you should
+use some consideration regarding the number of searches that you really need to perform.
 
 
 ## Search instances [/search/instances]
@@ -1755,7 +2009,7 @@ Required permission: *search*
 
 + Request (application/json)
     + Attributes
-        + expiration_minutes: 60 (number, optional) - Time in minutes after which the instance will be removed automatically (0 = no expiration). Counted from the instance creation.
+        + expiration_minutes: 60 (number, optional) - Time in minutes after which the instance will be removed automatically (0 = no expiration). Counted from the time of creation.
             + Default: 60
 + Response 200 (application/json)
     + Attributes (Search instance)
@@ -1776,6 +2030,7 @@ Get a single instance by ID.
 Required permission: *search*
 
 + Response 204
+
 
 ## Miscellaneous [/search]
 
@@ -1850,7 +2105,7 @@ All subscriptions from search instances are also available to be used across all
 
 ### Perform hub search [POST /search/instance/{instance_id}/hub_search]
 
-Search files from all connected (or separately specified) hubs.
+Search files from all connected (or separately specified) hubs. This will cancel possible hub searches that were queued earlier and clear the cached results.
 
 Required permission: *search*
 
@@ -1869,9 +2124,9 @@ Required permission: *search*
 
 ### Perform user search [POST /search/instance/{instance_id}/user_search]
 
-Search files from an individual user. The search will be sent instantly without queueing.
+Search files from an individual user. The search will be sent instantly without queueing. This will cancel possible hub searches that were queued earlier and clear the cached results.
 
-This method can be used with ADC users only.
+This method can be used with ADC users only ([all hubsofts may not deliver the searches correcly](https://airdcpp-web.github.io/docs/general/running-a-hub.html)).
 
 Required permission: *search*
 
@@ -1886,7 +2141,13 @@ Required permission: *search*
 
 ### Get results [GET /search/instance/{instance_id}/results/{start}/{max_count}]
 
-Get results for the previously posted search query.
+Get results for the previously posted search query. Results are sorted by relevance (the most relevant result is sorted first).
+
+All individual user results are grouped based on the following conditions
+
+- Files are grouped based on their TTH values
+- ADC directory results are grouped based on the combination of exact size and directory name
+- NMDC directory results are not grouped
 
 Required permission: *search*
 
@@ -1935,12 +2196,12 @@ Fired after all queued searches were sent.
         + sent: 4 (number) - Number of searches that were sent (this may also be 0 if all hubs were closed)
         + search_id: 643345 - ID of the search that was sent
 
-### Parent result added [POST /search/instance/{id}/listener/search_result_added]
+### Grouped result added [POST /search/instance/{id}/listener/search_result_added]
 
 + Response 200 (application/json)
     + Attributes (Grouped search result)
 
-### Parent result updated [POST /search/instance/{id}/listener/search_result_updated]
+### Grouped result updated [POST /search/instance/{id}/listener/search_result_updated]
 
 + Response 200 (application/json)
     + Attributes (Grouped search result)
@@ -1966,14 +2227,14 @@ Create a new API session by providing the web user credentials.
     + Attributes
         + username: user1 (required)
         + password: password (required)
-        + max_inactivity: 60 (optional) - Time in minutes after which the session is invalidated if there is no activity. Note that sessions with a connected websocket won't expire. The default session inactivity timeout can be configured from web server settings.
+        + max_inactivity: 60 (number, optional) - Time in minutes after which the session is invalidated if there is no activity. Note that sessions with a connected websocket won't expire. The default session inactivity timeout can be configured from web server settings.
             + Default: 20
 + Response 200 (application/json)
     + Attributes
         + token: `25793d1e-6d48-407c-9c27-a9dcbd2e1188` - Authorization token
         + system_info (System info) - Generic information about the system that the application is running on
         + user (Web user) - Current web user
-        + wizard_pending: false - Whether completion of the initial configuration wizard is pending
+        + wizard_pending: false (boolean) - Whether completion of the initial configuration wizard is pending
 
 ### Socket [POST /sessions/socket]
 
@@ -2006,7 +2267,7 @@ Notify the application about user activity or ensure that HTTP session won't exp
 
 + Request (application/json)
     + Attributes
-        + user_active: false (optional)
+        + user_active: false (boolean, optional)
         
           Specifies whether the user has been active since the last activity report. This information is used for calculating the away state of the application. Scripts that don't involve user interaction shouldn't provide this attribute.
         
@@ -2067,9 +2328,9 @@ Required permission: *admin*
 
 ### Session
 
-+ id: 143743423 (number) - Session ID (this is not the auth token)
++ id: 143743423 (number) - Session ID (this is not the same as auth token that is sent only in the authentication response)
 + ip: [::1] - Last IP address used for the connection (IPv4/IPv6)
-+ last_activity: 6236 - Milliseconds since last session activity
++ last_activity: 6236 (number) - Milliseconds since last session activity
 + type: secure (enum[string])
   + basic_http
   + plain
@@ -2133,7 +2394,9 @@ Get more detailed information about the specified setting items.
         + keys: download_limit_main, upload_limit_main (array[string]) - Array of setting keys
 
 + Response 200 (application/json)
-    + Attributes (array[Setting item info])
+    + Attributes (array)
+        + (object)
+            + download_limit_main (Setting item info)
             
 
 ## Data Structures
