@@ -27,14 +27,14 @@ First documented API version
 
 ### Tools
 
-**[airdcpp-apisocket-js](https://github.com/airdcpp-web/airdcpp-apisocket-js/tree/api-v1)**
+**[airdcpp-apisocket-js](https://github.com/airdcpp-web/airdcpp-apisocket-js)**
 
 Websocket connector for Javascript (Node.js/web browsers)
 
 
 ### Examples
 
-- [Example scripts for airdcpp-apisocket-js](https://github.com/airdcpp-web/airdcpp-apisocket-js/tree/api-v1/examples)
+- [Example scripts for airdcpp-apisocket-js](https://github.com/airdcpp-web/airdcpp-apisocket-js/tree/master/examples)
 - [AirDC++ Web UI](https://github.com/airdcpp-web/airdcpp-webui)
 
 
@@ -1615,7 +1615,7 @@ Required permission: *queue_edit*
 + Request (application/json)
     + Attributes
         + priority (Queue priority ID, optional)
-        + auto_priority: false (optional)
+        + auto_priority: false (boolean, optional)
 
 + Response 200 (application/json)
     + Attributes (Queue bundle)
@@ -2012,7 +2012,7 @@ socket.post(`search/instances/${instance.id}/hub_search`, {
 
 ```
 
-[Complete example](https://github.com/airdcpp-web/airdcpp-apisocket-js/blob/api-v1/examples/AutoDownloader.js)
+[Complete example](https://github.com/airdcpp-web/airdcpp-apisocket-js/blob/master/examples/AutoDownloader.js)
 
 HTTP users may also check the search instance object to see the current queue time or time ellapsed from the search.
 
@@ -2881,13 +2881,13 @@ Required permission: *admin*
 
 ### System info
 
-+ api_version: 1
-+ api_feature_level: 0
++ api_version: 1 (number)
++ api_feature_level: 0 (number)
 + cid: 76NLOTOBZVTWXOHIWKCXB27W46ULOI7EAUZUTTI - An unique application identifier
 + hostname: web-demo - System hostname
 + path_separator: / - System's native path separator character
 + client_version: `AirDC++w 2.0.0 armv7l` - Full application version string
-+ client_started: 1483972366 - Time when the application was started
++ client_started: 1483972366 (number) - Time when the application was started
 + platform: other (enum[string])
   + windows
   + osx
