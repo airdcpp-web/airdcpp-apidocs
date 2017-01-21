@@ -1560,7 +1560,7 @@ Change the priority of all queued bundles.
 
 + Request (application/json)
     + Attributes
-        + priority (Queue priority ID, required)
+        + priority (Queue priority ID, optional) - Auto priority will be enabled if no priority is supplied
 
 + Response 204
 
@@ -1608,18 +1608,6 @@ Required permission: *queue_view*
 + Response 200 (application/json)
     + Attributes (Queue bundle)
 
-### Update bundle properties [PATCH]
-
-Required permission: *queue_edit*
-
-+ Request (application/json)
-    + Attributes
-        + priority (Queue priority ID, optional)
-        + auto_priority: false (boolean, optional)
-
-+ Response 200 (application/json)
-    + Attributes (Queue bundle)
-
 ### Remove bundle [POST /queue/bundles/{id}/remove]
 
 Required permission: *queue_edit*
@@ -1653,6 +1641,16 @@ Required permission: *queue_edit*
     + Attributes
         + count: 4 (number) - Number of files from which the source was removed
 
+### Set bundle priority [POST /queue/bundles/{id}/priority]
+
+Required permission: *queue_edit*
+
++ Request (application/json)
+    + Attributes
+        + priority (Queue priority ID, optional) - Auto priority will be enabled if no priority is supplied
+
++ Response 204 (application/json)
+
 ### Search bundle for alternates [POST /queue/bundles/{id}/search]
 
 **File bundles**: the file TTH will be searched for.
@@ -1676,6 +1674,60 @@ Required permission: *queue_edit*
             + Default: false
 
 + Response 204
+
+
+## Files [/queue/files/{id}]
+
+### Remove file from queue [POST /queue/files/{id}/remove]
+
+Required permission: *queue_edit*
+
++ Request (application/json)
+    + Attributes
+        + remove_finished: false (boolean, optional) - Remove possible finished file
+            + Default: false
+
++ Response 204
+
+### Set file priority [POST /queue/files/{id}/priority]
+
+Required permission: *queue_edit*
+
++ Request (application/json)
+    + Attributes
+        + priority (Queue priority ID, optional) - Auto priority will be enabled if no priority is supplied
+
++ Response 204 (application/json)
+
+### Search file for alternates [POST /queue/files/{id}/search]
+
+Required permission: *queue_edit*
+
++ Response 204 (application/json)
+
+### Get file sources [GET /queue/files/{id}/sources]
+
+Required permission: *queue_view*
+
++ Response 200 (application/json)
+    + Attributes (array[Queue source])
+
+### Remove file source [DELETE /queue/files/{id}/sources/{cid}]
+
+Required permission: *queue_edit*
+
++ Response 204 (application/json)
+
+### Get file segments [GET /queue/files/{id}/segments]
+
+Required permission: *queue_view*
+
++ Response 200 (application/json)
+    + Attributes
+        + block_size: 524288 (number) - Block size of the tree used for validation (used for segment alignment). Total file size is used if there is no tree available.
+        + running (array[Queue segment]) - Running segments (entire segments)
+        + running_progress (array[Queue segment]) - Running segments (segment sizes based on the current progress)
+        + done (array[Queue segment]) - Completed segments
 
 
 ## Generic methods [/queue]
@@ -1704,20 +1756,6 @@ Required permission: *queue_edit*
 + Response 200 (application/json)
     + Attributes
         + count: 4 (number) - Number of files from which the source was removed
-
-### Remove file by path [DELETE /queue/remove_file]
-
-Remove source from all queued files.
-
-Required permission: *queue_edit*
-
-+ Request (application/json)
-    + Attributes
-        + target: /share/Ubuntu/Ubuntu 14.04.iso
-        + remove_finished: false (boolean, optional) - Remove possible finished file
-            + Default: false
-
-+ Response 204
 
 
 ## Bundle subscriptions [/queue/listener/queue_bundle]
@@ -1895,10 +1933,18 @@ Generic update event for other file status updates.
     + completed: false (boolean) - All file segments have finished downloading and the item has been renamed to use its final name (and possibly verified)
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
 
-### Queue bundle source
+### Queue segment
+
++ start: 13631488 (number) - Start position of the segment (bytes)
++ size: 524288 (number) - Size of the segment (bytes)
+
+### Queue source
 
 + user (Hinted user)
 + last_speed: 57453654 (number) - Last known total speed from the user, bytes per second
+
+### Queue bundle source (Queue source)
+
 + files: 53 (number) - Bundle files remaining from this source
 + size: 734234563 (number) - Total number of bytes remaining from this source
 
@@ -3021,10 +3067,10 @@ Only the values that have changed after the last event are sent.
 + target: /home/airdcpp/share/Ubuntu/Ubuntu 14.04.iso - Local file path
 + download: true (boolean) - Whether it's a download (false = upload)
 + type (File type) - Content type 'filelist' is also used here
-+ size: 62523525626 (number) - Size in bytes
-+ bytes_transferred: 4521124 (number)
-+ time_started: 65235235 (number)
-+ speed: 5234324 (number) - Current transfer speed, bytes per second
++ size: 625235256 (number) - Segment size in bytes
++ bytes_transferred: 452124 (number)
++ time_started: 1483277168 (number)
++ speed: 524324 (number) - Current transfer speed, bytes per second
 + seconds_left: 632576 (number) - Seconds left based on the current transfer speed
 + encryption (Encryption)
 + ip (IP)
@@ -3039,6 +3085,7 @@ Only the values that have changed after the last event are sent.
     + finished: false (boolean)
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
 + flags (array[Transfer flag])
++ queue_file_id: 743457 (number) - ID of the queued file (not available for uploads)
 
 ### Transfer flag (enum[string])
 
