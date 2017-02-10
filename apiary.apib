@@ -2,9 +2,6 @@ FORMAT: 1A
 
 # AirDC++ Web API
 
-WORK IN PROGRESS
-
-
 Missing information, typos or other errors? You can help with improving the documentation by [editing it on Github](https://github.com/airdcpp-web/airdcpp-apidocs). 
 
 API-related bugs or feature requests? Please report them for the [AirDC++ Web Client project on Github](https://github.com/airdcpp-web/airdcpp-webclient/issues).
@@ -16,10 +13,10 @@ API-related bugs or feature requests? Please report them for the [AirDC++ Web Cl
 
 First documented API version
 
-#### Applications
+#### Compatible applications
 
 - [AirDC++ Web Client](https://airdcpp-web.github.io) 2.0.0 (unreleased, [instructions for installing development build](https://airdcpp-web.github.io/docs/installation/compiling.html#installing-a-development-version))
-- [AirDC++ for Windows](https://www.airdcpp.net) 3.40 (unreleased, [development build download](http://builds.airdcpp.net/airdcpp_3.30b-73-g361d_x64.7z))
+- [AirDC++ for Windows](https://www.airdcpp.net) 3.40 (unreleased, [development build download](http://builds.airdcpp.net/airdcpp_3.40a_x64.7z))
 
 
 
@@ -32,7 +29,7 @@ First documented API version
 Websocket connector for Javascript (Node.js/web browsers)
 
 
-### Examples
+### Usage examples
 
 - [Example scripts for airdcpp-apisocket-js](https://github.com/airdcpp-web/airdcpp-apisocket-js/tree/master/examples)
 - [AirDC++ Web UI](https://github.com/airdcpp-web/airdcpp-webui)
@@ -517,6 +514,10 @@ Required permission: *events_view*
 
 # Group Filelists
 
+Filelist API allows browsing remote users' shared content or own share and manages queueing of directory downloads from other users. Note that filelist sessions are shared across API/UI sessions. Filelists of non-AirDC++ users will also contain less information about filelist directories/files.
+
+API sessions use partial filelists so the content of each directory is downloaded only once it has been requested. Due to this, it may take some time when switching from one directory to another (especially when browsing remote NMDC filelists).
+
 
 ## Filelist sessions [/filelists/sessions]
 
@@ -623,20 +624,6 @@ Required permission: *queue_edit*
         + user (Hinted user, required)
         + list_path: /Share/Ubuntu/ (optional) - Directory to match from ADC (recursive partial list is used). Full filelist is always matched from NMDC users.
             + Default: /
-+ Response 204
-
-
-### Find NFO [POST /filelists/find_nfo]
-
-Find a file with .nfo extension from the specified directory and open it for viewing. This method can only be used
-with ADC users as recursive partial filelist is used.
-
-Required permission: *view_files_edit*
-
-+ Request (application/json)
-    + Attributes
-        + user (Hinted user, required)
-        + list_path: /Share/Ubuntu/ (optional) - Directory to search the files from. Root ('/') is not allowed.
 + Response 204
 
 
@@ -822,9 +809,6 @@ Get disk space info for a set of directory paths
 
 
 # Group Hashing
-
-
-
 
 
 ## Methods [/hash]
@@ -1016,7 +1000,9 @@ Required permission: *hubs_view*
 
 # Group Hubs
 
-Hub API provides methods for communicating with hubs
+Hub API focuses on hub state management, chatting and hub-level user management.
+
+Hub sessions are identified by a numeric ID and the actual hub URL may change during the lifetime of a single session (e.g. in case of redirections).
 
 ## Sessions [/hubs/sessions]
 
@@ -1988,7 +1974,7 @@ const searchInfo = await api.post(`search/instances/${instance.id}/hub_search`, 
   },
 })
 
-// Collect the results for 10 seconds before fetcing them
+// Collect the results for 10 seconds before fetching them
 await sleep(10000)
 
 // Fetch the five most relevant results
@@ -2194,9 +2180,9 @@ Required permission: *search*
 
 + Response 200 (application/json)
     + Attributes
-        + queue_time: 5000 - Current queue time for this search in milliseconds. Given that this is not a manual search, higher priority searches that are queued after this one may increase the waiting time even more.
-        + search_id: 643345 - An individual search ID for this query
-        + queued_count: 3 - Number of hubs for which the search was queued
+        + queue_time: 5000 (number) - Current queue time for this search in milliseconds. Given that this is not a manual search, higher priority searches that are queued after this one may increase the waiting time even more.
+        + search_id: 643345 (number) - An individual search ID for this query
+        + queued_count: 3 (number) - Number of hubs for which the search was queued
 
 ### Perform user search [POST /search/instance/{instance_id}/user_search]
 
@@ -2204,12 +2190,19 @@ Search files from an individual user. The search will be sent instantly without 
 
 This method can be used with ADC users only ([all hubsofts may not deliver the searches correcly](https://airdcpp-web.github.io/docs/general/running-a-hub.html)).
 
+Options specified in the 'options' field are available only with users having the *asch* flag.
+
 Required permission: *search*
 
 + Request (application/json)
     + Attributes 
         + query (Search query, required)
-        + user (Hinted user, required) 
+        + user (Hinted user, required)
+        + options (optional)
+            + max_results: 20 (optional, number) - Maximum number of results to return. Note that the responding client may not obey large maximum result limits.
+                + Default: 5
+            + path: /Videos/video1/ (optional) - Directory in remote user's share in which the search should be performed
+                + Default: /
 
 + Response 204
 
@@ -2609,19 +2602,19 @@ Search for shared files.
 
 Required permission: *settings_view*
 
-### Share refreshed [POST /share/listener/share_refreshed]
+### Share refresh queued [POST /share/listener/share_refresh_queued]
 
-Fired when share refresh (partial or full refresh) has been completed.
+Fired when share refresh (partial or full refresh) was queued.
 
 + Response 200 (application/json)
-    + Attributes
-        + real_paths: /home/airdcpp/share/, /mnt/disk2/share/ (array)
-        + type (enum[string])
-            + add_directory - A new share directory was scanned and is now visible in shared
-            + add_bundle - Downloaded bundle was added in share
-            + refresh_all - Whole share was refreshed
-            + refresh_directories - Custom share paths were refreshed
-            + refresh_incoming - Share roots marked as incoming were refreshed
+    + Attributes (Share refresh info)
+
+### Share refresh completed [POST /share/listener/share_refresh_completed]
+
+Fired when share refresh (partial or full refresh) was completed.
+
++ Response 200 (application/json)
+    + Attributes (Share refresh info)
 
 ### Excluded path added [POST /share/listener/share_exclude_added]
 
@@ -2636,6 +2629,16 @@ Fired when share refresh (partial or full refresh) has been completed.
         + path: /home/airdcpp/share/Videos/secret/
 
 ## Data Structures
+
+### Share refresh info
+
++ real_paths: /home/airdcpp/share/, /mnt/disk2/share/ (array)
++ type (enum[string])
+    + add_directory - A new share directory was scanned and is now visible in shared
+    + add_bundle - Downloaded bundle was added in share
+    + refresh_all - Whole share was refreshed
+    + refresh_directories - Custom share paths were refreshed
+    + refresh_incoming - Share roots marked as incoming were refreshed
 
 ### Share item
 
