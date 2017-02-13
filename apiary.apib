@@ -860,6 +860,8 @@ Required permission: *settings_edit*
 
 ## Subscriptions [/hash/listener]
 
+Required permission: *settings_view*
+
 ### Database status updated [POST /hash/listener/hash_database_status]
 
 + Response 200 (application/json)
@@ -961,23 +963,31 @@ Required permission: *settings_edit*
 + Response 204
 
 
-## Hubs [/histories/hubs]
+## Sessions [/histories/sessions/{history_type}]
 
-### Get hubs [GET /histories/hubs/{max_count}]
+Stores lists of various previously opened sessions.
 
-Required permission: *hubs_view*
+The following history types are available:
+
++ hub
++ private_chat
++ filelist
+
+### Get session history [GET /histories/sessions/{history_type}/{max_count}]
+
+Required permission: *settings_view*
 
 + Parameters
-    + max_count: 0 - Maximum number of most recent hubs to return (0 = unlimited)
+    + max_count: 0 - Maximum number of most recent sessions to return (0 = unlimited)
     
 + Response 200 (application/json)
-    + Attributes (array[History hub])
+    + Attributes (array[History session])
 
-### Search hubs [POST /histories/hubs/search]
+### Search session history [POST /histories/sessions/{history_type}/search]
 
-Search hubs with hub name matching the provided pattern. The most relevant match is returned first.
+Search sessions with name matching the provided pattern. The most relevant match is returned first.
 
-Required permission: *hubs_view*
+Required permission: *settings_view*
 
 + Request (application/json)
     + Attributes
@@ -985,16 +995,29 @@ Required permission: *hubs_view*
         + max_results: 5 (number, required)
     
 + Response 200 (application/json)
-    + Attributes (array[History hub])
+    + Attributes (array[History session])
+
+### Clear session history [DELETE]
+
+Clear the specified history array.
+
+Required permission: *settings_edit*
+
++ Parameters
+    + history_type
+    
++ Response 204
 
 
 ## Data Structures
 
-### History hub
+### History session
 
 + name: Demo hub
 + hub_url: adcs://myhub.com:6423
 + description: Demo hub for AirDC++ Web Client
++ last_opened: 1483611358 (number) - Time when the session was opened previously
++ user (Hinted user) - Set only for private chat and filelist sessions
 
 
 
@@ -1053,6 +1076,8 @@ Required permission: *hubs_edit*
 
 Get a single hub session by URL (exact match).
 
+Required permission: *hubs_view*
+
 + Request (application/json)
     + Attributes
         + hub_url: adcs://myhub.com:6423 (required)
@@ -1063,6 +1088,8 @@ Get a single hub session by URL (exact match).
 ### Stats [GET /hubs/stats]
 
 Return various statistics about the connected hubs and their users
+
+Required permission: *hubs_view*
 
 + Response 200 (application/json)
 
@@ -2597,6 +2624,12 @@ Search for shared files.
 + Response 200 (application/json)
     + Attributes (array[Share item])
 
+### Stats [GET /share/stats]
+
+Required permission: *share_view*
+
++ Response 200 (application/json)
+
 
 ## Subscriptions [/share/listener]
 
@@ -2999,7 +3032,7 @@ Required permission: *transfers*
 
 ## Subscriptions [/transfers/listener]
 
-Required permission: *transfers* // CHECK
+Required permission: *transfers*
 
 ### Transfer added [POST /transfers/listener/transfer_added]
 
@@ -3388,18 +3421,6 @@ Required permission: *view_files_edit*
 Required permission: *view_files_view*
 
 + Response 204
-
-### Get the content as text [GET /view_files/sessions/{file_id}/text]
-
-Receive the content of the file as text. Using this method with files larger than 1 MB will return an error.
-
-Required permission: *view_files_view*
-
-+ Request (application/json)
-
-+ Response 200 (application/json)
-    + Attributes
-        + text: This is the file content
 
 
 ## Subscriptions [/view_files/listener]
