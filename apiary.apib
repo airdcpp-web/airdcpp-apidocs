@@ -184,11 +184,11 @@ Responses may not be delivered in the same order as the requests were sent. Requ
 ```
 
 
-### Event subscriptions
+### Event listeners
 
-#### Generic subscriptions
+#### Generic listeners
 
-The format for adding generic subscriptions is
+The format for adding generic listeners is
 
 `POST /<section>/listener/<subscription name>`
 
@@ -207,7 +207,7 @@ An example event message for this event would be:
 }
 ```
 
-The subscription may be removed with
+The lis may be removed with
 
 `DELETE /system/listener/away_state`
 
@@ -242,10 +242,71 @@ If you want to receive the event across all entities managing the subscriptions 
 The resulting event message will be the same as described earlier (entity IDs are still included for identification purposes).
 
 
+### Action hooks
+
+Action hooks allow scripts to perform validations related to various client actions, such as validate the content finished bundles/files or filter incoming chat messages. All events fired by the hook must either be accepted or rejected by the script before the application processes them futher.
 
 
+#### Adding hooks
+
+`POST /hubs/hooks/hub_incoming_message_hook`
+
+Data (required):
+
+```json
+{
+    "id": "simple_chat_filter",
+    "name": "Chat message filter",
+}
+```
+
++ id: Hook subscriber ID, which should be globally unique across all sessions for a single hook so it's better avoid using too generic IDs (subscribers with the same ID can't be added simultaneously from multiple sessions). The ID should contain alphanumeric characters only.
++ name: Display name for the subscriber
+
+It's not possible to add multiple subscribers for a single hook from within the same session.
+
+#### Removing hooks
+
+`DELETE /hubs/hooks/hub_incoming_message_hook`
+
+#### Handling hook events
+
+**Hook event format**
+
+```json
+{
+    "completion_id": 1,
+    "event": "hub_incoming_message_hook",
+    "hook_id": "example_chat_filter"
+    "data": "(hook-specific data)"
+}
+```
+
+*completion_id* should be put in the URL used for accepting/rejecting the event.
 
 
+**Accepting the event**
+
+`POST /hubs/hooks/hub_incoming_message_hook/1/resolve`
+
+
+**Rejecting the event**
+
+`POST /hubs/hooks/hub_incoming_message_hook/1/reject`
+
+Data (required):
+
+```json
+{
+    "reject_id": "filtered",
+    "message": "Filter due to message matching the pattern ignoretest"
+}
+```
+
+Data passed in the reject call is required and will be used for debugging purposes and, depending on the hook, may also be displayed to the user.
+
++ reject_id: Subscriber-specific reject ID
++ message: Display reason for the rejection
 
 
 
@@ -1122,6 +1183,7 @@ Required permission: *hubs_edit*
     + Attributes
         + sent: 1 (number) - Number of messages that were sent successfully.
 
+
 ## Subscriptions [/hubs/listener]
 
 Required permission: *hubs_view*
@@ -1138,6 +1200,22 @@ All subscriptions from hub entities are also available to be used across all ses
 
 + Response 200 (application/json)
     + Attributes (Hub)
+
+
+## Hooks [/hubs/hooks]
+
+### Incoming chat message [POST /hubs/hooks/hub_incoming_message_hook]
+
++ Response 200 (application/json)
+    + Attributes (Chat message)
+
+### Outgoing chat message [POST /hubs/hooks/hub_outgoing_message_hook]
+
++ Response 200 (application/json)
+    + Attributes
+        + text: Hello world
+        + hub_url: adcs://myhub.com:6423
+        + session_id: 5 (number)
 
 
 ## Data Structures
@@ -1393,10 +1471,7 @@ Send private chat message message to a specific user. This should generally be u
 Required permission: *private_chat_send*
 
 + Request (application/json)
-    + Attributes (Chat message request, required)
-        + user (Hinted user base, required)
-        + echo: false (boolean, optional) - Echo the sent message back to me. This will always cause a new private chat session to be created and allows the message to be logged. Note that a private chat session will also be created if the other users replies to your message (or sends an away message).
-            + Default: false
+    + Attributes (Private chat message request, required)
 
 + Response 204
 
@@ -1419,6 +1494,23 @@ All subscriptions from private chat entities are also available to be used acros
     + Attributes (Private chat)
 
 
+## Hooks [/private_chat/hooks]
+
+### Incoming chat message [POST /private_chat/hooks/private_chat_incoming_message_hook]
+
+Note that private chat session won't exist yet for private messages received from new users.
+
++ Response 200 (application/json)
+    + Attributes (Chat message)
+
+### Outgoing chat message [POST /private_chat/hooks/private_chat_outgoing_message_hook]
+
+Note that private chat session may not exist for announcement-like messages.
+
++ Response 200 (application/json)
+    + Attributes (Private chat message request)
+
+
 ## Data Structures
 
 ### Private chat
@@ -1434,6 +1526,11 @@ All subscriptions from private chat entities are also available to be used acros
     + encryption (Encryption, optional) - Available only with connected CCPM connections
 + message_counts (Chat message info)
 
+### Private chat message request (Chat message request)
+
++ user (Hinted user base, required)
++ echo: false (boolean, optional) - Echo the sent message back to me. This will always cause a new private chat session to be created and allows the message to be logged. Note that a private chat session will also be created if the other users replies to your message (or sends an away message).
+    + Default: false
 
 
 # Group Private chat sessions
@@ -1878,6 +1975,28 @@ Generic update event for other file status updates.
 
 + Response 200 (application/json)
     + Attributes (Queue file)
+
+
+## Hooks [/queue/hooks]
+
+Bundle/file completion hooks can be used for performing various content validations. Possible error returned by the hook is saved for the respective item and is also visible to the user. 
+
+`hook_validation_error` state is set for failed items and the full error is available from the `hook_error` status field. The [share](/#reference/queue/bundle/share-a-failed-bundle) method can be used to revalidate failed bundles.
+
+
+### File finished [POST /queue/hooks/queue_file_finished_hook]
+
+The hook is fired for each bundle file that finishes downloading.
+
++ Response 200 (application/json)
+    + Attributes (Queue file)
+
+### Bundle finished [POST /queue/hooks/queue_bundle_finished_hook]
+
+The hook is fired for each bundle that finishes downloading.
+
++ Response 200 (application/json)
+    + Attributes (Queue bundle)
 
 
 ## Data Structures
