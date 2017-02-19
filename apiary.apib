@@ -190,11 +190,11 @@ Responses may not be delivered in the same order as the requests were sent. Requ
 
 The format for adding generic listeners is
 
-`POST /<section>/listener/<subscription name>`
+`POST /<section>/listeners/<subscription name>`
 
 Such as:
 
-`POST /system/listener/away_state`
+`POST /system/listeners/away_state`
 
 An example event message for this event would be: 
 
@@ -209,7 +209,7 @@ An example event message for this event would be:
 
 The lis may be removed with
 
-`DELETE /system/listener/away_state`
+`DELETE /system/listeners/away_state`
 
 Note that all added subscriptions will be reset when the socket gets disconnected.
 
@@ -220,7 +220,7 @@ Demonstrated example responses will contain the `data` field content only instea
 
 You may add subscriptions for certain individual entities (such as hubs and filelists):
 
-`POST /hubs/sessions/0/listener/hub_status_message`
+`POST /hubs/sessions/0/listeners/hub_status_message`
 
 In such cases event messages will also contain the entitity identifier for which the event was triggered:
 
@@ -237,7 +237,7 @@ In such cases event messages will also contain the entitity identifier for which
 
 If you want to receive the event across all entities managing the subscriptions individually for each entity can become cumbersome. That's why the same listeners may also always be added without binding them to any specific entities:
 
-`POST /hubs/listener/hub_status_message`
+`POST /hubs/listeners/hub_status_message`
 
 The resulting event message will be the same as described earlier (entity IDs are still included for identification purposes).
 
@@ -374,11 +374,11 @@ Required permission: *settings_edit*
 + Response 204
 
 
-## Subscriptions [/favorite_directories/listener]
+## Subscriptions [/favorite_directories/listeners]
 
 Required permission: *settings_view*
 
-### Favorite directories updated [POST /favorite_hubs/listener/favorite_hub_updated]
+### Favorite directories updated [POST /favorite_hubs/listeners/favorite_hub_updated]
 
 + Response 200 (application/json)
     + Attributes (array[Favorite directory])
@@ -452,21 +452,21 @@ Required permission: *favorite_hubs_edit*
 + Response 204
 
 
-## Subscriptions [/favorite_hubs/listener]
+## Subscriptions [/favorite_hubs/listeners]
 
 Required permission: *favorite_hubs_view*
     
-### Favorite hub created [POST /favorite_hubs/listener/favorite_hub_created]
+### Favorite hub created [POST /favorite_hubs/listeners/favorite_hub_created]
 
 + Response 200 (application/json)
     + Attributes (Favorite hub)
 
-### Favorite hub updated [POST /favorite_hubs/listener/favorite_hub_updated]
+### Favorite hub updated [POST /favorite_hubs/listeners/favorite_hub_updated]
 
 + Response 200 (application/json)
     + Attributes (Favorite hub)
 
-### Favorite hub created [POST /favorite_hubs/listener/favorite_hub_removed]
+### Favorite hub created [POST /favorite_hubs/listeners/favorite_hub_removed]
 
 + Response 200 (application/json)
     + Attributes (Favorite hub)
@@ -556,16 +556,16 @@ Required permission: *events_view*
     + Attributes (Log message info)
 
 
-## Subscriptions [/events/listener]
+## Subscriptions [/events/listeners]
 
 Required permission: *events_view*
 
-### Event counts updated [POST /events/listener/event_counts]
+### Event counts updated [POST /events/listeners/event_counts]
 
 + Response 200 (application/json)
     + Attributes (Log message info)
 
-### Event added [POST /events/listener/event_message]
+### Event added [POST /events/listeners/event_message]
 
 + Response 200 (application/json)
     + Attributes (Status message)
@@ -688,41 +688,41 @@ Required permission: *queue_edit*
 + Response 204
 
 
-## Subscriptions [/filelists/listener]
+## Subscriptions [/filelists/listeners]
 
 Required permission: *filelists_view*
 
-All subscriptions from filelist entities are also available to be used across all sessions (add them with */filelists/listener/event_name*).
+All subscriptions from filelist entities are also available to be used across all sessions (add them with */filelists/listeners/event_name*).
 
-### Filelist session created [POST /filelists/listener/filelist_created]
+### Filelist session created [POST /filelists/listeners/filelist_created]
 
 + Response 200 (application/json)
 
     + Attributes (Filelist)
 
-### Filelist session removed [POST /filelists/listener/filelist_removed]
+### Filelist session removed [POST /filelists/listeners/filelist_removed]
 
 + Response 200 (application/json)
     + Attributes (Filelist)
 
-### Directory download added [POST /filelists/listener/filelist_directory_download_added]
+### Directory download added [POST /filelists/listeners/filelist_directory_download_added]
 
 + Response 200 (application/json)
     + Attributes (Directory download item)
 
-### Directory download removed [POST /filelists/listener/filelist_directory_download_removed]
+### Directory download removed [POST /filelists/listeners/filelist_directory_download_removed]
 
 + Response 200 (application/json)
     + Attributes (Directory download item)
 
-### Directory download processed [POST /filelists/listener/filelist_directory_download_processed]
+### Directory download processed [POST /filelists/listeners/filelist_directory_download_processed]
 
 + Response 200 (application/json)
     + Attributes 
         + directory_download (Directory download item)
         + result (Queue directory bundle add info)
 
-### Directory download failed [POST /filelists/listener/filelist_directory_download_failed]
+### Directory download failed [POST /filelists/listeners/filelist_directory_download_failed]
 
 + Response 200 (application/json)
     + Attributes (Directory download item)
@@ -803,13 +803,13 @@ Required permission: *filelists_view*
 + Response 204
 
 
-## Subscriptions [/filelists/sessions/{session_id}/listener]
+## Subscriptions [/filelists/sessions/{session_id}/listeners]
 
 Required permission: *filelists_view*
 
-All subscriptions from filelist entities are also available to be used across all sessions (add them with */filelists/listener/event_name*).
+All subscriptions from filelist entities are also available to be used across all sessions (add them with */filelists/listeners/event_name*).
 
-### Filelist session updated [POST /filelists/listener/filelist_updated]
+### Filelist session updated [POST /filelists/listeners/filelist_updated]
 
 + Response 200 (application/json)
     + Attributes (Filelist)
@@ -919,16 +919,16 @@ Required permission: *settings_edit*
 + Response 204
 
 
-## Subscriptions [/hash/listener]
+## Subscriptions [/hash/listeners]
 
 Required permission: *settings_view*
 
-### Database status updated [POST /hash/listener/hash_database_status]
+### Database status updated [POST /hash/listeners/hash_database_status]
 
 + Response 200 (application/json)
     + Attributes (Hash database status)
 
-### Hashing of a directory finished [POST /hash/listener/hasher_directory_finished]
+### Hashing of a directory finished [POST /hash/listeners/hasher_directory_finished]
 
 + Response 200 (application/json)
     + Attributes
@@ -938,7 +938,7 @@ Required permission: *settings_view*
         + duration: 32574 (number) - Time in milliseconds that was spent on hashing the directory
         + hasher_id: 0 (number) - ID of the hasher
 
-### Hashing finished [POST /hash/listener/hasher_finished]
+### Hashing finished [POST /hash/listeners/hasher_finished]
 
 A single hasher has finished.
 
@@ -951,7 +951,7 @@ A single hasher has finished.
         + hashed_id: 0 (number) - ID of the hasher
 
 
-### Hash statistics [POST /hash/listener/hash_statistics]
+### Hash statistics [POST /hash/listeners/hash_statistics]
 
 Only the properties that have changed since the last event are sent.
 
@@ -1184,19 +1184,19 @@ Required permission: *hubs_edit*
         + sent: 1 (number) - Number of messages that were sent successfully.
 
 
-## Subscriptions [/hubs/listener]
+## Subscriptions [/hubs/listeners]
 
 Required permission: *hubs_view*
 
-All subscriptions from hub entities are also available to be used across all sessions (add them with */hubs/listener/event_name*).
+All subscriptions from hub entities are also available to be used across all sessions (add them with */hubs/listeners/event_name*).
 
-### Hub session created [POST /hubs/listener/hub_created]
+### Hub session created [POST /hubs/listeners/hub_created]
 
 + Response 200 (application/json)
 
     + Attributes (Hub)
 
-### Hub session removed [POST /hubs/listener/hub_removed]
+### Hub session removed [POST /hubs/listeners/hub_removed]
 
 + Response 200 (application/json)
     + Attributes (Hub)
@@ -1374,45 +1374,45 @@ Required permission: *hubs_edit*
     + Attributes (Hub counts)
 
 
-## Subscriptions [/hubs/sessions/{id}/listener]
+## Subscriptions [/hubs/sessions/{id}/listeners]
 
 Required permission: *hubs_view*
 
-All subscriptions from hub entities are also available to be used across all sessions (add them with */hubs/listener/event_name*).
+All subscriptions from hub entities are also available to be used across all sessions (add them with */hubs/listeners/event_name*).
 
-### Session updated [POST /hubs/sessions/{id}/listener/hub_updated]
+### Session updated [POST /hubs/sessions/{id}/listeners/hub_updated]
 
 + Response 200 (application/json)
     + Attributes (Hub)
 
-### User/share counts updated [POST /hubs/sessions/{id}/listener/hub_counts_updated]
+### User/share counts updated [POST /hubs/sessions/{id}/listeners/hub_counts_updated]
 
 + Response 200 (application/json)
     + Attributes (Hub counts)
 
-### Chat message received [POST /hubs/sessions/{id}/listener/hub_message]
+### Chat message received [POST /hubs/sessions/{id}/listeners/hub_message]
 
 + Response 200 (application/json)
     + Attributes (Chat message)
 
-### Status message received [POST /hubs/sessions/{id}/listener/hub_status]
+### Status message received [POST /hubs/sessions/{id}/listeners/hub_status]
 
 + Response 200 (application/json)
     + Attributes (Status message)
 
-### Hub user connected [POST /hubs/sessions/{id}/listener/hub_user_connected]
+### Hub user connected [POST /hubs/sessions/{id}/listeners/hub_user_connected]
 
 + Response 200 (application/json)
     + Attributes (Hub user)
 
-### Hub user updated [POST /hubs/sessions/{id}/listener/hub_user_updated]
+### Hub user updated [POST /hubs/sessions/{id}/listeners/hub_user_updated]
 
 Only the user ID and possibly changed fields are sent 
 
 + Response 200 (application/json)
     + Attributes (Hub user)
 
-### Hub user disconnected [POST /hubs/sessions/{id}/listener/hub_user_disconnected]
+### Hub user disconnected [POST /hubs/sessions/{id}/listeners/hub_user_disconnected]
 
 + Response 200 (application/json)
     + Attributes (Hub user)
@@ -1476,19 +1476,19 @@ Required permission: *private_chat_send*
 + Response 204
 
 
-## Subscriptions [/private_chat/listener]
+## Subscriptions [/private_chat/listeners]
 
 Required permission: *private_chat_view*
 
-All subscriptions from private chat entities are also available to be used across all sessions (add them with */private_chat/listener/event_name*).
+All subscriptions from private chat entities are also available to be used across all sessions (add them with */private_chat/listeners/event_name*).
 
-### Private chat session created [POST /private_chat/listener/private_chat_created]
+### Private chat session created [POST /private_chat/listeners/private_chat_created]
 
 + Response 200 (application/json)
 
     + Attributes (Private chat)
 
-### Private chat session removed [POST /private_chat/listener/private_chat_removed]
+### Private chat session removed [POST /private_chat/listeners/private_chat_removed]
 
 + Response 200 (application/json)
     + Attributes (Private chat)
@@ -1602,25 +1602,25 @@ Required permission: *private_chat_edit*
 + Response 204
 
 
-## Subscriptions [/private_chat/sessions/{id}/listener]
+## Subscriptions [/private_chat/sessions/{id}/listeners]
 
 Required permission: *private_chat_view*
 
-All subscriptions from private chat entities are also available to be used across all sessions (add them with */private_chat/listener/event_name*).
+All subscriptions from private chat entities are also available to be used across all sessions (add them with */private_chat/listeners/event_name*).
 
-### Session updated [POST /private_chat/sessions/{id}/listener/private_chat_updated]
+### Session updated [POST /private_chat/sessions/{id}/listeners/private_chat_updated]
 
 + Response 200 (application/json)
     + Attributes
         + session (Private chat)
 
-### Chat message received [POST /private_chat/sessions/{id}/listener/private_chat_message]
+### Chat message received [POST /private_chat/sessions/{id}/listeners/private_chat_message]
 
 + Response 200 (application/json)
 
     + Attributes (Chat message)
         
-### Status message received [POST /private_chat/sessions/{id}/listener/private_chat_status]
+### Status message received [POST /private_chat/sessions/{id}/listeners/private_chat_status]
 
 + Response 200 (application/json)
     + Attributes (Status message)
@@ -1868,14 +1868,14 @@ Required permission: *queue_edit*
         + count: 4 (number) - Number of files from which the source was removed
 
 
-## Bundle subscriptions [/queue/listener/queue_bundle]
+## Bundle subscriptions [/queue/listeners/queue_bundle]
 
-### Bundle added [POST /queue/listener/queue_bundle_added]
+### Bundle added [POST /queue/listeners/queue_bundle_added]
 
 + Response 200 (application/json)
     + Attributes (Queue bundle)
 
-### Bundle updated [POST /queue/listener/queue_bundle_updated]
+### Bundle updated [POST /queue/listeners/queue_bundle_updated]
 
 Only the updated properties are sent.
 
@@ -1884,57 +1884,57 @@ This subscription generates a large number of event messages. If you are interes
 + Response 200 (application/json)
     + Attributes (Queue bundle)
 
-### Bundle status changed [POST /queue/listener/queue_bundle_status]
+### Bundle status changed [POST /queue/listeners/queue_bundle_status]
 
 Bundle status ID was changed.
 
 + Response 200 (application/json)
     + Attributes (Queue bundle)
 
-### Bundle priority updated [POST /queue/listener/queue_bundle_priority]
+### Bundle priority updated [POST /queue/listeners/queue_bundle_priority]
 
 Bundle priority was changed.
 
 + Response 200 (application/json)
     + Attributes (Queue bundle)
 
-### Bundle download progress [POST /queue/listener/queue_bundle_tick]
+### Bundle download progress [POST /queue/listeners/queue_bundle_tick]
 
 Fired about once per second while there are downloads running.
 
 + Response 200 (application/json)
     + Attributes (Queue bundle)
 
-### Bundle content updated [POST /queue/listener/queue_bundle_content]
+### Bundle content updated [POST /queue/listeners/queue_bundle_content]
 
 Bundle files were added or removed (directory bundles only).
 
 + Response 200 (application/json)
     + Attributes (Queue bundle)
 
-### Bundle sources updated [POST /queue/listener/queue_bundle_sources]
+### Bundle sources updated [POST /queue/listeners/queue_bundle_sources]
 
 Bundle sources were updated.
 
 + Response 200 (application/json)
     + Attributes (Queue bundle)
 
-### Bundle removed [POST /queue/listener/queue_bundle_removed]
+### Bundle removed [POST /queue/listeners/queue_bundle_removed]
 
 + Response 200 (application/json)
     + Attributes (Queue bundle)
 
 
-## File subscriptions [/queue/listener/queue_file]
+## File subscriptions [/queue/listeners/queue_file]
 
 Subscriptions for individual queued files.
 
-### File added [POST /queue/listener/file_added]
+### File added [POST /queue/listeners/file_added]
 
 + Response 200 (application/json)
     + Attributes (Queue file)
 
-### File updated [POST /queue/listener/file_updated]
+### File updated [POST /queue/listeners/file_updated]
 
 Only the updated properties are sent.
 
@@ -1943,35 +1943,35 @@ This subscription generates a large number of event messages. If you are interes
 + Response 200 (application/json)
     + Attributes (Queue file)
 
-### File priority updated [POST /queue/listener/queue_file_priority]
+### File priority updated [POST /queue/listeners/queue_file_priority]
 
 File priority was changed.
 
 + Response 200 (application/json)
     + Attributes (Queue file)
 
-### File download progress [POST /queue/listener/queue_file_tick]
+### File download progress [POST /queue/listeners/queue_file_tick]
 
 Fired about once per second while there are downloads running.
 
 + Response 200 (application/json)
     + Attributes (Queue file)
 
-### File sources updated [POST /queue/listener/queue_file_sources]
+### File sources updated [POST /queue/listeners/queue_file_sources]
 
 File sources were updated.
 
 + Response 200 (application/json)
     + Attributes (Queue file)
 
-### File status changed [POST /queue/listener/queue_file_status]
+### File status changed [POST /queue/listeners/queue_file_status]
 
 Generic update event for other file status updates.
 
 + Response 200 (application/json)
     + Attributes (Queue file)
 
-### File removed [POST /queue/listener/file_removed]
+### File removed [POST /queue/listeners/file_removed]
 
 + Response 200 (application/json)
     + Attributes (Queue file)
@@ -2254,11 +2254,11 @@ Return all search types
             + extensions: ape, flac, m4a, mid, mp3, mpc, ogg, ra, wav, wma
             + default_type: true (boolean) - This is an inbuilt type that can't be removed (extensions can still be modified)
 
-## Subscriptions [/search/listener]
+## Subscriptions [/search/listeners]
 
 Required permission: *search*
 
-All subscriptions from search instances are also available to be used across all instances (add them with */search/listener/event_name*).
+All subscriptions from search instances are also available to be used across all instances (add them with */search/listeners/event_name*).
 
 
 ## Data Structures
@@ -2396,13 +2396,13 @@ Required permission: *search*
     + Attributes (array[Child search result])
 
 
-## Subscriptions [/search/instance/{id}/listener]
+## Subscriptions [/search/instance/{id}/listeners]
 
 Required permission: *search*
 
-All subscriptions from search instances are also available to be used across all instances (add them with */search/listener/event_name*).
+All subscriptions from search instances are also available to be used across all instances (add them with */search/listeners/event_name*).
 
-### Hub searches sent [POST /search/instance/{id}/listener/search_hub_searches_sent]
+### Hub searches sent [POST /search/instance/{id}/listeners/search_hub_searches_sent]
 
 Fired after all queued searches were sent.
 
@@ -2411,17 +2411,17 @@ Fired after all queued searches were sent.
         + sent: 4 (number) - Number of searches that were sent (this may also be 0 if all hubs were closed)
         + search_id: 643345 - ID of the search that was sent
 
-### Grouped result added [POST /search/instance/{id}/listener/search_result_added]
+### Grouped result added [POST /search/instance/{id}/listeners/search_result_added]
 
 + Response 200 (application/json)
     + Attributes (Grouped search result)
 
-### Grouped result updated [POST /search/instance/{id}/listener/search_result_updated]
+### Grouped result updated [POST /search/instance/{id}/listeners/search_result_updated]
 
 + Response 200 (application/json)
     + Attributes (Grouped search result)
 
-### User result received [POST /search/instance/{id}/listener/search_user_result]
+### User result received [POST /search/instance/{id}/listeners/search_user_result]
 
 + Response 200 (application/json)
     + Attributes (Child search result)
@@ -2522,17 +2522,17 @@ Required permission: *admin*
     + Attributes (Session)
 
 
-## Subscriptions [/sessions/listener]
+## Subscriptions [/sessions/listeners]
 
 Required permission: *admin*
 
-### Session created [POST /sessions/listener/session_created]
+### Session created [POST /sessions/listeners/session_created]
 
 + Response 200
     + Attributes
         + session (Session)
 
-### Session removed [POST /sessions/listener/session_removed]
+### Session removed [POST /sessions/listeners/session_removed]
 
 + Response 200 (application/json)
     + Attributes
@@ -2750,31 +2750,31 @@ Required permission: *share_view*
 + Response 200 (application/json)
 
 
-## Subscriptions [/share/listener]
+## Subscriptions [/share/listeners]
 
 Required permission: *settings_view*
 
-### Share refresh queued [POST /share/listener/share_refresh_queued]
+### Share refresh queued [POST /share/listeners/share_refresh_queued]
 
 Fired when share refresh (partial or full refresh) was queued.
 
 + Response 200 (application/json)
     + Attributes (Share refresh info)
 
-### Share refresh completed [POST /share/listener/share_refresh_completed]
+### Share refresh completed [POST /share/listeners/share_refresh_completed]
 
 Fired when share refresh (partial or full refresh) was completed.
 
 + Response 200 (application/json)
     + Attributes (Share refresh info)
 
-### Excluded path added [POST /share/listener/share_exclude_added]
+### Excluded path added [POST /share/listeners/share_exclude_added]
 
 + Response 200 (application/json)
     + Attributes 
         + path: /home/airdcpp/share/Videos/secret/
 
-### Excluded path removed [POST /share/listener/share_exclude_removed]
+### Excluded path removed [POST /share/listeners/share_exclude_removed]
 
 + Response 200 (application/json)
     + Attributes 
@@ -2873,19 +2873,19 @@ Required permission: *settings_edit*
 + Response 204
 
 
-## Subscriptions [/share_profiles/listener]
+## Subscriptions [/share_profiles/listeners]
 
-### Share profile added [POST /share_profiles/listener/share_profile_added]
-
-+ Response 200 (application/json)
-    + Attributes (Share profile)
-
-### Share profile updated [POST /share_profiles/listener/share_profile_updated]
+### Share profile added [POST /share_profiles/listeners/share_profile_added]
 
 + Response 200 (application/json)
     + Attributes (Share profile)
 
-### Share profile removed [POST /share_profiles/listener/share_profile_removed]
+### Share profile updated [POST /share_profiles/listeners/share_profile_updated]
+
++ Response 200 (application/json)
+    + Attributes (Share profile)
+
+### Share profile removed [POST /share_profiles/listeners/share_profile_removed]
 
 + Response 200 (application/json)
     + Attributes (Share profile)
@@ -2966,23 +2966,23 @@ Required permission: *settings_edit*
 + Response 204
 
 
-## Subscriptions [/share_roots/listener]
+## Subscriptions [/share_roots/listeners]
 
 Required permission: *settings_view*
     
-### Share root created [POST /share_roots/listener/share_root_created]
+### Share root created [POST /share_roots/listeners/share_root_created]
 
 + Response 200 (application/json)
     + Attributes (Share root)
 
-### Share root updated [POST /share_roots/listener/share_root_updated]
+### Share root updated [POST /share_roots/listeners/share_root_updated]
 
 Only the updated properties are sent.
 
 + Response 200 (application/json)
     + Attributes (Share root)
 
-### Share root created [POST /share_roots/listener/share_root_removed]
+### Share root created [POST /share_roots/listeners/share_root_removed]
 
 + Response 200 (application/json)
     + Attributes (Share root)
@@ -3064,9 +3064,9 @@ Required permission: *admin*
 + Response 204
     
 
-## Subscriptions [/system/listener]
+## Subscriptions [/system/listeners]
 
-### Away state changed [POST /system/listener/away_state]
+### Away state changed [POST /system/listeners/away_state]
 
 + Response 200 (application/json)
     + Attributes (Away state)
@@ -3149,18 +3149,18 @@ Required permission: *transfers*
         + start_total_uploaded: 6433254263622 (number)
     
 
-## Subscriptions [/transfers/listener]
+## Subscriptions [/transfers/listeners]
 
 Required permission: *transfers*
 
-### Transfer added [POST /transfers/listener/transfer_added]
+### Transfer added [POST /transfers/listeners/transfer_added]
 
 A new transfer connection was added.
 
 + Response 200 (application/json)
     + Attributes (Transfer item)
 
-### Transfer updated [POST /transfers/listener/transfer_updated]
+### Transfer updated [POST /transfers/listeners/transfer_updated]
 
 Only the updated properties are sent.
 
@@ -3169,33 +3169,33 @@ This subscription generates a large number of event messages. If you are interes
 + Response 200 (application/json)
     + Attributes (Transfer item)
 
-### Transfer starting [POST /transfers/listener/transfer_starting]
+### Transfer starting [POST /transfers/listeners/transfer_starting]
 
 Transferring of a new file chunk transfer was started.
 
 + Response 200 (application/json)
     + Attributes (Transfer item)
 
-### Transfer completed [POST /transfers/listener/transfer_completed]
+### Transfer completed [POST /transfers/listeners/transfer_completed]
 
 The current file chunk transfer was completed successfully.
 
 + Response 200 (application/json)
     + Attributes (Transfer item)
 
-### Transfer failed [POST /transfers/listener/transfer_failed]
+### Transfer failed [POST /transfers/listeners/transfer_failed]
 
 Transfer failed (such as connection was closed or there are no slots available)
 
 + Response 200 (application/json)
     + Attributes (Transfer item)
 
-### Transfer removed [POST /transfers/listener/transfer_removed]
+### Transfer removed [POST /transfers/listeners/transfer_removed]
 
 + Response 200 (application/json)
     + Attributes (Transfer item)
 
-### Transfer statistics [POST /transfers/listener/transfer_statistics]
+### Transfer statistics [POST /transfers/listeners/transfer_statistics]
 
 Only the values that have changed after the last event are sent.
 
@@ -3303,35 +3303,35 @@ Search users with nick matching the provided pattern. The most relevant match is
 + Response 200 (application/json)
     + Attributes (array[Hub user])
 
-## Subscriptions [/users/listener]
+## Subscriptions [/users/listeners]
 
 Subscriptions related to connect state changes are tracked globally on per-user basis and sent users are not bound to any hub. If you want to track hub level user connect state changes, you should use the Hub API listeners instead.
 
-### User connected [POST /users/listener/user_connected]
+### User connected [POST /users/listeners/user_connected]
 
 + Response 200 (application/json)
     + Attributes
         + user (User)
         + was_offline: true (boolean) - true if the user wasn't online in any hub before this event
 
-### User updated [POST /users/listener/user_updated]
+### User updated [POST /users/listeners/user_updated]
 
 + Response 200 (application/json)
     + Attributes (User)
 
-### User disconnected [POST /users/listener/user_disconnected]
+### User disconnected [POST /users/listeners/user_disconnected]
 
 + Response 200 (application/json)
     + Attributes 
         + user (User)
         + went_offline: false (boolean) - true if the user isn't online in any hub
 
-### Ignored user added [POST /users/listener/ignored_user_added]
+### Ignored user added [POST /users/listeners/ignored_user_added]
 
 + Response 200 (application/json)
     + Attributes (User)
 
-### Ignored user removed [POST /users/listener/ignored_user_removed]
+### Ignored user removed [POST /users/listeners/ignored_user_removed]
 
 + Response 200 (application/json)
     + Attributes (User)
@@ -3398,21 +3398,21 @@ Required permission: *admin*
 + Response 204
 
 
-## Subscriptions [/web_users/listener]
+## Subscriptions [/web_users/listeners]
 
 Required permission: *admin*
     
-### Web user created [POST /web_users/listener/web_user_added]
+### Web user created [POST /web_users/listeners/web_user_added]
 
 + Response 200 (application/json)
     + Attributes (Web user)
 
-### Web user updated [POST /web_users/listener/web_user_updated]
+### Web user updated [POST /web_users/listeners/web_user_updated]
 
 + Response 200 (application/json)
     + Attributes (Web user)
 
-### Web user removed [POST /web_users/listener/web_user_removed]
+### Web user removed [POST /web_users/listeners/web_user_removed]
 
 + Response 200 (application/json)
     + Attributes (Web user)
@@ -3542,17 +3542,17 @@ Required permission: *view_files_view*
 + Response 204
 
 
-## Subscriptions [/view_files/listener]
+## Subscriptions [/view_files/listeners]
 
 Required permission: *view_files_view*
 
-### File added [POST /view_files/listener/view_file_added]
+### File added [POST /view_files/listeners/view_file_added]
 
 + Response 200 (application/json)
 
     + Attributes (View file)
 
-### File updated [POST /view_files/listener/view_file_updated]
+### File updated [POST /view_files/listeners/view_file_updated]
 
 Download state was updated
 
@@ -3560,7 +3560,7 @@ Download state was updated
 
     + Attributes (View file)
 
-### File finished [POST /view_files/listener/view_file_finished]
+### File finished [POST /view_files/listeners/view_file_finished]
 
 Fired when the file is ready for viewing
 
@@ -3568,7 +3568,7 @@ Fired when the file is ready for viewing
 
     + Attributes (View file)
 
-### File removed [POST /view_files/listener/view_file_removed]
+### File removed [POST /view_files/listeners/view_file_removed]
 
 + Response 200 (application/json)
     + Attributes (View file)
