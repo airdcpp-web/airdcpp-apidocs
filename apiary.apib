@@ -220,7 +220,7 @@ Demonstrated example responses will contain the `data` field content only instea
 
 You may add subscriptions for certain individual entities (such as hubs and filelists):
 
-`POST /hubs/sessions/0/listeners/hub_status_message`
+`POST /hubs/0/listeners/hub_status_message`
 
 In such cases event messages will also contain the entitity identifier for which the event was triggered:
 
@@ -277,7 +277,6 @@ It's not possible to add multiple subscribers for a single hook from within the 
 {
     "completion_id": 1,
     "event": "hub_incoming_message_hook",
-    "hook_id": "example_chat_filter"
     "data": "(hook-specific data)"
 }
 ```
@@ -580,7 +579,7 @@ Filelist API allows browsing remote users' shared content or own share and manag
 API sessions use partial filelists so the content of each directory is downloaded only once it has been requested. Due to this, it may take some time when switching from one directory to another (especially when browsing remote NMDC filelists).
 
 
-## Filelist sessions [/filelists/sessions]
+## Filelist [/filelists]
 
 ### Get filelist sessions [GET]
 
@@ -605,7 +604,7 @@ Required permission: *filelists_edit*
 + Response 200 (application/json)
     + Attributes (Filelist)
 
-### Create local filelist session [POST /filelists/sessions/self]
+### Create local filelist session [POST /filelists/self]
 
 Browse own share.
 
@@ -617,7 +616,21 @@ Required permission: *filelists_edit*
 + Response 200 (application/json)
     + Attributes (Filelist)
 
-## Filelist session [/filelists/sessions/{session_id}]
+### Match queue [POST /filelists/match_queue]
+
+Match queue and add the user as source for matching files.
+
+Required permission: *queue_edit*
+
++ Request (application/json)
+    + Attributes
+        + user (Hinted user, required)
+        + list_path: /Share/Ubuntu/ (optional) - Directory to match from ADC (recursive partial list is used). Full filelist is always matched from NMDC users.
+            + Default: /
++ Response 204
+
+
+## Filelist session [/filelists/{session_id}]
 
 ### Get session [GET]
 
@@ -671,21 +684,6 @@ Required permission: *download*
 
 + Response 204
 
-
-## Miscellaneous [/filelists]
-
-### Match queue [POST /filelists/match_queue]
-
-Match queue and add the user as source for matching files.
-
-Required permission: *queue_edit*
-
-+ Request (application/json)
-    + Attributes
-        + user (Hinted user, required)
-        + list_path: /Share/Ubuntu/ (optional) - Directory to match from ADC (recursive partial list is used). Full filelist is always matched from NMDC users.
-            + Default: /
-+ Response 204
 
 
 ## Subscriptions [/filelists/listeners]
@@ -767,9 +765,9 @@ All subscriptions from filelist entities are also available to be used across al
 
 # Group Filelist entities
 
-## Methods [/filelists/sessions/{session_id}/items]
+## Methods [/filelists/{session_id}/items]
 
-### Get directory content [GET /filelists/sessions/{session_id}/items/{start}/{count}]
+### Get directory content [GET /filelists/{session_id}/items/{start}/{count}]
 
 Get a list of all files and directories inside the current filelist location. If the directory content has not yet been loaded, an error will be returned.
 
@@ -783,7 +781,7 @@ Required permission: *filelists_view*
         Content of this directory is not yet available
 
 
-### Change directory [POST /filelists/sessions/{session_id}/directory]
+### Change directory [POST /filelists/{session_id}/directory]
 
 Change the current filelist directory.
 
@@ -796,14 +794,14 @@ Required permission: *filelists_view*
             + Default: false
 + Response 204
 
-### Set filelist as read [POST /filelists/sessions/{session_id}/read]
+### Set filelist as read [POST /filelists/{session_id}/read]
 
 Required permission: *filelists_view*
 
 + Response 204
 
 
-## Subscriptions [/filelists/sessions/{session_id}/listeners]
+## Subscriptions [/filelists/{session_id}/listeners]
 
 Required permission: *filelists_view*
 
@@ -1088,7 +1086,7 @@ Hub API focuses on hub state management, chatting and hub-level user management.
 
 Hub sessions are identified by a numeric ID and the actual hub URL may change during the lifetime of a single session (e.g. in case of redirections).
 
-## Sessions [/hubs/sessions]
+## Hubs [/hubs]
 
 ### Get a list of all hub sessions [GET]
 
@@ -1110,28 +1108,6 @@ Required permission: *hubs_edit*
         + hub_url: adcs://myhub.com:6423 (required) - Full URL of the hub to connect to
 + Response 200 (application/json)
     + Attributes (Hub)
-
-## Session [/hubs/sessions/{session_id}]
-
-### Get session [GET]
-
-Required permission: *hubs_view*
-
-Get a single session by ID.
-
-+ Request (application/json)
-
-+ Response 200 (application/json)
-    + Attributes (Hub)
-
-### Remove session [DELETE]
-
-Required permission: *hubs_edit*
-
-+ Response 204
-
-
-## Miscellaneous [/hubs]
 
 ### Find session by URL [POST /hubs/find_by_url]
 
@@ -1182,6 +1158,25 @@ Required permission: *hubs_edit*
 
     + Attributes
         + sent: 1 (number) - Number of messages that were sent successfully.
+
+## Session [/hubs/{session_id}]
+
+### Get session [GET]
+
+Required permission: *hubs_view*
+
+Get a single session by ID.
+
++ Request (application/json)
+
++ Response 200 (application/json)
+    + Attributes (Hub)
+
+### Remove session [DELETE]
+
+Required permission: *hubs_edit*
+
++ Response 204
 
 
 ## Subscriptions [/hubs/listeners]
@@ -1251,9 +1246,9 @@ All subscriptions from hub entities are also available to be used across all ses
 
 # Group Hub sessions
 
-## Messages [/hubs/sessions/{session_id}/messages]
+## Messages [/hubs/{session_id}/messages]
 
-### Get messages [GET /hubs/sessions/{session_id}/messages/{max_count}]
+### Get messages [GET /hubs/{session_id}/messages/{max_count}]
 
 Required permission: *hubs_view*
 
@@ -1273,13 +1268,13 @@ Required permission: *hubs_edit*
 
 + Response 204
 
-### Set all messages as read [POST /hubs/sessions/{session_id}/messages/read]
+### Set all messages as read [POST /hubs/{session_id}/messages/read]
 
 Required permission: *hubs_view*
 
 + Response 204
 
-### Send chat message [POST /hubs/sessions/{session_id}/chat_message]
+### Send chat message [POST /hubs/{session_id}/chat_message]
 
 Send a public chat message to this hub.
 
@@ -1290,7 +1285,7 @@ Required permission: *hubs_send*
 
 + Response 204
 
-### Send status message [POST /hubs/sessions/{session_id}/status_message]
+### Send status message [POST /hubs/{session_id}/status_message]
 
 Send a status message message that is only shown locally in this hub.
 
@@ -1302,10 +1297,10 @@ Required permission: *hubs_edit*
 + Response 204
 
 
-## Users [/hubs/sessions/{session_id}/users]
+## Users [/hubs/{session_id}/users]
 
 
-### Get users [GET /hubs/sessions/{session_id}/users/{start}/{count}]
+### Get users [GET /hubs/{session_id}/users/{start}/{count}]
 
 Get a list of users that are currently online in this hub.
 
@@ -1314,7 +1309,7 @@ Required permission: *hubs_view*
 + Response 200 (application/json)
     + Attributes (array[Hub user])
 
-### Get user [GET /hubs/sessions/{session_id}/users/{cid}]
+### Get user [GET /hubs/{session_id}/users/{cid}]
 
 Get user information by CID.
 
@@ -1324,10 +1319,10 @@ Required permission: *hubs_view*
     + Attributes (Hub user)
 
 
-## Miscellaneous [/hubs/sessions/{session_id}/]
+## Miscellaneous [/hubs/{session_id}/]
 
 
-### Send password [POST /hubs/sessions/{session_id}/password]
+### Send password [POST /hubs/{session_id}/password]
 
 Set the hub password. This should be used only when the hub is in *password* state. The password will be reused during the session lifetime in case the application gets disconnected from the hub.
 
@@ -1339,7 +1334,7 @@ Required permission: *hubs_edit*
 
 + Response 204
 
-### Follow redirect [POST /hubs/sessions/{session_id}/redirect]
+### Follow redirect [POST /hubs/{session_id}/redirect]
 
 Follow the redirection requested by the hub. This should be used only when the hub is in *redirect* state. 
 
@@ -1347,7 +1342,7 @@ Required permission: *hubs_edit*
 
 + Response 204
 
-### Reconnect [POST /hubs/sessions/{session_id}/reconnect]
+### Reconnect [POST /hubs/{session_id}/reconnect]
 
 Reconnect to the hub.
 
@@ -1355,7 +1350,7 @@ Required permission: *hubs_edit*
 
 + Response 204
 
-### Favorite [POST /hubs/sessions/{session_id}/favorite]
+### Favorite [POST /hubs/{session_id}/favorite]
 
 Save the hub in favorites.
 
@@ -1364,7 +1359,7 @@ Required permission: *hubs_edit*
 + Response 200 (application/json)
     + Attributes (Favorite hub)
 
-### Get user and share counts [GET /hubs/sessions/{session_id}/counts]
+### Get user and share counts [GET /hubs/{session_id}/counts]
 
 Get the current user and share counts.
 
@@ -1374,45 +1369,45 @@ Required permission: *hubs_edit*
     + Attributes (Hub counts)
 
 
-## Subscriptions [/hubs/sessions/{id}/listeners]
+## Subscriptions [/hubs/{id}/listeners]
 
 Required permission: *hubs_view*
 
 All subscriptions from hub entities are also available to be used across all sessions (add them with */hubs/listeners/event_name*).
 
-### Session updated [POST /hubs/sessions/{id}/listeners/hub_updated]
+### Session updated [POST /hubs/{id}/listeners/hub_updated]
 
 + Response 200 (application/json)
     + Attributes (Hub)
 
-### User/share counts updated [POST /hubs/sessions/{id}/listeners/hub_counts_updated]
+### User/share counts updated [POST /hubs/{id}/listeners/hub_counts_updated]
 
 + Response 200 (application/json)
     + Attributes (Hub counts)
 
-### Chat message received [POST /hubs/sessions/{id}/listeners/hub_message]
+### Chat message received [POST /hubs/{id}/listeners/hub_message]
 
 + Response 200 (application/json)
     + Attributes (Chat message)
 
-### Status message received [POST /hubs/sessions/{id}/listeners/hub_status]
+### Status message received [POST /hubs/{id}/listeners/hub_status]
 
 + Response 200 (application/json)
     + Attributes (Status message)
 
-### Hub user connected [POST /hubs/sessions/{id}/listeners/hub_user_connected]
+### Hub user connected [POST /hubs/{id}/listeners/hub_user_connected]
 
 + Response 200 (application/json)
     + Attributes (Hub user)
 
-### Hub user updated [POST /hubs/sessions/{id}/listeners/hub_user_updated]
+### Hub user updated [POST /hubs/{id}/listeners/hub_user_updated]
 
 Only the user ID and possibly changed fields are sent 
 
 + Response 200 (application/json)
     + Attributes (Hub user)
 
-### Hub user disconnected [POST /hubs/sessions/{id}/listeners/hub_user_disconnected]
+### Hub user disconnected [POST /hubs/{id}/listeners/hub_user_disconnected]
 
 + Response 200 (application/json)
     + Attributes (Hub user)
@@ -1422,7 +1417,7 @@ Only the user ID and possibly changed fields are sent
 
 # Group Private chat
 
-## Private chat sessions [/private_chat/sessions]
+## Private chat [/private_chat]
 
 ### Get a list of all private chat sessions [GET]
 
@@ -1443,7 +1438,18 @@ Required permission: *private_chat_edit*
 + Response 200 (application/json)
     + Attributes (Private chat)
 
-## Private chat session [/private_chat/sessions/{session_id}]
+### Send chat message [POST /private_chat/chat_message]
+
+Send private chat message message to a specific user. This should generally be used for announcement-like messages only as private chat sessions are more suitable for bidirectional chatting.
+
+Required permission: *private_chat_send*
+
++ Request (application/json)
+    + Attributes (Private chat message request, required)
+
++ Response 204
+
+## Private chat session [/private_chat/{session_id}]
 
 ### Get session [GET]
 
@@ -1459,19 +1465,6 @@ Get a single session by ID.
 ### Remove session [DELETE]
 
 Required permission: *private_chat_edit*
-
-+ Response 204
-
-## Miscellaneous [/private_chat]
-
-### Send chat message [POST /private_chat/chat_message]
-
-Send private chat message message to a specific user. This should generally be used for announcement-like messages only as private chat sessions are more suitable for bidirectional chatting.
-
-Required permission: *private_chat_send*
-
-+ Request (application/json)
-    + Attributes (Private chat message request, required)
 
 + Response 204
 
@@ -1535,9 +1528,9 @@ Note that private chat session may not exist for announcement-like messages.
 
 # Group Private chat sessions
 
-## Methods [/private_chat/sessions/{session_id}/]
+## Methods [/private_chat/{session_id}/]
 
-### Get messages [GET /private_chat/sessions/{session_id}/messages/{max_count}]
+### Get messages [GET /private_chat/{session_id}/messages/{max_count}]
 
 Required permission: *private_chat_view*
 
@@ -1551,7 +1544,7 @@ Required permission: *private_chat_view*
         + (object)
             + status_message (Status message)
 
-### Send chat message [POST /private_chat/sessions/{session_id}/chat_message]
+### Send chat message [POST /private_chat/{session_id}/chat_message]
 
 Send private message to the user.
 
@@ -1562,7 +1555,7 @@ Required permission: *private_chat_send*
 
 + Response 204
 
-### Send status message [POST /private_chat/sessions/{session_id}/status_message]
+### Send status message [POST /private_chat/{session_id}/status_message]
 
 Send a status message that is only shown locally in this chat session.
 
@@ -1573,19 +1566,19 @@ Required permission: *private_chat_edit*
 
 + Response 204
 
-### Clear message cache [POST /private_chat/sessions/{session_id}/clear]
+### Clear message cache [POST /private_chat/{session_id}/clear]
 
 Required permission: *private_chat_edit*
 
 + Response 204
 
-### Set all messages as read [POST /private_chat/sessions/{session_id}/read]
+### Set all messages as read [POST /private_chat/{session_id}/read]
 
 Required permission: *private_chat_view*
 
 + Response 204
 
-### Initiate CCPM connection [POST /private_chat/sessions/{session_id}/ccpm]
+### Initiate CCPM connection [POST /private_chat/{session_id}/ccpm]
 
 Establish an encrypted client-to-client private messaging channel. CCPM is available only with users having the *ccpm* flag.
 
@@ -1593,7 +1586,7 @@ Required permission: *private_chat_edit*
 
 + Response 204
 
-### Disconnect CCPM connection [DELETE /private_chat/sessions/{session_id}/ccpm]
+### Disconnect CCPM connection [DELETE /private_chat/{session_id}/ccpm]
 
 Disconnect encrypted client-to-client private messaging channel. Messages will be delivered through the hub after the channel has been disconnected.
 
@@ -1602,25 +1595,25 @@ Required permission: *private_chat_edit*
 + Response 204
 
 
-## Subscriptions [/private_chat/sessions/{id}/listeners]
+## Subscriptions [/private_chat/{id}/listeners]
 
 Required permission: *private_chat_view*
 
 All subscriptions from private chat entities are also available to be used across all sessions (add them with */private_chat/listeners/event_name*).
 
-### Session updated [POST /private_chat/sessions/{id}/listeners/private_chat_updated]
+### Session updated [POST /private_chat/{id}/listeners/private_chat_updated]
 
 + Response 200 (application/json)
     + Attributes
         + session (Private chat)
 
-### Chat message received [POST /private_chat/sessions/{id}/listeners/private_chat_message]
+### Chat message received [POST /private_chat/{id}/listeners/private_chat_message]
 
 + Response 200 (application/json)
 
     + Attributes (Chat message)
         
-### Status message received [POST /private_chat/sessions/{id}/listeners/private_chat_status]
+### Status message received [POST /private_chat/{id}/listeners/private_chat_status]
 
 + Response 200 (application/json)
     + Attributes (Status message)
@@ -2599,9 +2592,9 @@ Required permission: *settings_edit*
 + Response 204
 
 
-### Get setting information [POST /settings/infos]
+### Get setting information [POST /settings/definitions]
 
-Get more detailed information about the specified setting items.
+Get schema information of the specified settings.
 
 + Request (application/json)
     + Attributes
@@ -2620,23 +2613,27 @@ Get more detailed information about the specified setting items.
 + key: download_limit_main
 + title: Download limit - Localized setting title
 + unit: KiB/s - Localized unit strings
-+ value: 10 (Setting value) - Current setting value
 + auto: false (boolean) - Whether the current setting value is automatically determined by the application
 + values (array) - Possible value listing for enum-type settings
     + (object)
         + value
         + text
 + type (enum[string]) - Possible additional type hints
-    + 
+    + number
+    + string
+    + boolean
     + file_path
     + directory_path
-    + long_text
+    + text
+    + boolean
 
 ### Setting value (enum)
 
 + (string)
 + (number)
 + (boolean)
++ (array[string])
++ (array[number])
 
 
 
@@ -3086,6 +3083,7 @@ Required permission: *admin*
 + api_feature_level: 0 (number)
 + cid: 76NLOTOBZVTWXOHIWKCXB27W46ULOI7EAUZUTTI - An unique application identifier
 + hostname: web-demo - System hostname
++ language: fi-FI - Currently selected language
 + path_separator: / - System's native path separator character
 + client_version: `AirDC++w 2.0.0 armv7l` - Full application version string
 + client_started: 1483972366 (number) - Time when the application was started
@@ -3476,7 +3474,7 @@ Due to limitations of the embedded web server, the whole file content will be lo
 on systems with low amount of memory. Therefore, it's recommended to use this API for viewing relatively small files.
 
 
-## Viewed files [/view_files/sessions]
+## Viewed files [/view_files]
 
 ### Get a list of all viewed file [GET]
 
@@ -3502,7 +3500,7 @@ Required permission: *view_files_edit*
 + Response 200 (application/json)
     + Attributes (View file)
 
-### Open local file [POST /view_files/sessions/{tth}]
+### Open local file [POST /view_files/{tth}]
 
 Open a file that exists in share. 
 
@@ -3518,7 +3516,7 @@ Required permission: *view_files_edit*
 + Response 200 (application/json)
     + Attributes (View file)
 
-## View file [/view_files/sessions/{file_id}]
+## View file [/view_files/{file_id}]
 
 ### Get file [GET]
 
@@ -3535,7 +3533,7 @@ Required permission: *view_files_edit*
 
 + Response 204
 
-### Set the file as read [POST /view_files/sessions/{file_id}/read]
+### Set the file as read [POST /view_files/{file_id}/read]
 
 Required permission: *view_files_view*
 
