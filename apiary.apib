@@ -569,7 +569,230 @@ Required permission: *events_view*
 + Response 200 (application/json)
     + Attributes (Status message)
 
+# Group Extensions
 
+
+## Extensions [/extensions]
+
+### Get extensions [GET]
+
+Get a list of all installed extensions.
+
+Required permission: *admin*
+
++ Response 200 (application/json)
+    + Attributes (array[Extension])
+
+### Register unmanaged extension [POST]
+
+Register an extension from the calling session. The request payload should contain all required fields from package.json. 
+
+Sending the whole package.json content is acceptable as well.
+
+Please see ... for more information about the package.json format.
+
+Required permission: *admin*
+
++ Request (application/json)
+
+        {
+            "name": "airdcpp-create-extension",
+            "version": "0.0.1-beta5",
+            "description": "Starter project for AirDC++ extension development."
+            "author": {
+                "name": "maksis"
+            },
+            "keywords": [ "airdcpp", "airdcpp-extensions", "airdcpp-extensions-public", "airdcpp-extensions-test" ],
+            "bugs": "https://github.com/airdcpp-web/airdcpp-create-extension/issues/",
+            "repository": {
+                "type": "git",
+                "url": "https://github.com/airdcpp-web/airdcpp-create-extension/"
+            },
+            "airdcpp": {
+                "apiVersion": 1,
+                "minApiFeatureLevel": 0
+            }
+        }
+
++ Response 200 (application/json)
+    + Attributes (Extension)
+
+### Install managed extension [POST /extensions/download]
+
+Download extension package from the remote URL. The package will be installed and started automatically.
+
+Required permission: *admin*
+
++ Request (application/json)
+    + Attributes
+        + url: https://registry.npmjs.org/airdcpp-create-extension/-/airdcpp-create-extension-0.0.1-beta4.tgz - URL from which the extension should be download from
+        + shasum: 77f49298863b1460cf65e6c125e659f7dd9dac9e (optional) - Possible SHA1 sum that can be used for validating the package integrity
++ Response 204
+
+
+## Extension entity [/extensions/{extension_id}]
+
+### Get extension [GET]
+
+Required permission: *admin*
+
+Get a single extension by ID.
+
++ Request (application/json)
+
++ Response 200 (application/json)
+    + Attributes (Extension)
+
+### Remove extension [DELETE]
+
+Required permission: *admin*
+
++ Response 204
+
+
+
+## Subscriptions [/extensions/listeners]
+
+Required permission: *admin*
+
+All subscriptions from extension entities are also available to be used across all sessions (add them with */extensions/listeners/event_name*).
+
+### Extension added [POST /extensions/listeners/extension_created]
+
++ Response 200 (application/json)
+
+    + Attributes (Extension)
+
+### Extension removed [POST /extensions/listeners/extension_removed]
+
++ Response 200 (application/json)
+    + Attributes (Extension)
+
+### Extension package updated [POST /extensions/listeners/extension_package_updated]
+
++ Response 200 (application/json)
+    + Attributes (Extension)
+
+## Data Structures
+
+### Extension
+
++ id: airdcpp-create-extension
++ name: airdcpp-create-extension
++ description: Starter project for AirDC++ extension development
++ version: 0.0.1-beta4
++ homepage: https://airdcpp-web.github.io
++ author: maksis
++ running: true (boolean)
++ private: false (boolean) - Whether the extension is private (not published at npm)
++ logs (array[Filesystem item])
++ engines: node (array[string]) - List of scripting engines supported by the extension
++ managed: true - Whether the extension is managed (installed locally)
++ has_settings: true (boolean) - Whether there settings available for configuring
+
+
+# Group Extension entities
+
+## Methods [/extensions/{extension_id}/methods]
+
+### Start extension [POST /extensions/{extension_id}/start]
+
+Required permission: *admin*
+
++ Response 204
+
+### Stop extension [POST /extensions/{extension_id}/stop]
+
+Required permission: *admin*
+
++ Response 204
+
+
+
+### Post setting definitions [POST /extensions/{extension_id}/settings/definitions]
+
+Post schema for settings that can be added in the UI for configuring. 
+
+Setting definitions can't be changed or removed after they have been posted.
+
+Required permission: *admin*
+
++ Request (application/json)
+    + Attributes (array[Setting definition])
++ Response 204
+
+
+### Get setting definitions [GET /extensions/{extension_id}/settings/definitions]
+
+Required permission: *settings_view*
+
+Get schema information of the extension settings.
+
++ Response 200 (application/json)
+    + Attributes (array[Setting definition])
+
+
+
+### Get setting values [GET /extensions/{extension_id}/settings]
+
+Required permission: *settings_view*
+
++ Response 200 (application/json)
+    + Attributes (object)
+    
+        Key-value listing of setting keys and their current values
+    
+        + spam_on_startup: false (boolean)
+        + banner_text: Test
+
+### Update setting values [PATCH /extensions/{extension_id}/settings]
+
+Required permission: *settings_edit*
+
++ Request (application/json)
+    + Attributes (object)
+    
+        Key-value listing of setting keys and their new values
+    
+        + spam_on_startup: false (boolean)
+        + banner_text: Test
+
++ Response 204
+
+
+
+## Subscriptions [/extensions/{extension_id}/listeners]
+
+Required permission: *admin*
+
+All subscriptions from extension entities are also available to be used across all sessions (add them with */extensions/listeners/event_name*).
+
+### Extension started [POST /extensions/listeners/extension_started]
+
++ Response 200 (application/json)
+    + Attributes (Extension)
+
+### Extension stopped [POST /extensions/listeners/extension_stopped]
+
++ Response 200 (application/json)
+    + Attributes (Extension)
+
+### Extension updated [POST /extensions/listeners/extension_updated]
+
+Generic subscription for updated extension properties (only the updated ones are sent).
+
++ Response 200 (application/json)
+    + Attributes (Extension)
+
+### Extension settings updated [POST /extensions/listeners/extension_settings_updated]
+
++ Response 200 (application/json)
+    + Attributes (object)
+    
+        Key-value listing of updated setting keys and their values
+    
+        + spam_on_startup: false (boolean)
+        + banner_text: Test
 
 
 # Group Filelists
@@ -598,7 +821,7 @@ Required permission: *filelists_edit*
 
 + Request (application/json)
     + Attributes
-        + user (Hinted user, required)
+        + user (Hinted user base, required)
         + list_path: /Share/Ubuntu/ (optional) - Initial filelist directory to load. Filelist root is loaded, if not specified.
             + Default: /
 + Response 200 (application/json)
@@ -624,7 +847,7 @@ Required permission: *queue_edit*
 
 + Request (application/json)
     + Attributes
-        + user (Hinted user, required)
+        + user (Hinted user base, required)
         + list_path: /Share/Ubuntu/ (optional) - Directory to match from ADC (recursive partial list is used). Full filelist is always matched from NMDC users.
             + Default: /
 + Response 204
@@ -670,7 +893,7 @@ Required permission: *download*
 
 + Request (application/json)
     + Attributes (Download params)
-        + user (Hinted user, required)
+        + user (Hinted user base, required)
         + list_path: /Share/Ubuntu/ (required)
 + Response 200 (application/json)
     + Attributes (Directory download item)
@@ -840,11 +1063,7 @@ Get a listing of items inside the supplied path
             + Default: false
             
 + Response 200 (application/json)
-    + Attributes (array)
-        + (object)
-            + name: myfile1
-            + type (Item type) - Directory content information is not available here
-            + size: 6382343 (number) - Size in bytes (available for files only)
+    + Attributes (array[Filesystem item])
 
 ### Get disk space information [POST /filesystem/disk_info]
 
@@ -864,8 +1083,6 @@ Get disk space info for a set of directory paths
             + path: /mnt/disk2/dir/
             + free_space: 400443416576 (number) - Free disk space in bytes
             + total_space: 2953372659712 (number) - Total disk space in bytes
-
-
 
 # Group Hashing
 
@@ -2104,10 +2321,10 @@ Basic code example for searching:
 ```javascript
 
 // Create a new search instance
-const instance = await api.post('search/instances')
+const instance = await api.post('search')
 
 // Post the search
-const searchInfo = await api.post(`search/instances/${instance.id}/hub_search`, {
+const searchInfo = await api.post(`search/${instance.id}/hub_search`, {
   query: {
     pattern: pattern,
   },
@@ -2117,7 +2334,7 @@ const searchInfo = await api.post(`search/instances/${instance.id}/hub_search`, 
 await sleep(10000)
 
 // Fetch the five most relevant results
-const results = await api.get(`search/instances/${instance.id}/results/0/5`)
+const results = await api.get(`search/${instance.id}/results/0/5`)
 
 // .... do something with them
 
@@ -2163,10 +2380,10 @@ When using Websockets, there's a 'search_hub_searches_sent' that will be fired a
 ```javascript
 
 // Create a new search instance
-const instance = await socket.post('search/instances')
+const instance = await socket.post('search')
 
 // Add listener for the 'searches sent' event before performing the actual search
-socket.addListener(`search/instances/${instance.id}`, 'search_hub_searches_sent', searchInfo => {
+socket.addListener(`search/${instance.id}`, 'search_hub_searches_sent', searchInfo => {
   // Collect the results for 5 seconds before fetching them
   await sleep(5000)
   
@@ -2174,7 +2391,7 @@ socket.addListener(`search/instances/${instance.id}`, 'search_hub_searches_sent'
 })
 
 // Perform the search
-socket.post(`search/instances/${instance.id}/hub_search`, {
+socket.post(`search/${instance.id}/hub_search`, {
   query: {
     pattern: pattern,
   },
@@ -2191,7 +2408,7 @@ Note that the application may also choose reject new searches in order to preven
 use some consideration regarding the number of searches that you really need to perform.
 
 
-## Search instances [/search/instances]
+## Search instances [/search]
 
 ### Get a list of all search instances [GET]
 
@@ -2200,9 +2417,6 @@ Required permission: *search*
 + Response 200 (application/json)
     + Attributes (array[Search instance])
 
-
-
-## Search instance [/search/instances/]
 
 ### Create instance [POST]
 
@@ -2215,7 +2429,7 @@ Required permission: *search*
 + Response 200 (application/json)
     + Attributes (Search instance)
 
-### Get instance [GET /search/instances/{instance_id}]
+### Get instance [GET /search/{instance_id}]
 
 Required permission: *search*
 
@@ -2226,14 +2440,14 @@ Get a single instance by ID.
 + Response 200 (application/json)
     + Attributes (Search instance)
 
-### Remove instance [DELETE /search/instances/{instance_id}]
+### Remove instance [DELETE /search/{instance_id}]
 
 Required permission: *search*
 
 + Response 204
 
 
-## Miscellaneous [/search]
+## Miscellaneous [/search/types]
 
 ### Search types [GET /search/types]
 
@@ -2302,9 +2516,9 @@ All subscriptions from search instances are also available to be used across all
 
 # Group Search instances
 
-## Search [/search/instance/{instance_id}]
+## Search [/search/{instance_id}]
 
-### Perform hub search [POST /search/instance/{instance_id}/hub_search]
+### Perform hub search [POST /search/{instance_id}/hub_search]
 
 Search files from all connected (or separately specified) hubs. This will cancel possible hub searches that were queued earlier and clear the cached results.
 
@@ -2323,7 +2537,7 @@ Required permission: *search*
         + search_id: 643345 (number) - An individual search ID for this query
         + queued_count: 3 (number) - Number of hubs for which the search was queued
 
-### Perform user search [POST /search/instance/{instance_id}/user_search]
+### Perform user search [POST /search/{instance_id}/user_search]
 
 Search files from an individual user. The search will be sent instantly without queueing. This will cancel possible hub searches that were queued earlier and clear the cached results.
 
@@ -2336,7 +2550,7 @@ Required permission: *search*
 + Request (application/json)
     + Attributes 
         + query (Search query, required)
-        + user (Hinted user, required)
+        + user (Hinted user base, required)
         + options (optional)
             + max_results: 20 (optional, number) - Maximum number of results to return. Note that the responding client may not obey large maximum result limits.
                 + Default: 5
@@ -2345,9 +2559,9 @@ Required permission: *search*
 
 + Response 204
 
-## Results [/search/instance/{instance_id}/results]
+## Results [/search/{instance_id}/results]
 
-### Get results [GET /search/instance/{instance_id}/results/{start}/{max_count}]
+### Get results [GET /search/{instance_id}/results/{start}/{max_count}]
 
 Get results for the previously posted search query. Results are sorted by relevance (the most relevant result is sorted first).
 
@@ -2362,7 +2576,7 @@ Required permission: *search*
 + Response 200 (application/json)
     + Attributes (array[Grouped search results])
 
-### Download result [POST /search/instance/{instance_id}/results/{result_id}/download]
+### Download result [POST /search/{instance_id}/results/{result_id}/download]
 
 Queue the specified result. If there is a large number of users sharing the same item, the application will pick the fastest ones automatically.
 
@@ -2379,7 +2593,7 @@ Required permission: *download*
             + directory_downloads (array[Directory download item]) - Response for directory downloads
 
 
-### Get child user results [GET /search/instance/{instance_id}/results/{result_id}/children]
+### Get child user results [GET /search/{instance_id}/results/{result_id}/children]
 
 Get a list of individual user results.
 
@@ -2389,13 +2603,13 @@ Required permission: *search*
     + Attributes (array[Child search result])
 
 
-## Subscriptions [/search/instance/{id}/listeners]
+## Subscriptions [/search/{id}/listeners]
 
 Required permission: *search*
 
 All subscriptions from search instances are also available to be used across all instances (add them with */search/listeners/event_name*).
 
-### Hub searches sent [POST /search/instance/{id}/listeners/search_hub_searches_sent]
+### Hub searches sent [POST /search/{id}/listeners/search_hub_searches_sent]
 
 Fired after all queued searches were sent.
 
@@ -2404,17 +2618,17 @@ Fired after all queued searches were sent.
         + sent: 4 (number) - Number of searches that were sent (this may also be 0 if all hubs were closed)
         + search_id: 643345 - ID of the search that was sent
 
-### Grouped result added [POST /search/instance/{id}/listeners/search_result_added]
+### Grouped result added [POST /search/{id}/listeners/search_result_added]
 
 + Response 200 (application/json)
     + Attributes (Grouped search result)
 
-### Grouped result updated [POST /search/instance/{id}/listeners/search_result_updated]
+### Grouped result updated [POST /search/{id}/listeners/search_result_updated]
 
 + Response 200 (application/json)
     + Attributes (Grouped search result)
 
-### User result received [POST /search/instance/{id}/listeners/search_user_result]
+### User result received [POST /search/{id}/listeners/search_user_result]
 
 + Response 200 (application/json)
     + Attributes (Child search result)
@@ -2438,11 +2652,7 @@ Create a new API session by providing the web user credentials.
         + max_inactivity: 60 (number, optional) - Time in minutes after which the session is invalidated if there is no activity. Note that sessions with a connected websocket won't expire. The default session inactivity timeout can be configured from web server settings.
             + Default: 20
 + Response 200 (application/json)
-    + Attributes
-        + auth_token: `25793d1e-6d48-407c-9c27-a9dcbd2e1188` - Authorization token
-        + system_info (System info) - Generic information about the system that the application is running on
-        + user (Web user) - Current web user
-        + wizard_pending: false (boolean) - Whether completion of the initial configuration wizard is pending
+    + Attributes (Authentication info)
 
 ### Socket [POST /sessions/socket]
 
@@ -2452,7 +2662,8 @@ Associate socket with an existing session.
     + Attributes
         + auth_token: `25793d1e-6d48-407c-9c27-a9dcbd2e1188` (required) - Session identifier token
 
-+ Response 204
++ Response 200 (application/json)
+    + Attributes (Authentication info)
 
 ## Current session [/sessions/self]
 
@@ -2544,7 +2755,12 @@ Required permission: *admin*
   + secure
 + user (Web user) - Web user account used for authentication
 
+### Authentication info
 
++ auth_token: `25793d1e-6d48-407c-9c27-a9dcbd2e1188` - Authorization token
++ system_info (System info) - Generic information about the system that the application is running on
++ user (Web user) - Current web user
++ wizard_pending: false (boolean) - Whether completion of the initial configuration wizard is pending
 
 
 # Group Settings
@@ -2603,21 +2819,16 @@ Get schema information of the specified settings.
 + Response 200 (application/json)
     + Attributes (array)
         + (object)
-            + download_limit_main (Setting item info)
+            + download_limit_main (Setting definition)
             
 
 ## Data Structures
 
-### Setting item info
+### Setting definition
 
 + key: download_limit_main
 + title: Download limit - Localized setting title
-+ unit: KiB/s - Localized unit strings
-+ auto: false (boolean) - Whether the current setting value is automatically determined by the application
-+ values (array) - Possible value listing for enum-type settings
-    + (object)
-        + value
-        + text
++ optional: false (boolean) - Whether the setting is optional
 + type (enum[string]) - Possible additional type hints
     + number
     + string
@@ -2626,6 +2837,13 @@ Get schema information of the specified settings.
     + directory_path
     + text
     + boolean
++ values (array) - Possible value listing for enum-type settings
+    + (object)
+        + id
+        + name
++ min: 1 (number) - Minimum allowed value (numeric types only), default is 0
++ max: 1000000 (number) - Maximum allowed value (numeric types only)
+
 
 ### Setting value (enum)
 
@@ -3693,7 +3911,11 @@ Fired when the file is ready for viewing
 + files: 49 (number)
 + directories: 2 (number)
 
+### Filesystem item
 
++ name: myfile1.log
++ type (Item type) - Directory content information is not available here
++ size: 6382343 (number) - Size in bytes (available for files only)
 
 
 ### Chat message info
