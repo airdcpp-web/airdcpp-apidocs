@@ -625,6 +625,7 @@ Required permission: *admin*
 
 + Request (application/json)
     + Attributes
+        + install_id: `airdcpp-create-extension` - Install ID that can be used for tracking the installation progress events. Any (unique) string can be used (such as the name of the extension).
         + url: https://registry.npmjs.org/airdcpp-create-extension/-/airdcpp-create-extension-0.0.1-beta4.tgz - URL from which the extension should be download from
         + shasum: 77f49298863b1460cf65e6c125e659f7dd9dac9e (optional) - Possible SHA1 sum that can be used for validating the package integrity
 + Response 204
@@ -672,6 +673,26 @@ All subscriptions from extension entities are also available to be used across a
 
 + Response 200 (application/json)
     + Attributes (Extension)
+
+### Extension installation started [POST /extensions/listeners/extension_installation_started]
+
++ Response 200 (application/json)
+    + Attributes
+        + install_id: `airdcpp-create-extension` - The supplied extension install ID
+
+### Extension installation succeeded [POST /extensions/listeners/extension_installation_succeeded]
+
++ Response 200 (application/json)
+    + Attributes
+        + install_id: `airdcpp-create-extension` - The supplied extension install ID
+
+### Extension installation failed [POST /extensions/listeners/extension_installation_failed]
+
++ Response 200 (application/json)
+    + Attributes
+        + install_id: `airdcpp-create-extension` - The supplied extension install ID
+        + message: `Failed to move extension files to the final destination directory (permission denied)`
+
 
 ## Data Structures
 
@@ -2808,7 +2829,7 @@ Required permission: *settings_edit*
 + Response 204
 
 
-### Get setting information [POST /settings/definitions]
+### Get setting definitions [POST /settings/definitions]
 
 Get schema information of the specified settings.
 
@@ -2824,26 +2845,37 @@ Get schema information of the specified settings.
 
 ## Data Structures
 
-### Setting definition
+### Setting definition base
 
 + key: download_limit_main
-+ title: Download limit - Localized setting title
-+ optional: false (boolean) - Whether the setting is optional
-+ type (enum[string]) - Possible additional type hints
-    + number
-    + string
-    + boolean
-    + file_path
-    + directory_path
-    + text
-    + boolean
-+ values (array) - Possible value listing for enum-type settings
++ title: `Download limit (KiB/s, 0 = disabled)` - Setting field title
++ help: Set the total speed limit for downloads (optional) - Additional help message
++ optional: false (boolean, optional) - Whether the setting is optional
++ type (Setting type base) - Value type
+    + boolean - Boolean field
+    + list - List with items defined by the 'item_type' field
++ item_type (Setting type base) - List item value type. Required for 'list' type settings.
+    + struct - List items with subproperties configured in the 'definitions' field
+
++ options (array, optional) - Optional value selection options for enum-type settings. Options may also be specified for string and number lists when multiselect component should be used.
     + (object)
         + id
         + name
-+ min: 1 (number) - Minimum allowed value (numeric types only), default is 0
-+ max: 1000000 (number) - Maximum allowed value (numeric types only)
++ min: 1 (number, optional) - Minimum allowed value (numeric types only), default is 0
++ max: 100 (number, optional) - Maximum allowed value (numeric types only)
++ default_value: 0 (number) - Default value
 
+### Setting definition (Setting definition base)
+
++ definitions (array[object]) - Property definitions for list items (required when using the 'list' type with 'struct' items)
+
+### Setting type base (enum[string])
+
++ number - Numeric (integer) field
++ string - Regular string field
++ file_path - File path selector
++ directory_path - Directory path selector
++ text - Field for longer text content
 
 ### Setting value (enum)
 
@@ -2852,6 +2884,7 @@ Get schema information of the specified settings.
 + (boolean)
 + (array[string])
 + (array[number])
++ (array[object])
 
 
 
@@ -2953,7 +2986,7 @@ Search for shared files.
 + Request (application/json)
     + Attributes (object, required)
         + query (Search query, required)
-        + share_profile (number, optional) - Items will be searched for from whole share if no profile is specified.
+        + share_profile: 7453466 (number, optional) - Items will be searched for from whole share if no profile is specified.
 
 + Response 200 (application/json)
     + Attributes (array[Share item])
@@ -2963,6 +2996,33 @@ Search for shared files.
 Required permission: *share_view*
 
 + Response 200 (application/json)
+
+### Validate path [GET /share/validate_path]
+
+Validate a path of an existing file/directory.
+
++ Request (application/json)
+    + Attributes (object, required)
+        + path: /home/airdcpp/share/Ubuntu/CD1/ - File/directory path
+        + skip_check_queue: false (boolean, optional)
+            + Default: false
+
++ Response 204
++ Response 403
+
+    Validation failed (non-temporary failure)
+
+    + Body
+    
+            Forbidden file extension
+
++ Response 409
+
+    The path is inside an incomplete bundle (temporary failure)
+    
+    + Body
+
+            Directory is inside an unfinished bundle
 
 
 ## Subscriptions [/share/listeners]
@@ -2994,6 +3054,27 @@ Fired when share refresh (partial or full refresh) was completed.
 + Response 200 (application/json)
     + Attributes 
         + path: /home/airdcpp/share/Videos/secret/
+
+
+## Hooks [/share/hooks]
+
+### File validation hook [POST /share/hooks/share_file_validation_hook]
+
+The hook is fired for each file that is being validated (rejected files won't be shared).
+
++ Response 200 (application/json)
+    + Attributes
+        + path: /home/airdcpp/share/Ubuntu/CD1/Ubuntu CD1.iso - Full file path
+        + size: 62523525626 (number) - File size (bytes)
+
+### Directory validation hook [POST /share/hooks/share_directory_validation_hook]
+
+The hook is fired for each directory that is being validated (rejected directories won't be shared).
+
++ Response 200 (application/json)
+    + Attributes
+        + path: /home/airdcpp/share/Ubuntu/CD1/ - Full directory path
+
 
 ## Data Structures
 
@@ -3104,6 +3185,7 @@ Required permission: *settings_edit*
 
 + Response 200 (application/json)
     + Attributes (Share profile)
+
 
 ## Data structures
 
@@ -3305,9 +3387,11 @@ Required permission: *admin*
 + path_separator: / - System's native path separator character
 + client_version: `AirDC++w 2.0.0 armv7l` - Full application version string
 + client_started: 1483972366 (number) - Time when the application was started
-+ platform: other (enum[string])
-  + windows
-  + osx
++ platform: linux (enum[string])
+  + win32
+  + darwin
+  + linux
+  + freebsd
   + other
 
 
@@ -4029,8 +4113,8 @@ Fired when the file is ready for viewing
 
 + self - The user is me
 + bot - The user is a bot (ADC users only)
-+ ascs - The user supports advanced searching extension (ADC users only)
-+ ccpm - The user supports encrypted client-to-client private messaging (ADC users only)
++ asch - The user supports [advanced searching extension](http://adc.sourceforge.net/ADC-EXT.html#_asch_extended_searching_capability) (ADC users only)
++ ccpm - The user supports [encrypted client-to-client private messaging](https://forum.dcbase.org/viewtopic.php?f=55&t=724) (ADC users only)
 + ignored - Messages from this user are ignored
 + favorite - The user has been marked as favorite
 + nmdc - NMDC user
