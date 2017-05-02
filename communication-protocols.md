@@ -170,7 +170,7 @@ An example event message for this event would be:
 
 ```json
 {
-    "event": "away_state"
+    "event": "away_state",
     "data": { 
         "id": "idle"
     }
