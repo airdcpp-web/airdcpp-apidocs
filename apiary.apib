@@ -115,7 +115,7 @@ Required permission: *settings_edit*
 + Response 204
 
 
-## Subscriptions [/favorite_directories/listeners]
+## Event listeners [/favorite_directories/listeners]
 
 Required permission: *settings_view*
 
@@ -193,7 +193,7 @@ Required permission: *favorite_hubs_edit*
 + Response 204
 
 
-## Subscriptions [/favorite_hubs/listeners]
+## Event listeners [/favorite_hubs/listeners]
 
 Required permission: *favorite_hubs_view*
     
@@ -297,7 +297,7 @@ Required permission: *events_view*
     + Attributes (Log message info)
 
 
-## Subscriptions [/events/listeners]
+## Event listeners [/events/listeners]
 
 Required permission: *events_view*
 
@@ -394,11 +394,11 @@ Required permission: *admin*
 
 
 
-## Subscriptions [/extensions/listeners]
+## Event listeners [/extensions/listeners]
 
 Required permission: *admin*
 
-All subscriptions from extension entities are also available to be used across all sessions (add them with */extensions/listeners/event_name*).
+All event listeners from extension entities are also available to be used across all sessions (add them with */extensions/listeners/event_name*).
 
 ### Extension added [POST /extensions/listeners/extension_created]
 
@@ -524,11 +524,11 @@ Required permission: *settings_edit*
 
 
 
-## Subscriptions [/extensions/{extension_id}/listeners]
+## Event listeners [/extensions/{extension_id}/listeners]
 
 Required permission: *admin*
 
-All subscriptions from extension entities are also available to be used across all sessions (add them with */extensions/listeners/event_name*).
+All event listeners from extension entities are also available to be used across all sessions (add them with */extensions/listeners/event_name*).
 
 ### Extension started [POST /extensions/listeners/extension_started]
 
@@ -542,7 +542,7 @@ All subscriptions from extension entities are also available to be used across a
 
 ### Extension updated [POST /extensions/listeners/extension_updated]
 
-Generic subscription for updated extension properties (only the updated ones are sent).
+Generic listener for updated extension properties (only the updated ones are sent).
 
 + Response 200 (application/json)
     + Attributes (Extension)
@@ -672,11 +672,11 @@ Required permission: *download*
 
 
 
-## Subscriptions [/filelists/listeners]
+## Event listeners [/filelists/listeners]
 
 Required permission: *filelists_view*
 
-All subscriptions from filelist entities are also available to be used across all sessions (add them with */filelists/listeners/event_name*).
+All event listeners from filelist entities are also available to be used across all sessions (add them with */filelists/listeners/event_name*).
 
 ### Filelist session created [POST /filelists/listeners/filelist_created]
 
@@ -787,11 +787,11 @@ Required permission: *filelists_view*
 + Response 204
 
 
-## Subscriptions [/filelists/{session_id}/listeners]
+## Event listeners [/filelists/{session_id}/listeners]
 
 Required permission: *filelists_view*
 
-All subscriptions from filelist entities are also available to be used across all sessions (add them with */filelists/listeners/event_name*).
+All event listeners from filelist entities are also available to be used across all sessions (add them with */filelists/listeners/event_name*).
 
 ### Filelist session updated [POST /filelists/listeners/filelist_updated]
 
@@ -897,7 +897,7 @@ Required permission: *settings_edit*
 + Response 204
 
 
-## Subscriptions [/hash/listeners]
+## Event listeners [/hash/listeners]
 
 Required permission: *settings_view*
 
@@ -1159,11 +1159,11 @@ Required permission: *hubs_edit*
 + Response 204
 
 
-## Subscriptions [/hubs/listeners]
+## Event listeners [/hubs/listeners]
 
 Required permission: *hubs_view*
 
-All subscriptions from hub entities are also available to be used across all sessions (add them with */hubs/listeners/event_name*).
+All event listeners from hub entities are also available to be used across all sessions (add them with */hubs/listeners/event_name*).
 
 ### Hub session created [POST /hubs/listeners/hub_created]
 
@@ -1179,7 +1179,7 @@ All subscriptions from hub entities are also available to be used across all ses
 
 ## Validation hooks [/hubs/hooks]
 
-Hooks should be used for validation purposes only. If just want to be notified about new hub messages, you should use [event listeners](#reference/hub-sessions/subscriptions) instead.
+Hooks should be used for validation purposes only. If just want to be notified about new hub messages, you should use [event listeners](#reference/hub-sessions/event-listeners) instead.
 
 ### Incoming chat message [POST /hubs/hooks/hub_incoming_message_hook]
 
@@ -1355,11 +1355,11 @@ Required permission: *hubs_edit*
     + Attributes (Hub counts)
 
 
-## Subscriptions [/hubs/{id}/listeners]
+## Event listeners [/hubs/{id}/listeners]
 
 Required permission: *hubs_view*
 
-All subscriptions from hub entities are also available to be used across all sessions (add them with */hubs/listeners/event_name*).
+All event listeners from hub entities are also available to be used across all sessions (add them with */hubs/listeners/event_name*).
 
 ### Session updated [POST /hubs/{id}/listeners/hub_updated]
 
@@ -1455,11 +1455,11 @@ Required permission: *private_chat_edit*
 + Response 204
 
 
-## Subscriptions [/private_chat/listeners]
+## Event listeners [/private_chat/listeners]
 
 Required permission: *private_chat_view*
 
-All subscriptions from private chat entities are also available to be used across all sessions (add them with */private_chat/listeners/event_name*).
+All event listeners from private chat entities are also available to be used across all sessions (add them with */private_chat/listeners/event_name*).
 
 ### Private chat session created [POST /private_chat/listeners/private_chat_created]
 
@@ -1475,7 +1475,7 @@ All subscriptions from private chat entities are also available to be used acros
 
 ## Validation hooks [/private_chat/hooks]
 
-Hooks should be used for validation purposes only. If just want to be notified about new private messages, you should use [event listeners](#reference/private-chat-sessions/subscriptions) instead.
+Hooks should be used for validation purposes only. If just want to be notified about new private messages, you should use [event listeners](#reference/private-chat-sessions/event-listeners) instead.
 
 ### Incoming chat message [POST /private_chat/hooks/private_chat_incoming_message_hook]
 
@@ -1587,11 +1587,11 @@ Required permission: *private_chat_edit*
 + Response 204
 
 
-## Subscriptions [/private_chat/{id}/listeners]
+## Event listeners [/private_chat/{id}/listeners]
 
 Required permission: *private_chat_view*
 
-All subscriptions from private chat entities are also available to be used across all sessions (add them with */private_chat/listeners/event_name*).
+All event listeners from private chat entities are also available to be used across all sessions (add them with */private_chat/listeners/event_name*).
 
 ### Session updated [POST /private_chat/{id}/listeners/private_chat_updated]
 
@@ -1853,7 +1853,7 @@ Required permission: *queue_edit*
         + count: 4 (number) - Number of files from which the source was removed
 
 
-## Bundle subscriptions [/queue/listeners/queue_bundle]
+## Bundle event listeners [/queue/listeners/queue_bundle]
 
 ### Bundle added [POST /queue/listeners/queue_bundle_added]
 
@@ -1864,7 +1864,7 @@ Required permission: *queue_edit*
 
 Only the updated properties are sent.
 
-This subscription generates a large number of event messages. If you are interested in specific types of updates only, you should generally use the other subscriptions listed below.
+This listener generates a large number of event messages. If you are interested in specific types of updates only, you should generally use the other event listeners listed below.
 
 + Response 200 (application/json)
     + Attributes (Queue bundle)
@@ -1910,7 +1910,7 @@ Bundle sources were updated.
     + Attributes (Queue bundle)
 
 
-## File subscriptions [/queue/listeners/queue_file]
+## File event listeners [/queue/listeners/queue_file]
 
 Subscriptions for individual queued files.
 
@@ -1923,7 +1923,7 @@ Subscriptions for individual queued files.
 
 Only the updated properties are sent.
 
-This subscription generates a large number of event messages. If you are interested in specific types of updates only, you should generally use the other subscriptions listed below.
+This listener generates a large number of event messages. If you are interested in specific types of updates only, you should generally use the other event listeners listed below.
 
 + Response 200 (application/json)
     + Attributes (Queue file)
@@ -1968,7 +1968,7 @@ Bundle/file completion hooks can be used for performing various content validati
 
 `hook_validation_error` state is set for failed items and the full error is available from the `hook_error` status field. The [share](#reference/queue/bundle/share-a-failed-bundle) method can be used to revalidate failed bundles.
 
-**Note that the hooks should be used for content validation purposes only**. If you just want to know when a file/bundle has completed downloading, you should use the respective status event listeners ([bundles](#reference/queue/bundle-subscriptions/bundle-status-changed), [files](#reference/queue/file-subscriptions/file-status-changed)) and check the ID of the new status instead.
+**Note that the hooks should be used for content validation purposes only**. If you just want to know when a file/bundle has completed downloading, you should use the respective status event listeners ([bundles](#reference/queue/bundle-event-listeners/bundle-status-changed), [files](#reference/queue/file-event-listeners/file-status-changed)) and check the ID of the new status instead.
 
 
 ### File finished [POST /queue/hooks/queue_file_finished_hook]
@@ -2238,11 +2238,11 @@ Return all search types
             + extensions: ape, flac, m4a, mid, mp3, mpc, ogg, ra, wav, wma
             + default_type: true (boolean) - This is an inbuilt type that can't be removed (extensions can still be modified)
 
-## Subscriptions [/search/listeners]
+## Event listeners [/search/listeners]
 
 Required permission: *search*
 
-All subscriptions from search instances are also available to be used across all instances (add them with */search/listeners/event_name*).
+All event listeners from search instances are also available to be used across all instances (add them with */search/listeners/event_name*).
 
 
 ## Data Structures
@@ -2380,11 +2380,11 @@ Required permission: *search*
     + Attributes (array[Child search result])
 
 
-## Subscriptions [/search/{id}/listeners]
+## Event listeners [/search/{id}/listeners]
 
 Required permission: *search*
 
-All subscriptions from search instances are also available to be used across all instances (add them with */search/listeners/event_name*).
+All event listeners from search instances are also available to be used across all instances (add them with */search/listeners/event_name*).
 
 ### Hub searches sent [POST /search/{id}/listeners/search_hub_searches_sent]
 
@@ -2503,7 +2503,7 @@ Required permission: *admin*
     + Attributes (Session)
 
 
-## Subscriptions [/sessions/listeners]
+## Event listeners [/sessions/listeners]
 
 Required permission: *admin*
 
@@ -2781,7 +2781,7 @@ Validate a path of an existing file/directory.
             Directory is inside an unfinished bundle
 
 
-## Subscriptions [/share/listeners]
+## Event listeners [/share/listeners]
 
 Required permission: *settings_view*
 
@@ -2927,7 +2927,7 @@ Required permission: *settings_edit*
 + Response 204
 
 
-## Subscriptions [/share_profiles/listeners]
+## Event listeners [/share_profiles/listeners]
 
 ### Share profile added [POST /share_profiles/listeners/share_profile_added]
 
@@ -3021,7 +3021,7 @@ Required permission: *settings_edit*
 + Response 204
 
 
-## Subscriptions [/share_roots/listeners]
+## Event listeners [/share_roots/listeners]
 
 Required permission: *settings_view*
     
@@ -3119,7 +3119,7 @@ Required permission: *admin*
 + Response 204
     
 
-## Subscriptions [/system/listeners]
+## Event listeners [/system/listeners]
 
 ### Away state changed [POST /system/listeners/away_state]
 
@@ -3207,7 +3207,7 @@ Required permission: *transfers*
         + start_total_uploaded: 6433254263622 (number)
     
 
-## Subscriptions [/transfers/listeners]
+## Event listeners [/transfers/listeners]
 
 Required permission: *transfers*
 
@@ -3222,7 +3222,7 @@ A new transfer connection was added.
 
 Only the updated properties are sent.
 
-This subscription generates a large number of event messages. If you are interested in specific types of updates only, you should generally use the other subscriptions listed below.
+This listener generates a large number of event messages. If you are interested in specific types of updates only, you should generally use the other event listeners listed below.
 
 + Response 200 (application/json)
     + Attributes (Transfer item)
@@ -3361,7 +3361,7 @@ Search users with nick matching the provided pattern. The most relevant match is
 + Response 200 (application/json)
     + Attributes (array[Hub user])
 
-## Subscriptions [/users/listeners]
+## Event listeners [/users/listeners]
 
 Subscriptions related to connect state changes are tracked globally on per-user basis and sent users are not bound to any hub. If you want to track hub level user connect state changes, you should use the Hub API listeners instead.
 
@@ -3456,7 +3456,7 @@ Required permission: *admin*
 + Response 204
 
 
-## Subscriptions [/web_users/listeners]
+## Event listeners [/web_users/listeners]
 
 Required permission: *admin*
     
@@ -3600,7 +3600,7 @@ Required permission: *view_files_view*
 + Response 204
 
 
-## Subscriptions [/view_files/listeners]
+## Event listeners [/view_files/listeners]
 
 Required permission: *view_files_view*
 
