@@ -216,6 +216,12 @@ The resulting event message will be the same as described earlier (entity IDs ar
 
 Action hooks allow scripts to perform validations related to various client actions, such as validate the content finished bundles/files or filter incoming chat messages. All events fired by the hook must either be accepted or rejected by the script before the application processes them futher.
 
+**Action hooks vs event listeners**
+
+Action hooks are meant to be used only if you are going to change the behavior how certain actions/events are being processed by the application (or whether the action/event is being processed at all). If you just want to be notified of a certain event, you should use regular event listeners, as unlike action hooks, the application won't stop and wait for the listener events to be processed by subscribers and are thus faster and more lightweight. 
+
+Furthermore, various action hooks can be used to reject events from being processed further. As the hook processing order is undefined, you have no way of knowing whether the subsequent subscribers are going to prevent the event from actually "going live". For example, if you use the bundle completion hook as a trigger to move downloaded files to a different location on disk, you will miss possible content validations being performed by other subscribers. Alternatively, you could be logging chat messages in an incoming message hook before knowing whether they are going to be ignored. The correct solution in both cases would be to use the respective event listeners instead (“Bundle status changed” listener to filter bundle completion events and incoming message listeners for chat message).
+ 
 
 #### Adding hooks
 
