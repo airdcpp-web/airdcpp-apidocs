@@ -1177,14 +1177,20 @@ All subscriptions from hub entities are also available to be used across all ses
     + Attributes (Hub)
 
 
-## Hooks [/hubs/hooks]
+## Validation hooks [/hubs/hooks]
+
+Hooks should be used for validation purposes only. If just want to be notified about new hub messages, you should use [event listeners](#reference/hub-sessions/subscriptions) instead.
 
 ### Incoming chat message [POST /hubs/hooks/hub_incoming_message_hook]
+
+Hook is fired for each incoming hub chat message and can be used to prevent certain messages from being displayed to the user.
 
 + Response 200 (application/json)
     + Attributes (Chat message)
 
 ### Outgoing chat message [POST /hubs/hooks/hub_outgoing_message_hook]
+
+Hook is fired for each outgoing hub chat message and can be used to prevent certain messages from being sent to the hub.
 
 + Response 200 (application/json)
     + Attributes
@@ -1467,9 +1473,13 @@ All subscriptions from private chat entities are also available to be used acros
     + Attributes (Private chat)
 
 
-## Hooks [/private_chat/hooks]
+## Validation hooks [/private_chat/hooks]
+
+Hooks should be used for validation purposes only. If just want to be notified about new private messages, you should use [event listeners](#reference/private-chat-sessions/subscriptions) instead.
 
 ### Incoming chat message [POST /private_chat/hooks/private_chat_incoming_message_hook]
+
+Hook is fired for each incoming private chat message and can be used to prevent certain messages from being displayed to the user.
 
 Note that private chat session won't exist yet for private messages received from new users.
 
@@ -1478,7 +1488,9 @@ Note that private chat session won't exist yet for private messages received fro
 
 ### Outgoing chat message [POST /private_chat/hooks/private_chat_outgoing_message_hook]
 
-Note that private chat session may not exist for announcement-like messages.
+Hook is fired for each outgoing private chat message and can be used to prevent certain messages from being sent.
+
+Note that private chat session may not exist for announcement-like messages that sent via the API.
 
 + Response 200 (application/json)
     + Attributes (Private chat message request)
@@ -1950,11 +1962,13 @@ Generic update event for other file status updates.
     + Attributes (Queue file)
 
 
-## Hooks [/queue/hooks]
+## Validation hooks [/queue/hooks]
 
 Bundle/file completion hooks can be used for performing various content validations. Possible error returned by the hook is saved for the respective item and is also visible to the user. 
 
-`hook_validation_error` state is set for failed items and the full error is available from the `hook_error` status field. The [share](/#reference/queue/bundle/share-a-failed-bundle) method can be used to revalidate failed bundles.
+`hook_validation_error` state is set for failed items and the full error is available from the `hook_error` status field. The [share](#reference/queue/bundle/share-a-failed-bundle) method can be used to revalidate failed bundles.
+
+**Note that the hooks should be used for content validation purposes only**. If you just want to know when a file/bundle has completed downloading, you should use the respective status event listeners ([bundles](#reference/queue/bundle-subscriptions/bundle-status-changed), [files](#reference/queue/file-subscriptions/file-status-changed)) and check the ID of the new status instead.
 
 
 ### File finished [POST /queue/hooks/queue_file_finished_hook]
@@ -2798,7 +2812,9 @@ Fired when share refresh (partial or full refresh) was completed.
         + path: /home/airdcpp/share/Videos/secret/
 
 
-## Hooks [/share/hooks]
+## Validation hooks [/share/hooks]
+
+Validation hooks are fired for each file/directory that is found while refreshing the share. Due to possible increased refresh times, you shouldn't perform any long-running operations in the validation hooks.
 
 ### File validation hook [POST /share/hooks/share_file_validation_hook]
 
