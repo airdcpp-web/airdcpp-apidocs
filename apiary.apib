@@ -1902,12 +1902,12 @@ Bundle sources were updated.
 
 Subscriptions for individual queued files.
 
-### File added [POST /queue/listeners/file_added]
+### File added [POST /queue/listeners/queue_file_added]
 
 + Response 200 (application/json)
     + Attributes (Queue file)
 
-### File updated [POST /queue/listeners/file_updated]
+### File updated [POST /queue/listeners/queue_file_updated]
 
 Only the updated properties are sent.
 
@@ -1944,7 +1944,7 @@ Generic update event for other file status updates.
 + Response 200 (application/json)
     + Attributes (Queue file)
 
-### File removed [POST /queue/listeners/file_removed]
+### File removed [POST /queue/listeners/queue_file_removed]
 
 + Response 200 (application/json)
     + Attributes (Queue file)
@@ -3034,7 +3034,7 @@ Only the updated properties are sent.
 + virtual_name: Ubuntu 14.04 (optional) - Directory name that is shown in the filelist. Multiple roots may be added with the same virtual name and they will be merged in filelist. If no virtual name is specified, it will be determined automatically from the path.
 + incoming: true (boolean, optional) - Set this root as incoming that can be configured to use a different refresh interval.
     + Default: false
-+ profiles: 13, 5314 (array, optional) - List of share profiles to use for this root. If no share profile is specified, the default one will be added.
++ profiles: 13, 5314 (array[number], optional) - List of share profiles to use for this root. If no share profile is specified, the default one will be added.
 
 ### Share root
 
