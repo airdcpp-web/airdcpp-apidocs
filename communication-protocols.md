@@ -17,14 +17,15 @@ An example for refreshing the whole share with [curl](https://curl.haxx.se):
 
 `curl -H "Content-Type: application/json" -X POST -u myusername:mypassword http://localhost:5600/api/v1/share/refresh`
 
-Note that a session object is still created internally by the application, so the methods available for [current session](/#reference/sessions/current-session) can still be used (such as if you need information about the current user permissions).
+Note that a session object is still created internally by the application, so the methods available for [current session](http://docs.airdcpp.apiary.io/#reference/sessions/current-session/get-current-session) can still be used (such as if you need information about the current user permissions).
 
 
 ### Session-based authentication
 
 Creating an unique session should generally be done only if you are going to use HTTP calls in conjuction with WebSockets.
 
-Authentication happens through [Session API's authentication method](/#reference/sessions/authentication/create-session). Once you have sent the user credentials, you will receive the session token in the response message:
+Authentication happens through [Session API's authentication method](http://docs.airdcpp.apiary.io/#
+/sessions/authentication/create-session). Once you have sent the user credentials, you will receive the session token in the response message:
 
 ```json
     ....
@@ -62,7 +63,8 @@ You should use the following URL format when establishing WebSocket connections:
 Unencrypted: `ws://<address>:<http port>/api/v1/`
 Encrypted: `wss://<address>:<https port>/api/v1/`
 
-WebSockets require an [unique session created via the Session API](/#introduction/http-calls/session-based-authentication) (basic HTTP authentication isn't sufficient).
+WebSockets require an [unique session created via the Session API](http://docs.airdcpp.apiary.io/#
+/sessions/authentication/create-session) (basic HTTP authentication isn't sufficient).
 
 
 #### Associating socket with an existing session
@@ -105,7 +107,7 @@ To create a new session directly via the socket, send the following message:
 }
 ```
 
-[Authentication method API reference](/#reference/sessions/authentication/create-session)
+[Authentication method API reference](http://docs.airdcpp.apiary.io/#reference/sessions/authentication/create-session)
 
 
 ### Requests
