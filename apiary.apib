@@ -47,8 +47,9 @@ Websocket connector for Javascript (Node.js/web browsers) for remote/browser-sid
 ### Usage examples
 
 - [Example JavaScript extensions](https://github.com/airdcpp-web/airdcpp-extension-js/tree/master/examples)
-- [Release validator extension](https://github.com/maksis/airdcpp-release-validator)
-- [AirDC++ Web UI](https://github.com/airdcpp-web/airdcpp-webui)
+- [Example Python extension](https://github.com/airdcpp-web/airdcpp-example-python-extension)
+- [Release validator extension (JavaScript)](https://github.com/maksis/airdcpp-release-validator)
+- [AirDC++ Web UI (JavaScript)](https://github.com/airdcpp-web/airdcpp-webui)
 
 
 # Group Favorite directories
@@ -629,6 +630,19 @@ Get a single filelist session by ID.
 + Response 200 (application/json)
     + Attributes (Filelist)
 
+### Update session [PATCH]
+
+**Minimum API feature level**: 1
+
+Update filelist session properties
+
++ Request (application/json)
+    + Attributes
+        + hub_url: adcs://myhub.com:6423 - URL of the hub to browse the list through (remote filelists only)
+        + share_profile: 643 (number, optional) - ID of the share profile to browse (own filelist only)
+
++ Response 204
+
 ### Remove session [DELETE]
 
 Required permission: *filelists_edit*
@@ -818,6 +832,8 @@ Required permission: *filesystem_edit*
 ### List directory content [POST /filesystem/list_items]
 
 Get a listing of items inside the supplied path
+
+Required permission: *filesystem_view*
 
 + Request (application/json)
     + Attributes
@@ -1447,6 +1463,19 @@ Get a single session by ID.
 
 + Response 200 (application/json)
     + Attributes (Private chat)
+
+### Update session [PATCH]
+
+**Minimum API feature level**: 1
+
+Update session properties.
+
++ Request (application/json)
+    + Attributes
+        + hub_url: adcs://myhub.com:6423 - URL of the hub to send the messages through
+
++ Response 204
+
 
 ### Remove session [DELETE]
 
@@ -2177,7 +2206,7 @@ socket.post(`search/${instance.id}/hub_search`, {
 
 ```
 
-[Complete example](https://github.com/airdcpp-web/airdcpp-apisocket-js/blob/master/examples/AutoDownloader.js)
+[Complete example extension](https://github.com/airdcpp-web/airdcpp-extension-js/blob/master/examples/airdcpp-auto-downloader.js)
 
 HTTP users may also check the search instance object to see the current queue time or time ellapsed from the search.
 
@@ -2351,7 +2380,7 @@ All individual user results are grouped based on the following conditions
 Required permission: *search*
 
 + Response 200 (application/json)
-    + Attributes (array[Grouped search results])
+    + Attributes (array[Grouped search result])
 
 ### Download result [POST /search/{instance_id}/results/{result_id}/download]
 
@@ -3339,14 +3368,16 @@ Required permission: *settings_edit*
 
 ## Miscellaneous [/users]
 
-### Get user [GET /users/user/{cid}]
+### Get user [GET /users/{cid}]
+
+**Minimum API feature level**: 1 (deprecated method path: /users/user/{cid} will also work with older versions)
 
 Get user by CID.
 
 + Response 200 (application/json)
     + Attributes (User)
 
-### Search nicks [POST /users]
+### Search nicks [POST /users/search_nicks]
 
 Search users with nick matching the provided pattern. The most relevant match is returned first.
 
