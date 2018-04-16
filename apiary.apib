@@ -100,9 +100,9 @@ Required permission: *settings_edit*
 
 ### Get favorite directory [GET]
 
-Required permission: *settings_view*
-
 Get a single directory by ID.
+
+Required permission: *settings_view*
 
 + Request (application/json)
 
@@ -177,9 +177,9 @@ Required permission: *favorite_hubs_edit*
 
 ### Get favorite hub [GET]
 
-Required permission: *favorite_hubs_view*
-
 Get a single hub by ID.
+
+Required permission: *favorite_hubs_view*
 
 + Request (application/json)
 
@@ -332,7 +332,7 @@ Register an extension from the calling session. The request payload should conta
 
 Sending the whole package.json content is acceptable as well.
 
-Please see ... for more information about the package.json format.
+Please see [the extension specifications](https://github.com/airdcpp-web/airdcpp-extensions#packagejson) for more information about the package.json format.
 
 Required permission: *admin*
 
@@ -378,9 +378,9 @@ Required permission: *admin*
 
 ### Get extension [GET]
 
-Required permission: *admin*
-
 Get a single extension by ID.
+
+Required permission: *admin*
 
 + Request (application/json)
 
@@ -488,9 +488,9 @@ Required permission: *admin*
 
 ### Get setting definitions [GET /extensions/{extension_id}/settings/definitions]
 
-Required permission: *settings_view*
-
 Get schema information of the extension settings.
+
+Required permission: *settings_view*
 
 + Response 200 (application/json)
     + Attributes (array[Setting definition])
@@ -527,9 +527,9 @@ Required permission: *settings_edit*
 
 ## Event listeners [/extensions/{extension_id}/listeners]
 
-Required permission: *admin*
-
 All event listeners from extension entities are also available to be used across all sessions (add them with */extensions/listeners/event_name*).
+
+Required permission: *admin*
 
 ### Extension started [POST /extensions/listeners/extension_started]
 
@@ -621,9 +621,9 @@ Required permission: *queue_edit*
 
 ### Get session [GET]
 
-Required permission: *filelists_view*
-
 Get a single filelist session by ID.
+
+Required permission: *filelists_view*
 
 + Request (application/json)
 
@@ -688,9 +688,9 @@ Required permission: *download*
 
 ## Event listeners [/filelists/listeners]
 
-Required permission: *filelists_view*
-
 All event listeners from filelist entities are also available to be used across all sessions (add them with */filelists/listeners/event_name*).
+
+Required permission: *filelists_view*
 
 ### Filelist session created [POST /filelists/listeners/filelist_created]
 
@@ -803,9 +803,9 @@ Required permission: *filelists_view*
 
 ## Event listeners [/filelists/{session_id}/listeners]
 
-Required permission: *filelists_view*
-
 All event listeners from filelist entities are also available to be used across all sessions (add them with */filelists/listeners/event_name*).
+
+Required permission: *filelists_view*
 
 ### Filelist session updated [POST /filelists/listeners/filelist_updated]
 
@@ -1159,9 +1159,9 @@ Required permission: *hubs_edit*
 
 ### Get session [GET]
 
-Required permission: *hubs_view*
-
 Get a single session by ID.
+
+Required permission: *hubs_view*
 
 + Request (application/json)
 
@@ -1177,9 +1177,9 @@ Required permission: *hubs_edit*
 
 ## Event listeners [/hubs/listeners]
 
-Required permission: *hubs_view*
-
 All event listeners from hub entities are also available to be used across all sessions (add them with */hubs/listeners/event_name*).
+
+Required permission: *hubs_view*
 
 ### Hub session created [POST /hubs/listeners/hub_created]
 
@@ -1373,9 +1373,9 @@ Required permission: *hubs_edit*
 
 ## Event listeners [/hubs/{id}/listeners]
 
-Required permission: *hubs_view*
-
 All event listeners from hub entities are also available to be used across all sessions (add them with */hubs/listeners/event_name*).
+
+Required permission: *hubs_view*
 
 ### Session updated [POST /hubs/{id}/listeners/hub_updated]
 
@@ -1455,9 +1455,9 @@ Required permission: *private_chat_send*
 
 ### Get session [GET]
 
-Required permission: *private_chat_view*
-
 Get a single session by ID.
+
+Required permission: *private_chat_view*
 
 + Request (application/json)
 
@@ -1486,9 +1486,9 @@ Required permission: *private_chat_edit*
 
 ## Event listeners [/private_chat/listeners]
 
-Required permission: *private_chat_view*
-
 All event listeners from private chat entities are also available to be used across all sessions (add them with */private_chat/listeners/event_name*).
+
+Required permission: *private_chat_view*
 
 ### Private chat session created [POST /private_chat/listeners/private_chat_created]
 
@@ -1618,9 +1618,9 @@ Required permission: *private_chat_edit*
 
 ## Event listeners [/private_chat/{id}/listeners]
 
-Required permission: *private_chat_view*
-
 All event listeners from private chat entities are also available to be used across all sessions (add them with */private_chat/listeners/event_name*).
+
+Required permission: *private_chat_view*
 
 ### Session updated [POST /private_chat/{id}/listeners/private_chat_updated]
 
@@ -1668,9 +1668,9 @@ Required permission: *queue_view*
 
 ### Remove completed bundles [POST /queue/bundles/remove_completed]
 
-Required permission: *queue_edit*
-
 Remove all bundles that have finished downloading and verified successfully.
+
+Required permission: *queue_edit*
 
 + Response 200 (application/json)
     + Attributes
@@ -1678,9 +1678,9 @@ Remove all bundles that have finished downloading and verified successfully.
 
 ### Set bundle priorities [POST /queue/bundles/priority]
 
-Required permission: *queue_edit*
-
 Change the priority of all queued bundles.
+
+Required permission: *queue_edit*
 
 + Request (application/json)
     + Attributes
@@ -2237,9 +2237,9 @@ Required permission: *search*
 
 ### Get instance [GET /search/{instance_id}]
 
-Required permission: *search*
-
 Get a single instance by ID.
+
+Required permission: *search*
 
 + Request (application/json)
 
@@ -2269,10 +2269,9 @@ Return all search types
 
 ## Event listeners [/search/listeners]
 
-Required permission: *search*
-
 All event listeners from search instances are also available to be used across all instances (add them with */search/listeners/event_name*).
 
+Required permission: *search*
 
 ## Data Structures
 
@@ -2411,9 +2410,9 @@ Required permission: *search*
 
 ## Event listeners [/search/{id}/listeners]
 
-Required permission: *search*
-
 All event listeners from search instances are also available to be used across all instances (add them with */search/listeners/event_name*).
+
+Required permission: *search*
 
 ### Hub searches sent [POST /search/{id}/listeners/search_hub_searches_sent]
 
@@ -3033,9 +3032,9 @@ Required permission: *settings_edit*
 
 ### Get share root [GET]
 
-Required permission: *settings_view*
-
 Get a single root by ID.
+
+Required permission: *settings_view*
 
 + Request (application/json)
 
@@ -3471,9 +3470,9 @@ Required permission: *admin*
 
 ### Get web user [GET]
 
-Required permission: *admin*
-
 Get a single user by ID.
+
+Required permission: *admin*
 
 + Request (application/json)
 
