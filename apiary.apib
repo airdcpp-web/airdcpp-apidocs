@@ -24,7 +24,11 @@ First documented API version
 
 When communicating with the API locally, you can write an extension that is managed by the application itself (see the [Resources section](#resources) below)
 
-For raw HTTP/WebSocket protocol information, see [communication-protocols.md on GitHub](https://github.com/airdcpp-web/airdcpp-apidocs/blob/master/communication-protocols.md).
+You may also access the API from external sources (such as shell scripts or command line). For example, the following terminal command can be used to rescan all your shared files:
+
+`curl -H "Content-Type: application/json" -X POST -u myusername:mypassword http://localhost:5600/api/v1/share/refresh`
+
+See [communication-protocols.md on GitHub](https://github.com/airdcpp-web/airdcpp-apidocs/blob/master/communication-protocols.md) for more information about the raw HTTP/WebSocket protocol.
 
 
 ## Resources
