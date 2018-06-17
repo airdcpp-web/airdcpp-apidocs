@@ -750,7 +750,7 @@ Required permission: *filelists_view*
 
 + id: 32 (number)
 + name: Ubuntu 14.04
-+ type (Item type) - Directory content information (files and directories) is available from certain users only 
++ type (File item type) - Directory content information (files and directories) is available from certain users only 
 + path: /home/airdcpp/share/Ubuntu/Ubuntu 14.04/ - Path in remote user's share
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
 + dupe (Dupe)
@@ -2050,7 +2050,7 @@ The hook is fired for each bundle that finishes downloading.
 + id: 83425443
 + name: Ubuntu
 + target: /home/airdcpp/share/Ubuntu/
-+ type (Item type)
++ type (File item type)
 + status
     + id: queued (enum[string])
          + new - Not added in queue yet
@@ -2296,7 +2296,7 @@ Required permission: *search*
 + relevance: 1.34 (number) - Calculated item relevance based on the result name and number of hits
 + hits: 4 (number) - Number of users (child users) from who the item was found
 + user (Hinted user) - Base user from who the result name and path were picked from
-+ type (Item type) - Directory content information (files and directories) is available from certain ADC users only
++ type (File item type) - Directory content information (files and directories) is available from certain ADC users only
 + path: /home/airdcpp/share/dir/ - Path in remote user's share
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
 + dupe (Dupe)
@@ -2642,16 +2642,18 @@ Get schema information of the specified settings.
 + type (Setting type base) - Value type
     + boolean - Boolean field
     + list - List with items defined by the 'item_type' field
-+ item_type (Setting type base) - List item value type. Required for 'list' type settings.
++ item_type (Setting type base, optional) - List item value type. Required for 'list' type settings.
     + struct - List items with subproperties configured in the 'definitions' field
 
 + options (array, optional) - Optional value selection options for enum-type settings. Options may also be specified for string and number lists when multiselect component should be used.
     + (object)
-        + id
+        + id (enum)
+            + (string)
+            + (number)
         + name
 + min: 1 (number, optional) - Minimum allowed value (numeric types only), default is 0
 + max: 100 (number, optional) - Maximum allowed value (numeric types only)
-+ default_value: 0 (number) - Default value
++ default_value: 0 (Setting value) - Default value
 
 ### Setting definition (Setting definition base)
 
@@ -2884,7 +2886,7 @@ The hook is fired for each directory that is being validated (rejected directori
 + name: Ubuntu 14.04
 + virtual_path: /Linux/Ubuntu 14.04/
 + real_paths: /home/airdcpp/share/Linux/Ubuntu 14.04/ (array)
-+ type (Item type)
++ type (File item type)
 + time: 1483611358 (number) - Modification date
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
 + size: 62523525626 (number) - Size in bytes
@@ -3759,10 +3761,16 @@ Fired when the file is ready for viewing
 + 4 - High
 + 5 - Highest
 
-### Item type (enum)
+### File item type (enum)
 
 + (Folder type)
 + (File type)
+
+### Filesystem item type (enum)
+
++ (Folder type)
++ (File type)
++ (Drive type)
 
 ### File type
 
@@ -3770,6 +3778,13 @@ Fired when the file is ready for viewing
 + str: iso
 + content_type (File content ID)
     + other
+
+### Drive type
+
++ id (enum[string])
+    + removable - Removable device
+    + drive_fixed - Local drive
+    + drive_remote - Network drive
 
 ### File content ID (enum[string])
 
@@ -3779,6 +3794,8 @@ Fired when the file is ready for viewing
 + executable
 + picture
 + video
++ filelist
++ other
 
 ### Folder type
 
@@ -3790,19 +3807,19 @@ Fired when the file is ready for viewing
 ### Filesystem item
 
 + name: myfile1.log
-+ type (Item type) - Directory content information is not available here
++ type (Filesystem item type) - Directory content information is not available here
 + size: 6382343 (number) - Size in bytes (available for files only)
 
 
 ### Chat message info
 
-+ total_count: 100 (number)
-+ unread_counts (Unread chat info)
++ total: 100 (number)
++ unread (Unread chat info)
 
 ### Log message info
 
-+ total_count: 100 (number)
-+ unread_counts (Unread log info)
++ total: 100 (number)
++ unread (Unread log info)
 
 ### Unread chat info
 
