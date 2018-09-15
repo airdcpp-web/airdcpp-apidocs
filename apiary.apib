@@ -2295,7 +2295,9 @@ Required permission: *search*
 + name: dir
 + relevance: 1.34 (number) - Calculated item relevance based on the result name and number of hits
 + hits: 4 (number) - Number of users (child users) from who the item was found
-+ user (Hinted user) - Base user from who the result name and path were picked from
++ users
+    + count: 4 (number)
+    + user (Hinted user) - Base user from who the result name and path were picked from
 + type (File item type) - Directory content information (files and directories) is available from certain ADC users only
 + path: /home/airdcpp/share/dir/ - Path in remote user's share
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
@@ -3354,7 +3356,7 @@ Only the values that have changed after the last event are sent.
 Required permission: *settings_view*
 
 + Response 200 (application/json)
-    + Attributes (array[User])
+    + Attributes (array[Ignored user])
     
 
 ### Add ignored user [POST /users/ignore/{cid}]
@@ -3430,6 +3432,12 @@ Subscriptions related to connect state changes are tracked globally on per-user 
 + Response 200 (application/json)
     + Attributes (User)
 
+## Data Structures
+
+### Ignored user
+
++ user (User)
++ ignored_messages: 14 (number)
 
 
 # Group Web users
