@@ -225,13 +225,13 @@ Required permission: *favorite_hubs_view*
 + hub_description: Demo hub for AirDC++ Web Client
 + hub_url: adcs://myhub.com:6423
 + auto_connect: true (boolean) - Automatically connect to this hub on startup
-+ nick: Developer - User nick (defaults to global value if not set)
-+ user_description: Just writing scripts - User description (defaults to global value if not set)
-+ nmdc_encoding: CP1252 - Iconv codepage to use for text conversion (NMDC hubs only, defaults to global value if not set)
-+ connection_mode_v4 (Connectivity mode) - IPv4 connectivity mode (defaults to global value if not set)
-+ connection_mode_v6 (Connectivity mode) - IPv6 connectivity mode (defaults to global value if not set)
-+ connection_ip_v4: 89.255.248.35 - IPv4 address (defaults to global value if not set)
-+ connection_ip_v6: 2a00:1a48:1261::168 - IPv6 address (defaults to global value if not set)
++ nick: Developer (nullable) - User nick (defaults to global value if not set)
++ user_description: Just writing scripts (nullable) - User description (defaults to global value if not set)
++ nmdc_encoding: CP1252 (nullable) - Iconv codepage to use for text conversion (NMDC hubs only, defaults to global value if not set)
++ connection_mode_v4 (Connectivity mode, nullable) - IPv4 connectivity mode (defaults to global value if not set)
++ connection_mode_v6 (Connectivity mode, nullable) - IPv6 connectivity mode (defaults to global value if not set)
++ connection_ip_v4: 89.255.248.35 (nullable) - IPv4 address (defaults to global value if not set)
++ connection_ip_v6: 2a00:1a48:1261::168 (nullable) - IPv6 address (defaults to global value if not set)
 
 ### Favorite hub (Favorite hub base)
 
@@ -243,13 +243,13 @@ Required permission: *favorite_hubs_view*
         + disconnected
     + str: Connected
     + current_hub_id: 5 (number) - Current hub session ID (0 = no session)
-+ share_profile (Share profile basic) - Share profile to use (ADC hubs only, defaults to global value if not set)
++ share_profile (Share profile basic, nullable) - Share profile to use (ADC hubs only, defaults to global value if not set)
 + has_password: true (boolean) - Specifies whether a password has been saved for this entry
 
 ### Favorite hub request (Favorite hub base)
 
-+ share_profile: 7436564 (number)  - Share profile to use (ADC hubs only, defaults to global value if not set)
-+ password: mystrongpassword
++ share_profile: 7436564 (number, nullable)  - Share profile to use (ADC hubs only, defaults to global value if not set)
++ password: mystrongpassword (nullable)
 
 
 # Group Events
@@ -753,7 +753,7 @@ Required permission: *filelists_view*
 + type (File item type) - Directory content information (files and directories) is available from certain users only 
 + path: /home/airdcpp/share/Ubuntu/Ubuntu 14.04/ - Path in remote user's share
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
-+ dupe (Dupe)
++ dupe (Dupe, nullable)
 + time: 1483611358 (number) - File creation/modification date (available from certain users only)
 + size: 62523525626 (number) - Size in bytes (directory sizes are available from certain users only)
 + complete: true (boolean) - Whether the directory content has been downloaded
@@ -1242,7 +1242,7 @@ Hook is fired for each outgoing hub chat message and can be used to prevent cert
 + share_profile (Share profile)
 + favorite_hub: 64723743 (number) - Favorite hub ID (0 = no favorite hub)
 + message_counts (Chat message info)
-+ encryption (Encryption, optional) - Available only for connected ADCS hubs
++ encryption (Encryption, nullable) - Available only for connected ADCS hubs
 
 ### Hub counts
 
@@ -2043,7 +2043,6 @@ The hook is fired for each bundle that finishes downloading.
 + time_finished: 0 (number) - Time when the item was finished (0 = not finished)
 + speed: 5234324 (number) - Current download speed, bytes per second
 + seconds_left: 632576 (number) - Seconds left based on the current download speed
-+ sources (Queue source info)
 
 ### Queue bundle (Queue item base)
 
@@ -2051,6 +2050,7 @@ The hook is fired for each bundle that finishes downloading.
 + name: Ubuntu
 + target: /home/airdcpp/share/Ubuntu/
 + type (File item type)
++ sources (Queue bundle source)
 + status
     + id: queued (enum[string])
          + new - Not added in queue yet
@@ -2066,7 +2066,7 @@ The hook is fired for each bundle that finishes downloading.
     + downloaded: false (boolean) - All files have finished downloaded (states 'downloaded' and above)
     + completed: false (boolean) - All files have finished downloaded and the content was verified (states 'completed' and 'shared')
     + str: `Running (42.3%)`
-    + hook_error
+    + hook_error (nullable)
         + hook_id: share_scanner
         + hook_name: Share scanner
         + error_id: files_missing
@@ -2084,6 +2084,7 @@ The hook is fired for each bundle that finishes downloading.
     + downloaded: false (boolean) - All file segments have finished downloading
     + completed: false (boolean) - All file segments have finished downloading and the item has been renamed to use its final name (and possibly verified)
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
++ sources (Queue source info)
 
 ### Queue segment
 
@@ -2301,7 +2302,7 @@ Required permission: *search*
 + type (File item type) - Directory content information (files and directories) is available from certain ADC users only
 + path: /home/airdcpp/share/dir/ - Path in remote user's share
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
-+ dupe (Dupe)
++ dupe (Dupe, nullable)
 + time: 1483611358 (number) - File creation/modification date. The oldest found date is shown for parent results. Available from certain ADC users only.
 + slots (Slot count) - Accummulated slot counts from users
 + connection: 42500000 (number) - Accummulated connection speed from users, bytes per second
@@ -2386,6 +2387,17 @@ Required permission: *search*
 
 + Response 200 (application/json)
     + Attributes (array[Grouped search result])
+
+
+### Get result [GET /search/{instance_id}/results/{result_id}]
+
+Get a single result
+
+Required permission: *search*
+
++ Response 200 (application/json)
+    + Attributes (Grouped search result)
+
 
 ### Download result [POST /search/{instance_id}/results/{result_id}/download]
 
@@ -3321,7 +3333,7 @@ Only the values that have changed after the last event are sent.
 + time_started: 1483277168 (number)
 + speed: 524324 (number) - Current transfer speed, bytes per second
 + seconds_left: 632576 (number) - Seconds left based on the current transfer speed
-+ encryption (Encryption)
++ encryption (Encryption, nullable)
 + ip (IP)
 + user (Hinted user)
 + status
@@ -3334,7 +3346,7 @@ Only the values that have changed after the last event are sent.
     + finished: false (boolean)
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
 + flags (array[Transfer flag])
-+ queue_file_id: 743457 (number) - ID of the queued file (not available for uploads)
++ queue_file_id: 743457 (number, nullable) - ID of the queued file (not available for uploads)
 
 ### Transfer flag (enum[string])
 
@@ -3690,7 +3702,7 @@ Fired when the file is ready for viewing
 + read: false (boolean) - Has the file been marked as read
 + download_state (Downloadable item state) - Current download state of the remote user file. Not available for local files.
 + content_ready: true (boolean) - Whether the file content is ready to be viewed
-
++ mime_type: string;
 
 
 
@@ -3753,21 +3765,22 @@ Fired when the file is ready for viewing
 
 ### Priority ID (enum[number])
 
-+ 1 - Lowest
-+ 2 - Low
-+ 3 - Normal
-+ 4 - High
-+ 5 - Highest
++ 2 - Lowest
++ 3 - Low
++ 4 - Normal
++ 5 - High
++ 6 - Highest
 
 ### Queue priority ID (enum[number])
 
-+ `-1` - `Paused (forced)`
-+ 0 - Paused
-+ 1 - Lowest
-+ 2 - Low
-+ 3 - Normal
-+ 4 - High
-+ 5 - Highest
++ `-1` - Default
++ 0 - Paused (forced)
++ 1 - Paused
++ 2 - Lowest
++ 3 - Low
++ 4 - Normal
++ 5 - High
++ 6 - Highest
 
 ### File item type (enum)
 
