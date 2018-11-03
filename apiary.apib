@@ -148,9 +148,15 @@ Favorite hubs allow storing commonly used hubs that can be opened automatically 
 
 ### List favorite hubs [GET /favorite_hubs/{start}/{count}]
 
+
 Get a list of favorite hubs
 
 Required permission: *favorite_hubs_view*
+
+
++ Parameters
+    + start: 0 - Index of the first item to return
+    + count: 0 - Maximum number of items to return (0 = unlimited)
 
 + Response 200 (application/json)
     + Attributes (array[Favorite hub])
@@ -777,6 +783,10 @@ Get a list of all files and directories inside the current filelist location. If
 
 Required permission: *filelists_view*
 
++ Parameters
+    + start: 0 - Index of the first item to return
+    + count: 0 - Maximum number of items to return (0 = unlimited)
+
 + Response 200 (application/json)
     + Attributes (array[Filelist item])
     
@@ -1312,6 +1322,10 @@ Get a list of users that are currently online in this hub.
 
 Required permission: *hubs_view*
 
++ Parameters
+    + start: 0 - Index of the first item to return
+    + count: 0 - Maximum number of items to return (0 = unlimited)
+
 + Response 200 (application/json)
     + Attributes (array[Hub user])
 
@@ -1375,45 +1389,45 @@ Required permission: *hubs_edit*
     + Attributes (Hub counts)
 
 
-## Event listeners [/hubs/{id}/listeners]
+## Event listeners [/hubs/{session_id}/listeners]
 
 All event listeners from hub entities are also available to be used across all sessions (add them with */hubs/listeners/event_name*).
 
 Required permission: *hubs_view*
 
-### Session updated [POST /hubs/{id}/listeners/hub_updated]
+### Session updated [POST /hubs/{session_id}/listeners/hub_updated]
 
 + Response 200 (application/json)
     + Attributes (Hub)
 
-### User/share counts updated [POST /hubs/{id}/listeners/hub_counts_updated]
+### User/share counts updated [POST /hubs/{session_id}/listeners/hub_counts_updated]
 
 + Response 200 (application/json)
     + Attributes (Hub counts)
 
-### Chat message received [POST /hubs/{id}/listeners/hub_message]
+### Chat message received [POST /hubs/{session_id}/listeners/hub_message]
 
 + Response 200 (application/json)
     + Attributes (Chat message)
 
-### Status message received [POST /hubs/{id}/listeners/hub_status]
+### Status message received [POST /hubs/{session_id}/listeners/hub_status]
 
 + Response 200 (application/json)
     + Attributes (Status message)
 
-### Hub user connected [POST /hubs/{id}/listeners/hub_user_connected]
+### Hub user connected [POST /hubs/{session_id}/listeners/hub_user_connected]
 
 + Response 200 (application/json)
     + Attributes (Hub user)
 
-### Hub user updated [POST /hubs/{id}/listeners/hub_user_updated]
+### Hub user updated [POST /hubs/{session_id}/listeners/hub_user_updated]
 
 Only the user ID and possibly changed fields are sent 
 
 + Response 200 (application/json)
     + Attributes (Hub user)
 
-### Hub user disconnected [POST /hubs/{id}/listeners/hub_user_disconnected]
+### Hub user disconnected [POST /hubs/{session_id}/listeners/hub_user_disconnected]
 
 + Response 200 (application/json)
     + Attributes (Hub user)
@@ -1620,25 +1634,25 @@ Required permission: *private_chat_edit*
 + Response 204
 
 
-## Event listeners [/private_chat/{id}/listeners]
+## Event listeners [/private_chat/{session_id}/listeners]
 
 All event listeners from private chat entities are also available to be used across all sessions (add them with */private_chat/listeners/event_name*).
 
 Required permission: *private_chat_view*
 
-### Session updated [POST /private_chat/{id}/listeners/private_chat_updated]
+### Session updated [POST /private_chat/{session_id}/listeners/private_chat_updated]
 
 + Response 200 (application/json)
     + Attributes
         + session (Private chat)
 
-### Chat message received [POST /private_chat/{id}/listeners/private_chat_message]
+### Chat message received [POST /private_chat/{session_id}/listeners/private_chat_message]
 
 + Response 200 (application/json)
 
     + Attributes (Chat message)
         
-### Status message received [POST /private_chat/{id}/listeners/private_chat_status]
+### Status message received [POST /private_chat/{session_id}/listeners/private_chat_status]
 
 + Response 200 (application/json)
     + Attributes (Status message)
@@ -1666,6 +1680,10 @@ It's beneficial to keep the content size (file and directory count) of a single 
 ### Get bundles [GET /queue/bundles/{start}/{count}]
 
 Required permission: *queue_view*
+
++ Parameters
+    + start: 0 - Index of the first item to return
+    + count: 0 - Maximum number of items to return (0 = unlimited)
 
 + Response 200 (application/json)
     + Attributes (array[Queue bundle])
@@ -1727,7 +1745,7 @@ Required permission: *queue_edit*
 + Response 200 (application/json)
     + Attributes (Queue directory bundle add info)
 
-## Bundle [/queue/bundles/{id}]
+## Bundle [/queue/bundles/{bundle_id}]
 
 ### Get bundle [GET]
 
@@ -1736,7 +1754,7 @@ Required permission: *queue_view*
 + Response 200 (application/json)
     + Attributes (Queue bundle)
 
-### Remove bundle [POST /queue/bundles/{id}/remove]
+### Remove bundle [POST /queue/bundles/{bundle_id}/remove]
 
 Required permission: *queue_edit*
 
@@ -1747,21 +1765,25 @@ Required permission: *queue_edit*
 
 + Response 204
 
-### Get bundle files [GET /queue/bundles/{id}/files/{start}/{count}]
+### Get bundle files [GET /queue/bundles/{bundle_id}/files/{start}/{count}]
 
 Required permission: *queue_view*
+
++ Parameters
+    + start: 0 - Index of the first item to return
+    + count: 0 - Maximum number of items to return (0 = unlimited)
 
 + Response 200 (application/json)
     + Attributes (array[Queue file])
 
-### Get bundle sources [GET /queue/bundles/{id}/sources]
+### Get bundle sources [GET /queue/bundles/{bundle_id}/sources]
 
 Required permission: *queue_view*
 
 + Response 200 (application/json)
     + Attributes (array[Queue bundle source])
 
-### Remove bundle source [DELETE /queue/bundles/{id}/sources/{cid}]
+### Remove bundle source [DELETE /queue/bundles/{bundle_id}/sources/{cid}]
 
 Required permission: *queue_edit*
 
@@ -1769,7 +1791,7 @@ Required permission: *queue_edit*
     + Attributes
         + count: 4 (number) - Number of files from which the source was removed
 
-### Set bundle priority [POST /queue/bundles/{id}/priority]
+### Set bundle priority [POST /queue/bundles/{bundle_id}/priority]
 
 Required permission: *queue_edit*
 
@@ -1779,7 +1801,7 @@ Required permission: *queue_edit*
 
 + Response 204 (application/json)
 
-### Search bundle for alternates [POST /queue/bundles/{id}/search]
+### Search bundle for alternates [POST /queue/bundles/{bundle_id}/search]
 
 **File bundles**: the file TTH will be searched for.
 **Directory bundles**: 1-4 random bundle files are searched for. The number of files to search for depends on the bundle directory structure.
@@ -1790,7 +1812,7 @@ Required permission: *queue_edit*
     + Attributes
         + sent: 4 (number) - Number of bundle files that were searched for
 
-### Share a failed bundle [POST /queue/bundles/{id}/share]
+### Share a failed bundle [POST /queue/bundles/{bundle_id}/share]
 
 Attempt to add a failed bundle in share. This may used only for bundle that are in 'completion_validation_error' state.
 
@@ -1804,9 +1826,9 @@ Required permission: *queue_edit*
 + Response 204
 
 
-## Files [/queue/files/{id}]
+## Files [/queue/files/{file_id}]
 
-### Remove file from queue [POST /queue/files/{id}/remove]
+### Remove file from queue [POST /queue/files/{file_id}/remove]
 
 Required permission: *queue_edit*
 
@@ -1817,7 +1839,7 @@ Required permission: *queue_edit*
 
 + Response 204
 
-### Set file priority [POST /queue/files/{id}/priority]
+### Set file priority [POST /queue/files/{file_id}/priority]
 
 Required permission: *queue_edit*
 
@@ -1827,26 +1849,26 @@ Required permission: *queue_edit*
 
 + Response 204 (application/json)
 
-### Search file for alternates [POST /queue/files/{id}/search]
+### Search file for alternates [POST /queue/files/{file_id}/search]
 
 Required permission: *queue_edit*
 
 + Response 204 (application/json)
 
-### Get file sources [GET /queue/files/{id}/sources]
+### Get file sources [GET /queue/files/{file_id}/sources]
 
 Required permission: *queue_view*
 
 + Response 200 (application/json)
     + Attributes (array[Queue source])
 
-### Remove file source [DELETE /queue/files/{id}/sources/{cid}]
+### Remove file source [DELETE /queue/files/{file_id}/sources/{cid}]
 
 Required permission: *queue_edit*
 
 + Response 204 (application/json)
 
-### Get file segments [GET /queue/files/{id}/segments]
+### Get file segments [GET /queue/files/{file_id}/segments]
 
 Required permission: *queue_view*
 
@@ -2373,7 +2395,7 @@ Required permission: *search*
 
 ## Results [/search/{instance_id}/results]
 
-### Get results [GET /search/{instance_id}/results/{start}/{max_count}]
+### Get results [GET /search/{instance_id}/results/{start}/{count}]
 
 Get results for the previously posted search query. Results are sorted by relevance (the most relevant result is sorted first).
 
@@ -2384,6 +2406,10 @@ All individual user results are grouped based on the following conditions
 - NMDC directory results are not grouped
 
 Required permission: *search*
+
++ Parameters
+    + start: 0 - Index of the first item to return
+    + count: 0 - Maximum number of items to return (0 = unlimited)
 
 + Response 200 (application/json)
     + Attributes (array[Grouped search result])
@@ -2426,13 +2452,13 @@ Required permission: *search*
     + Attributes (array[Child search result])
 
 
-## Event listeners [/search/{id}/listeners]
+## Event listeners [/search/{instance_id}/listeners]
 
 All event listeners from search instances are also available to be used across all instances (add them with */search/listeners/event_name*).
 
 Required permission: *search*
 
-### Hub searches sent [POST /search/{id}/listeners/search_hub_searches_sent]
+### Hub searches sent [POST /search/{instance_id}/listeners/search_hub_searches_sent]
 
 Fired after all queued searches were sent.
 
@@ -2441,17 +2467,17 @@ Fired after all queued searches were sent.
         + sent: 4 (number) - Number of searches that were sent (this may also be 0 if all hubs were closed)
         + search_id: 643345 - ID of the search that was sent
 
-### Grouped result added [POST /search/{id}/listeners/search_result_added]
+### Grouped result added [POST /search/{instance_id}/listeners/search_result_added]
 
 + Response 200 (application/json)
     + Attributes (Grouped search result)
 
-### Grouped result updated [POST /search/{id}/listeners/search_result_updated]
+### Grouped result updated [POST /search/{instance_id}/listeners/search_result_updated]
 
 + Response 200 (application/json)
     + Attributes (Grouped search result)
 
-### User result received [POST /search/{id}/listeners/search_user_result]
+### User result received [POST /search/{instance_id}/listeners/search_user_result]
 
 + Response 200 (application/json)
     + Attributes (Child search result)
@@ -3217,7 +3243,7 @@ Required permission: *transfers*
     + Attributes (array[Transfer item])
 
 
-## Transfer [/transfers/{id}]
+## Transfer [/transfers/{transfer_id}]
 
 ### Get transfer [GET]
 
@@ -3226,7 +3252,7 @@ Required permission: *transfers*
 + Response 200 (application/json)
     + Attributes (Transfer item)
 
-### Disconnect transfer [POST /transfers/{id}/disconnect]
+### Disconnect transfer [POST /transfers/{transfer_id}/disconnect]
 
 Disconnect a running transfer. Note that the transfer connection is often re-established afterwards.
 
@@ -3234,7 +3260,7 @@ Required permission: *transfers*
 
 + Response 204
 
-### Force connect [POST /transfers/{id}/force]
+### Force connect [POST /transfers/{transfer_id}/force]
 
 Attempt to establish connection instantly. This has no effect for running transfers.
 
