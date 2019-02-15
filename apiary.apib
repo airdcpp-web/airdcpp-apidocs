@@ -596,7 +596,7 @@ Required permission: *filelists_edit*
 + Request (application/json)
     + Attributes
         + user (Hinted user base, required)
-        + list_path: /Share/Ubuntu/ (optional) - Initial filelist directory to load. Filelist root is loaded, if not specified.
+        + directory: /Share/Ubuntu/ (optional) - Initial filelist directory to load. Filelist root is loaded, if not specified.
             + Default: /
 + Response 200 (application/json)
     + Attributes (Filelist)
@@ -622,7 +622,7 @@ Required permission: *queue_edit*
 + Request (application/json)
     + Attributes
         + user (Hinted user base, required)
-        + list_path: /Share/Ubuntu/ (optional) - Directory to match from ADC (recursive partial list is used). Full filelist is always matched from NMDC users.
+        + directory: /Share/Ubuntu/ (optional) - Directory to match from ADC (recursive partial list is used). Full filelist is always matched from NMDC users.
             + Default: /
 + Response 204
 
