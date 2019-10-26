@@ -676,6 +676,8 @@ Required permission: *download*
 
 Queue all content inside the specified location. Recursive partial filelist will be downloaded from ADC users and full list is used with NMDC users.
 
+To track the results (errors/queued bundled ID), use the event listeners or poll the returned directory download by ID.
+
 Required permission: *download*
 
 + Request (application/json)
@@ -687,6 +689,15 @@ Required permission: *download*
 
 
 ## Directory download [/filelists/directory_downloads/{download_id}]
+
+### Get directory download [GET]
+
+Required permission: *download*
+
+**Minimum API feature level**: 3
+
++ Response 200 (application/json)
+    + Attributes (Directory download item)
 
 ### Remove directory download [DELETE]
 
@@ -770,6 +781,9 @@ Required permission: *filelists_view*
 + id: 427 (number)
 + list_path: /Linux/Ubuntu/Ubuntu 14.04/
 + user (Hinted user)
++ queue_info (Queue directory bundle add info) - **Minimum API feature level**: 3
++ error: `A file with different TTH root already exists in the queue (affected file(s): Ubuntu 14.04.nfo)` - **Minimum API feature level**: 3
++ state (Directory download state) - **Minimum API feature level**: 3
 
 
 
@@ -2429,6 +2443,18 @@ Required permission: *search*
 
 Queue the specified result. If there is a large number of users sharing the same item, the application will pick the fastest ones automatically.
 
+#### Tracking downloads
+
+**Individual file downloads**
+
+The bundle creation information (or possible errors) will be provided immediately in the response. Use the [queue API](#reference/queue/bundle/get-bundle) to receive bundle information by the returned bundle ID.
+
+**Directory downloads**
+
+Before the bundle can be created, the application must download a filelist from the user to obtain the full directory content. 
+
+In order to track the directory download progress (errors/queued bundled ID), use the [directory download event listeners](#reference/filelists/event-listeners) or [poll the returned directory download by ID](#reference/filelists/directory-download/get-directory-download).
+
 Required permission: *download*
 
 + Request (application/json)
@@ -2761,6 +2787,48 @@ Required permission: *share_edit*
 
 + Response 204
 
+## Temp shared files [/temp_shares]
+
+**Minimum API feature level**: 2
+
+### List temp shares [GET]
+
+Required permission: *share_view*
+
++ Response 200 (application/json)
+    + Attributes (array[Temp share item])
+
+### Add temp share [POST]
+
+Required permissions: *share_edit*, *filesystem_edit*
+
+Binary content of all temp shared files must first be uploaded to *APPLICATION_URL/temp* (use *POST* method and set the binary content of the file as body). **Authorization** header containing the session token must be present in the request.
+
+ID of the uploaded file will be returned in the **Location** response header, which is needed when using this method.
+
++ Request (application/json)
+    + Attributes
+        + file_id: 51864326 (string, required) - ID of the uploaded file
+        + name: image1.png (string, required) - Display name
+        + hub_url: adcs://myhub.com:6423 (string, required) - URL of the hub where the file will be shared. This will be only used to check existing TTH matches from the share profile used in the specified hub.
+        + cid: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA (string) - Possible CID of the user who will only be able to download the file (file will be available to all users if no CID is specified)
+
++ Response 200 (application/json)
+    + Attributes 
+        + magnet: magnet:?xt=urn:tree:tiger:CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y&xl=7524332&dn=image1.png - Magnet URI of the temp share item
+        + item (Temp share item) - Create temp share item. If the item is null, a file with the same TTH was already found from the share.
+
+
+### Remove temp share [DELETE /share/temp_shares/{item_id}]
+
+Required permission: *share_edit*
+
++ Parameters
+    + item_id: 51864326 (required) - Temp share item ID
+
++ Response 204
+
+
 ## Generic methods [/share]
 
 ### Grouped share roots [GET /share/grouped_root_paths]
@@ -2931,7 +2999,16 @@ The hook is fired for each directory that is being validated (rejected directori
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
 + size: 62523525626 (number) - Size in bytes
 
+### Temp share item
 
++ id: 624563154
++ name: image1.png - Display name
++ path: /tmp/54332674327 - Path on disk
++ size: 7524332 - File size
++ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
++ time_added: 1483611358 (number) - Time when the file was added in temp share
++ type (File item type)
++ user (User) - Possible user who is able to access the file. If no user is set, the file can be found by everyone.
 
 # Group Share profiles
 
@@ -3771,6 +3848,13 @@ Fired when the file is ready for viewing
     + downloaded
 + str: `Downloading (45.4%)`
 + time_finished: 0 (number) - Time when the item finished downloading (0 = not finished)
+
+### Directory download state (enum)
+
++ pending - Filelist download pending
++ queued - Filelist downloaded and files were queued
++ failed - Failed to queue bundle
+
 
 ### Encryption
 
