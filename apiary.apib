@@ -1575,7 +1575,7 @@ Note that private chat session may not exist for announcement-like messages that
 ### Private chat message request (Chat message request)
 
 + user (Hinted user base, required)
-+ echo: false (boolean, optional) - Echo the sent message back to me. This will always cause a new private chat session to be created and allows the message to be logged. Note that a private chat session will also be created if the other users replies to your message (or sends an away message).
++ echo: false (boolean, optional) - Echo the sent message back to me (or in case of a chat room, to all chatroom members). This will always cause a new private chat session to be created and allows the message to be logged. Note that a private chat session will also be created if the other users replies to your message (or sends an away message). This flag should also be enabled when sending a message to a chat room and you want the message to be broadcasted to all chatroom members.
     + Default: false
 
 
@@ -2294,25 +2294,89 @@ Required permission: *search*
 + Response 204
 
 
-## Miscellaneous [/search/types]
+## Search types [/search/types]
 
-### Search types [GET /search/types]
+### List search types [GET]
 
 Return all search types
 
 + Response 200 (application/json)
     + Attributes (array)
-        + (object)
-            + id: 1
-            + str: Audio
-            + extensions: ape, flac, m4a, mid, mp3, mpc, ogg, ra, wav, wma
-            + default_type: true (boolean) - This is an inbuilt type that can't be removed (extensions can still be modified)
+        + (Search type)
+
+### Add search type [POST]
+
+Add new search type
+
+Required permission: *settings_edit*
+
+**Minimum API feature level**: 3
+
++ Request (application/json)
+    + Attributes
+        + name: Code files (required)
+        + extensions: js, ts, cpp, h (required)
++ Response 200 (application/json)
+    + Attributes (Search type)
+
+
+
+## Search type [/search/types/{type_id}]
+
+
+### Get search type [GET]
+
+Get search type by ID
+
+Required permission: *settings_edit*
+
+**Minimum API feature level**: 3
+
++ Response 200 (application/json)
+    + Attributes (Search type)
+
+
+### Update search type [PATCH]
+
+Edit an existing search type
+
+Required permission: *settings_edit*
+
+**Minimum API feature level**: 3
+
++ Request (application/json)
+    + Attributes
+        + name: Code files
+        + extensions: js, ts, cpp, h
++ Response 200 (application/json)
+    + Attributes (Search type)
+    
+
+### Remove search type [DELETE]
+
+Remove search type by ID
+
+Required permission: *settings_edit*
+
+**Minimum API feature level**: 3
+
++ Response 204
+
 
 ## Event listeners [/search/listeners]
 
 All event listeners from search instances are also available to be used across all instances (add them with */search/listeners/event_name*).
 
 Required permission: *search*
+
+### Search types updated [POST /search/listeners/search_types_updated]
+
+Fired when search types are added/updated/removed
+
+**Minimum API feature level**: 3
+
++ Response 204
+
 
 ## Data Structures
 
@@ -2325,6 +2389,14 @@ Required permission: *search*
 + queued_count: 0 - Number of hub searches that haven't been sent yet (hub searches only)
 + result_count: 3153 - Number of received results
 + searches_sent_ago: 47243 - Milliseconds ellapsed since the previous search was sent
+
+### Search type
+
++ id: audio
++ name: Audio
++ str: Audio
++ extensions: ape, flac, m4a, mid, mp3, mpc, ogg, ra, wav, wma
++ default_type: true (boolean) - Whether this is an inbuilt type that can't be removed (extensions can still be modified)
 
 ### Grouped search result
 
