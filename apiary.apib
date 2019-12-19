@@ -131,11 +131,11 @@ Required permission: *settings_view*
 
 ## Data Structures
 
-### Favorite directory
+### Favorite directory (object, fixed-type)
 
-+ id: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
-+ name: Linux - Virtual display name for the directory. Multiple paths can be added with the same name.
-+ path: /home/airdcpp/share/Linux/ - Directory path
++ id: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required)
++ name: Linux (required) - Virtual display name for the directory. Multiple paths can be added with the same name.
++ path: /home/airdcpp/share/Linux/ (required) - Directory path
 
 
 
@@ -181,6 +181,8 @@ Required permission: *favorite_hubs_edit*
 
 + Request (application/json)
     + Attributes (Favorite hub request)
+        + name: Demo hub (optional)
+        + hub_url: adcs://myhub.com:6423 (optional)
     
 + Response 200 (application/json)
     + Attributes (Favorite hub)
@@ -225,12 +227,11 @@ Required permission: *favorite_hubs_view*
 
 ## Data Structures
 
-### Favorite hub base
+### Favorite hub base (object)
 
-+ name: Demo hub
-+ hub_description: Demo hub for AirDC++ Web Client
-+ hub_url: adcs://myhub.com:6423
-+ auto_connect: true (boolean) - Automatically connect to this hub on startup
++ name: Demo hub (required)
++ hub_description: Demo hub for AirDC++ Web Client (nullable)
++ hub_url: adcs://myhub.com:6423 (required)
 + nick: Developer (nullable) - User nick (defaults to global value if not set)
 + user_description: Just writing scripts (nullable) - User description (defaults to global value if not set)
 + nmdc_encoding: CP1252 (nullable) - Iconv codepage to use for text conversion (NMDC hubs only, defaults to global value if not set)
@@ -239,10 +240,11 @@ Required permission: *favorite_hubs_view*
 + connection_ip_v4: 89.255.248.35 (nullable) - IPv4 address (defaults to global value if not set)
 + connection_ip_v6: 2a00:1a48:1261::168 (nullable) - IPv6 address (defaults to global value if not set)
 
-### Favorite hub (Favorite hub base)
+### Favorite hub (Favorite hub base, fixed-type)
 
-+ id: 64723743 (number)
-+ connect_state (object)
++ id: 64723743 (number, required)
++ auto_connect: true (boolean, required) - Automatically connect to this hub on startup
++ connect_state (object, required)
     + id: connected (enum[string])
         + connecting
         + connected
@@ -250,12 +252,13 @@ Required permission: *favorite_hubs_view*
     + str: Connected
     + current_hub_id: 5 (number) - Current hub session ID (0 = no session)
 + share_profile (Share profile basic, nullable) - Share profile to use (ADC hubs only, defaults to global value if not set)
-+ has_password: true (boolean) - Specifies whether a password has been saved for this entry
++ has_password: true (boolean, required) - Specifies whether a password has been saved for this entry
 
-### Favorite hub request (Favorite hub base)
+### Favorite hub request (Favorite hub base, fixed-type)
 
 + share_profile: 7436564 (number, nullable)  - Share profile to use (ADC hubs only, defaults to global value if not set)
 + password: mystrongpassword (nullable)
++ auto_connect: true (boolean) - Automatically connect to this hub on startup
 
 
 # Group Events
@@ -377,9 +380,9 @@ Download extension package from the remote URL. The package will be installed an
 Required permission: *admin*
 
 + Request (application/json)
-    + Attributes
-        + install_id: `airdcpp-create-extension` - Install ID that can be used for tracking the installation progress events. Any (unique) string can be used (such as the name of the extension).
-        + url: https://registry.npmjs.org/airdcpp-create-extension/-/airdcpp-create-extension-0.0.1-beta4.tgz - URL from which the extension should be download from
+    + Attributes (object)
+        + install_id: `airdcpp-create-extension` (required) - Install ID that can be used for tracking the installation progress events. Any (unique) string can be used (such as the name of the extension).
+        + url: https://registry.npmjs.org/airdcpp-create-extension/-/airdcpp-create-extension-0.0.1-beta4.tgz (required) - URL from which the extension should be download from
         + shasum: 77f49298863b1460cf65e6c125e659f7dd9dac9e (optional) - Possible SHA1 sum that can be used for validating the package integrity
 + Response 204
 
@@ -430,39 +433,39 @@ All event listeners from extension entities are also available to be used across
 ### Extension installation started [POST /extensions/listeners/extension_installation_started]
 
 + Response 200 (application/json)
-    + Attributes
-        + install_id: `airdcpp-create-extension` - The supplied extension install ID
+    + Attributes (object, fixed-type)
+        + install_id: `airdcpp-create-extension` (required) - The supplied extension install ID
 
 ### Extension installation succeeded [POST /extensions/listeners/extension_installation_succeeded]
 
 + Response 200 (application/json)
-    + Attributes
-        + install_id: `airdcpp-create-extension` - The supplied extension install ID
+    + Attributes (object, fixed-type)
+        + install_id: `airdcpp-create-extension` (required) - The supplied extension install ID
 
 ### Extension installation failed [POST /extensions/listeners/extension_installation_failed]
 
 + Response 200 (application/json)
-    + Attributes
-        + install_id: `airdcpp-create-extension` - The supplied extension install ID
-        + message: `Failed to move extension files to the final destination directory (permission denied)`
+    + Attributes (object, fixed-type)
+        + install_id: `airdcpp-create-extension` (required) - The supplied extension install ID
+        + message: `Failed to move extension files to the final destination directory (permission denied)` (required)
 
 
 ## Data Structures
 
-### Extension
+### Extension (object, fixed-type)
 
-+ id: airdcpp-create-extension
-+ name: airdcpp-create-extension
-+ description: Starter project for AirDC++ extension development
-+ version: 0.0.1-beta4
-+ homepage: https://airdcpp-web.github.io
-+ author: maksis
-+ running: true (boolean)
-+ private: false (boolean) - Whether the extension is private (not published at npm)
-+ logs (array[Filesystem item])
-+ engines: node (array[string]) - List of scripting engines supported by the extension
-+ managed: true - Whether the extension is managed (installed locally)
-+ has_settings: true (boolean) - Whether there settings available for configuring
++ id: `airdcpp-create-extension` (required)
++ name: `airdcpp-create-extension` (required)
++ description: Starter project for AirDC++ extension development (required)
++ version: `0.0.1-beta4` (required)
++ homepage: `https://airdcpp-web.github.io` (nullable)
++ author: maksis (required)
++ running: true (boolean, required)
++ private: false (boolean, required) - Whether the extension is private (not published at npm)
++ logs (array[Filesystem item], required)
++ engines: node (array[string], required) - List of scripting engines supported by the extension
++ managed: true (boolean, required) - Whether the extension is managed (installed locally)
++ has_settings: true (boolean, required) - Whether there settings available for configuring
 
 
 # Group Extension entities
@@ -485,9 +488,9 @@ Required permission: *admin*
 
 ### Post setting definitions [POST /extensions/{extension_id}/settings/definitions]
 
-Post schema for settings that can be added in the UI for configuring. 
+Post schema for extension-specific settings that can be made available in the UI for configuring. Extensions should generally post their setting definitions on every startup.
 
-Setting definitions can't be changed or removed after they have been posted.
+Setting definitions can't be changed or removed after they have been posted (the extension must be restarted before new definitions can be added).
 
 Required permission: *admin*
 
@@ -498,7 +501,7 @@ Required permission: *admin*
 
 ### Get setting definitions [GET /extensions/{extension_id}/settings/definitions]
 
-Get schema information of the extension settings.
+Get schema information of the extension-specific settings that have been posted earlier (if there are any).
 
 Required permission: *settings_view*
 
@@ -509,27 +512,30 @@ Required permission: *settings_view*
 
 ### Get setting values [GET /extensions/{extension_id}/settings]
 
+Key-value listing of extension-specific setting keys and their current values.
+
 Required permission: *settings_view*
 
 + Response 200 (application/json)
     + Attributes (object)
-    
-        Key-value listing of setting keys and their current values
-    
-        + spam_on_startup: false (boolean)
-        + banner_text: Test
+        + Sample
+            + spam_on_startup: false (boolean)
+            + banner_text: Test
+
 
 ### Update setting values [PATCH /extensions/{extension_id}/settings]
+
+Update the extension-specific setting values. The values are being validated based on the previously posted schema definitions.
+
+Partial updates are supported (only values for the specified keys are being updated).
 
 Required permission: *settings_edit*
 
 + Request (application/json)
     + Attributes (object)
-    
-        Key-value listing of setting keys and their new values
-    
-        + spam_on_startup: false (boolean)
-        + banner_text: Test
+        + Sample
+            + spam_on_startup: false (boolean)
+            + banner_text: Test
 
 + Response 204
 
@@ -560,13 +566,13 @@ Generic listener for updated extension properties (only the updated ones are sen
 
 ### Extension settings updated [POST /extensions/listeners/extension_settings_updated]
 
+Key-value listing of updated setting keys and their values (only the updated ones are sent).
+
 + Response 200 (application/json)
     + Attributes (object)
-    
-        Key-value listing of updated setting keys and their values
-    
-        + spam_on_startup: false (boolean)
-        + banner_text: Test
+        + Sample
+            + spam_on_startup: false (boolean, sample)
+            + banner_text: Test (sample)
 
 
 # Group Filelists
@@ -608,7 +614,7 @@ Browse own share.
 Required permission: *filelists_edit*
 
 + Request (application/json)
-    + Attributes
+    + Attributes (object)
         + share_profile: 643 (number, optional) - ID of the share profile to browse. Default profile is used if not specified.
 + Response 200 (application/json)
     + Attributes (Filelist)
@@ -620,7 +626,7 @@ Match queue and add the user as source for matching files.
 Required permission: *queue_edit*
 
 + Request (application/json)
-    + Attributes
+    + Attributes (object)
         + user (Hinted user base, required)
         + directory: /Share/Ubuntu/ (optional) - Directory to match from ADC (recursive partial list is used). Full filelist is always matched from NMDC users.
             + Default: /
@@ -647,8 +653,8 @@ Required permission: *filelists_view*
 Update filelist session properties
 
 + Request (application/json)
-    + Attributes
-        + hub_url: adcs://myhub.com:6423 - URL of the hub to browse the list through (remote filelists only)
+    + Attributes (object)
+        + hub_url: adcs://myhub.com:6423 (optional) - URL of the hub to browse the list through (remote filelists only)
         + share_profile: 643 (number, optional) - ID of the share profile to browse (own filelist only)
 
 + Response 204
@@ -681,7 +687,7 @@ To track the results (errors/queued bundled ID), use the event listeners or poll
 Required permission: *download*
 
 + Request (application/json)
-    + Attributes (Download params)
+    + Attributes (Download params, fixed-type)
         + user (Hinted user base, required)
         + list_path: /Share/Ubuntu/ (required)
 + Response 200 (application/json)
@@ -737,53 +743,53 @@ Required permission: *filelists_view*
 ### Directory download processed [POST /filelists/listeners/filelist_directory_download_processed]
 
 + Response 200 (application/json)
-    + Attributes 
-        + directory_download (Directory download item)
-        + result (Queue directory bundle add info)
+    + Attributes (object, fixed-type)
+        + directory_download (Directory download item, required)
+        + result (Queue directory bundle add info, required)
 
 ### Directory download failed [POST /filelists/listeners/filelist_directory_download_failed]
 
 + Response 200 (application/json)
-    + Attributes (Directory download item)
-        + directory_download (Directory download item)
-        + error: The directory is empty
+    + Attributes (Directory download item, fixed-type)
+        + directory_download (Directory download item, required)
+        + error: The directory is empty (required)
 
 ## Data Structures
 
-### Filelist
+### Filelist (object, fixed-type)
 
-+ id: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA
-+ user (Hinted user)
-+ location (Filelist item) - Information about the current location
-+ share_profile (Share profile basic) - Only available for own filelist
-+ state (Downloadable item state)
-+ read: false (boolean) - Has the filelist been marked as read
-+ partial_list: true (boolean)
-+ total_files: 53356 (number)
-+ total_size: 221767274 (number)
++ id: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA (required)
++ user (Hinted user, required)
++ location (Filelist item, required) - Information about the current location
++ share_profile (Share profile basic, nullable) - Only available for own filelist
++ state (Downloadable item state, required)
++ read: false (boolean, required) - Has the filelist been marked as read
++ partial_list: true (boolean, required)
++ total_files: 53356 (number, required)
++ total_size: 221767274 (number, required)
 
 
-### Filelist item
+### Filelist item (object, fixed-type)
 
-+ id: 32 (number)
-+ name: Ubuntu 14.04
-+ type (File item type) - Directory content information (files and directories) is available from certain users only 
-+ path: /home/airdcpp/share/Ubuntu/Ubuntu 14.04/ - Path in remote user's share
-+ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
++ id: 32 (number, required)
++ name: Ubuntu 14.04 (required)
++ type (File item type, required) - Directory content information (files and directories) is available from certain users only 
++ path: /home/airdcpp/share/Ubuntu/Ubuntu 14.04/ (required) - Path in remote user's share
++ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (nullable) - Available for files only
 + dupe (Dupe, nullable)
-+ time: 1483611358 (number) - File creation/modification date (available from certain users only)
-+ size: 62523525626 (number) - Size in bytes (directory sizes are available from certain users only)
-+ complete: true (boolean) - Whether the directory content has been downloaded
++ time: 1483611358 (number, required) - File creation/modification date (available from certain users only)
++ size: 62523525626 (number, required) - Size in bytes (directory sizes are available from certain users only)
++ complete: true (boolean, required) - Whether the directory content has been downloaded
 
 
-### Directory download item (Download params)
+### Directory download item (Download params, fixed-type)
 
-+ id: 427 (number)
-+ list_path: /Linux/Ubuntu/Ubuntu 14.04/
-+ user (Hinted user)
-+ queue_info (Queue directory bundle add info) - **Minimum API feature level**: 3
-+ error: `A file with different TTH root already exists in the queue (affected file(s): Ubuntu 14.04.nfo)` - **Minimum API feature level**: 3
-+ state (Directory download state) - **Minimum API feature level**: 3
++ id: 427 (number, required)
++ list_path: /Linux/Ubuntu/Ubuntu 14.04/ (required)
++ user (Hinted user, required)
++ queue_info (Queue directory bundle add info, nullable) - **Minimum API feature level**: 3
++ error: `A file with different TTH root already exists in the queue (affected file(s): Ubuntu 14.04.nfo)` - **Minimum API feature level**: 3 (nullable)
++ state (Directory download state, required) - **Minimum API feature level**: 3
 
 
 
@@ -882,14 +888,14 @@ Get disk space info for a set of directory paths
             
 + Response 200 (application/json)
     + Attributes (array)
-        + (object)
-            + path: /home/airdcpp/share/dir/
-            + free_space: 81279320064 (number) - Free disk space in bytes
-            + total_space: 109646487552 (number) - Total disk space in bytes
-        + (object)
-            + path: /mnt/disk2/dir/
-            + free_space: 400443416576 (number) - Free disk space in bytes
-            + total_space: 2953372659712 (number) - Total disk space in bytes
+        + (object, fixed-type)
+            + path: /home/airdcpp/share/dir/ (required)
+            + free_space: 81279320064 (number, required) - Free disk space in bytes
+            + total_space: 109646487552 (number, required) - Total disk space in bytes
+        + (object, fixed-type)
+            + path: /mnt/disk2/dir/ (required)
+            + free_space: 400443416576 (number, required) - Free disk space in bytes
+            + total_space: 2953372659712 (number, required) - Total disk space in bytes
 
 # Group Hashing
 
@@ -953,24 +959,24 @@ Required permission: *settings_view*
 ### Hashing of a directory finished [POST /hash/listeners/hasher_directory_finished]
 
 + Response 200 (application/json)
-    + Attributes
-        + path: /home/airdcpp/share/Ubuntu/ - Directory path
-        + size: 43676423 (number) - Total size of the files that were hashed from this directory
-        + files: 7 (number) - Number of files that were hashed from this directory
-        + duration: 32574 (number) - Time in milliseconds that was spent on hashing the directory
-        + hasher_id: 0 (number) - ID of the hasher
+    + Attributes (object, fixed-type)
+        + path: /home/airdcpp/share/Ubuntu/ (required) - Directory path
+        + size: 43676423 (number, required) - Total size of the files that were hashed from this directory
+        + files: 7 (number, required) - Number of files that were hashed from this directory
+        + duration: 32574 (number, required) - Time in milliseconds that was spent on hashing the directory
+        + hasher_id: 0 (number, required) - ID of the hasher
 
 ### Hashing finished [POST /hash/listeners/hasher_finished]
 
 A single hasher has finished.
 
 + Response 200 (application/json)
-    + Attributes
-        + size: 436764423 (number) - Total size of the files that were hashed
-        + files: 52 (number) - Number of files that were hashed
-        + directories: 4 (number) - Number of directories that were hashed
-        + duration: 6332574 (number) - Time in milliseconds that was spent on hashing the items
-        + hashed_id: 0 (number) - ID of the hasher
+    + Attributes (object, fixed-type)
+        + size: 436764423 (number, required) - Total size of the files that were hashed
+        + files: 52 (number, required) - Number of files that were hashed
+        + directories: 4 (number, required) - Number of directories that were hashed
+        + duration: 6332574 (number, required) - Time in milliseconds that was spent on hashing the items
+        + hashed_id: 0 (number, required) - ID of the hasher
 
 
 ### Hash statistics [POST /hash/listeners/hash_statistics]
@@ -978,7 +984,7 @@ A single hasher has finished.
 Only the properties that have changed since the last event are sent.
 
 + Response 200 (application/json)
-    + Attributes
+    + Attributes (object)
         + hash_speed: 4367623 (number) - Total current hashing speed, bytes per second
         + hash_bytes_left: 52 (number) - Total number of bytes remaining to be hashed
         + hash_files_left: 4 (number) - Total number of files remaining to be hashed
@@ -989,9 +995,9 @@ Only the properties that have changed since the last event are sent.
 
 ### Hash database status
 
-+ maintenance_running: false (boolean) - Whether database optimization is currently running
-+ file_index_size: 2143207 (number) - Size of the file index database on disk (bytes)
-+ hash_store_size: 446720235 (number) - Size of the hash store database on disk (bytes)
++ maintenance_running: false (boolean, required) - Whether database optimization is currently running
++ file_index_size: 2143207 (number, required) - Size of the file index database on disk (bytes)
++ hash_store_size: 446720235 (number, required) - Size of the hash store database on disk (bytes)
 
 
 # Group History
@@ -1094,13 +1100,13 @@ Required permission: *settings_edit*
 
 ## Data Structures
 
-### History session
+### History session (object, fixed-type)
 
-+ name: Demo hub
-+ hub_url: adcs://myhub.com:6423
-+ description: Demo hub for AirDC++ Web Client
-+ last_opened: 1483611358 (number) - Time when the session was opened previously
-+ user (Hinted user) - Set only for private chat and filelist sessions
++ name: Demo hub (required)
++ hub_url: adcs://myhub.com:6423 (required)
++ description: Demo hub for AirDC++ Web Client (required)
++ last_opened: 1483611358 (number, required) - Time when the session was opened previously
++ user (Hinted user, nullable) - Set only for private chat and filelist sessions
 
 
 
@@ -1245,11 +1251,11 @@ Hook is fired for each outgoing hub chat message and can be used to prevent cert
 
 ## Data Structures
 
-### Hub
+### Hub (object, fixed-type)
 
-+ id: 5 (number)
-+ hub_url: adcs://myhub.com:6423
-+ connect_state (object)
++ id: 5 (number, required)
++ hub_url: adcs://myhub.com:6423 (required)
++ connect_state (object, required, fixed-type)
     + id: connected (enum[string])
         + connecting - Connecting to the hub in processed
         + password - Password was requested by the hub and there is no saved one. The 'password' can be used to post one.
@@ -1260,12 +1266,12 @@ Hook is fired for each outgoing hub chat message and can be used to prevent cert
     + str: Connected
     + data - Possible state-related data
         + hub_url: mynmdchub.com - Redirect url ('redirect' state only)
-+ identity (object)
-    + name: Demo hub
-    + description: Demo hub for AirDC++ Web Client
-+ share_profile (Share profile)
-+ favorite_hub: 64723743 (number) - Favorite hub ID (0 = no favorite hub)
-+ message_counts (Chat message info)
++ identity (object, required, fixed-type)
+    + name: Demo hub (required)
+    + description: Demo hub for AirDC++ Web Client (required)
++ share_profile (Share profile, required)
++ favorite_hub: 64723743 (number, required) - Favorite hub ID (0 = no favorite hub)
++ message_counts (Chat message info, required)
 + encryption (Encryption, nullable) - Available only for connected ADCS hubs
 
 ### Hub counts
@@ -1559,18 +1565,18 @@ Note that private chat session may not exist for announcement-like messages that
 
 ## Data Structures
 
-### Private chat
+### Private chat (object, fixed-type)
 
-+ id: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA
-+ user (Hinted user)
-+ ccpm_state (object)
++ id: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA (required)
++ user (Hinted user, required)
++ ccpm_state (object, required)
     + id: connected (enum[string])
         + connecting
         + connected
         + disconnected
     + str: Connected
     + encryption (Encryption, optional) - Available only with connected CCPM connections
-+ message_counts (Chat message info)
++ message_counts (Chat message info, required)
 
 ### Private chat message request (Chat message request)
 
@@ -2057,38 +2063,38 @@ The hook is fired for each bundle that finishes downloading.
 
 ## Data Structures
 
-### Queue bundle add info
+### Queue bundle add info (object, fixed-type)
 
-+ id: 83425443 (number) - Bundle ID
-+ merged: true (boolean) - Indicates whether this is a new bundle or was the queued item merged into an existing one
++ id: 83425443 (number, required) - Bundle ID
++ merged: true (boolean, required) - Indicates whether this is a new bundle or was the queued item merged into an existing one
 
-### Queue directory bundle add info
+### Queue directory bundle add info (object, fixed-type)
 
-+ files_queued: 14 (number) - Number of new files that were queued successfully
-+ files_updated: 34 (number) - Number of existing files that were possibly updated (new source was added)
-+ files_failed: 1 (number) - Number of files that could not be queued
-+ error: `A file with different TTH root already exists in the queue (affected file(s): Ubuntu 14.04.nfo)`
-+ bundle (Queue bundle add info) 
++ files_queued: 14 (number, required) - Number of new files that were queued successfully
++ files_updated: 34 (number, required) - Number of existing files that were possibly updated (new source was added)
++ files_failed: 1 (number, required) - Number of files that could not be queued
++ error: `A file with different TTH root already exists in the queue (affected file(s): Ubuntu 14.04.nfo)` (nullable)
++ bundle (Queue bundle add info, nullable) 
 
-### Queue item base
+### Queue item base (object, fixed-type)
 
-+ size: 62523525626 (number) - Size in bytes
-+ downloaded_bytes: 4521124 (number)
-+ priority (Queue priority)
-+ time_added: 65235235 (number)
-+ time_finished: 0 (number) - Time when the item was finished (0 = not finished)
-+ speed: 5234324 (number) - Current download speed, bytes per second
-+ seconds_left: 632576 (number) - Seconds left based on the current download speed
++ size: 62523525626 (number, required) - Size in bytes
++ downloaded_bytes: 4521124 (number, required)
++ priority (Queue priority, required)
++ time_added: 65235235 (number, required)
++ time_finished: 0 (number, required) - Time when the item was finished (0 = not finished)
++ speed: 5234324 (number, required) - Current download speed, bytes per second
++ seconds_left: 632576 (number, required) - Seconds left based on the current download speed
 
-### Queue bundle (Queue item base)
+### Queue bundle (Queue item base, fixed-type)
 
-+ id: 83425443
-+ name: Ubuntu
-+ target: /home/airdcpp/share/Ubuntu/
-+ type (File item type)
-+ sources (Queue bundle source)
-+ status
-    + id: queued (enum[string])
++ id: 83425443 (required)
++ name: Ubuntu (required)
++ target: /home/airdcpp/share/Ubuntu/ (required)
++ type (File item type, required)
++ sources (Queue bundle source, required)
++ status (object, required)
+    + id: queued (enum[string], required)
          + new - Not added in queue yet
          + queued - Queued
          + download_error - Download can't be continued because of a fatal error (such as there is no available disk space)
@@ -2098,56 +2104,56 @@ The hook is fired for each bundle that finishes downloading.
          + completion_validation_error - An error was triggered by a custom completion hook. See the field 'hook_error' for more detailed information
          + completed - All completion hooks have completed successfully
          + shared - The bundle has been added in share
-    + failed: false (boolean) - Whether the bundle is in an error state
-    + downloaded: false (boolean) - All files have finished downloaded (states 'downloaded' and above)
-    + completed: false (boolean) - All files have finished downloaded and the content was verified (states 'completed' and 'shared')
-    + str: `Running (42.3%)`
+    + failed: false (boolean, required) - Whether the bundle is in an error state
+    + downloaded: false (boolean, required) - All files have finished downloaded (states 'downloaded' and above)
+    + completed: false (boolean, required) - All files have finished downloaded and the content was verified (states 'completed' and 'shared')
+    + str: `Running (42.3%)` (required)
     + hook_error (nullable)
         + hook_id: share_scanner
         + hook_name: Share scanner
         + error_id: files_missing
         + str: 42 missing files
 
-### Queue file (Queue item base)
+### Queue file (Queue item base, fixed-type)
 
-+ id: 23425443
-+ name: Ubuntu 14.04.iso
-+ target: /home/airdcpp/share/Ubuntu/Ubuntu 14.04.iso
-+ type (File type)
-+ bundle: 83425443 (number) - Bundle (0 = no bundle)
-+ status
-    + str: `Running (42.3%)`
-    + downloaded: false (boolean) - All file segments have finished downloading
-    + completed: false (boolean) - All file segments have finished downloading and the item has been renamed to use its final name (and possibly verified)
-+ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
-+ sources (Queue source info)
++ id: 23425443 (required)
++ name: Ubuntu 14.04.iso (required)
++ target: /home/airdcpp/share/Ubuntu/Ubuntu 14.04.iso (required)
++ type (File type, required)
++ bundle: 83425443 (number, required) - Bundle (0 = no bundle)
++ status (object, required, fixed-type)
+    + str: `Running (42.3%)` (required)
+    + downloaded: false (boolean, required) - All file segments have finished downloading
+    + completed: false (boolean, required) - All file segments have finished downloading and the item has been renamed to use its final name (and possibly verified)
++ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required) - File TTH
++ sources (Queue source info, required)
 
-### Queue segment
+### Queue segment (object, fixed-type)
 
-+ start: 13631488 (number) - Start position of the segment (bytes)
-+ size: 524288 (number) - Size of the segment (bytes)
++ start: 13631488 (number, required) - Start position of the segment (bytes)
++ size: 524288 (number, required) - Size of the segment (bytes)
 
-### Queue source
+### Queue source (object, fixed-type)
 
-+ user (Hinted user)
-+ last_speed: 57453654 (number) - Last known total speed from the user, bytes per second
++ user (Hinted user, required)
++ last_speed: 57453654 (number, required) - Last known total speed from the user, bytes per second
 
-### Queue bundle source (Queue source)
+### Queue bundle source (Queue source, fixed-type)
 
-+ files: 53 (number) - Bundle files remaining from this source
-+ size: 734234563 (number) - Total number of bytes remaining from this source
++ files: 53 (number, required) - Bundle files remaining from this source
++ size: 734234563 (number, required) - Total number of bytes remaining from this source
 
-### Queue source info
+### Queue source info (object, fixed-type)
 
-+ online: 2 (number) - Number of sources online
-+ total: 3 (number) - Total number of item sources
-+ str: 2/3 online
++ online: 2 (number, required) - Number of sources online
++ total: 3 (number, required) - Total number of item sources
++ str: `2/3 online` (required)
 
-### Queue priority
+### Queue priority (object, fixed-type)
 
-+ id (Queue priority ID)
-+ str: Paused
-+ auto: false (boolean) - Auto priority state
++ id (Queue priority ID, required)
++ str: Paused (required)
++ auto: false (boolean, required) - Auto priority state
 
 
 
@@ -2345,9 +2351,9 @@ Required permission: *settings_edit*
 **Minimum API feature level**: 3
 
 + Request (application/json)
-    + Attributes
-        + name: Code files
-        + extensions: js, ts, cpp, h
+    + Attributes (object)
+        + name: Code files (optional)
+        + extensions: js, ts, cpp, h (array, optional)
 + Response 200 (application/json)
     + Attributes (Search type)
     
@@ -2382,39 +2388,39 @@ Fired when search types are added/updated/removed
 
 ### Search instance
 
-+ id: 0 (number)
-+ expires_in: 60000 (number) - Time in milliseconds until the instance expires
-+ current_search_id: 643345 - ID of the previously sent search
-+ queue_time: 0 - Current queue time in milliseconds for the previously sent search (hub searches only)
-+ queued_count: 0 - Number of hub searches that haven't been sent yet (hub searches only)
-+ result_count: 3153 - Number of received results
-+ searches_sent_ago: 47243 - Milliseconds ellapsed since the previous search was sent
++ id: 0 (number, required)
++ expires_in: 60000 (number, required) - Time in milliseconds until the instance expires
++ current_search_id: 643345 (number, required) - ID of the previously sent search
++ queue_time: 0 (number, required) - Current queue time in milliseconds for the previously sent search (hub searches only)
++ queued_count: 0 (number, required) - Number of hub searches that haven't been sent yet (hub searches only)
++ result_count: 3153 (number, required) - Number of received results
++ searches_sent_ago: 47243 (number, required) - Milliseconds ellapsed since the previous search was sent
 
-### Search type
+### Search type (object, fixed-type)
 
-+ id: audio
-+ name: Audio
-+ str: Audio
-+ extensions: ape, flac, m4a, mid, mp3, mpc, ogg, ra, wav, wma
-+ default_type: true (boolean) - Whether this is an inbuilt type that can't be removed (extensions can still be modified)
++ id: audio (required)
++ name: Audio (required)
++ str: Audio (required)
++ extensions: ape, flac, m4a, mid, mp3, mpc, ogg, ra, wav, wma (array, required)
++ default_type: true (boolean, required) - Whether this is an inbuilt type that can't be removed (extensions can still be modified)
 
 ### Grouped search result
 
-+ id: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
-+ name: dir
-+ relevance: 1.34 (number) - Calculated item relevance based on the result name and number of hits
-+ hits: 4 (number) - Number of users (child users) from who the item was found
-+ users
-    + count: 4 (number)
-    + user (Hinted user) - Base user from who the result name and path were picked from
-+ type (File item type) - Directory content information (files and directories) is available from certain ADC users only
-+ path: /home/airdcpp/share/dir/ - Path in remote user's share
-+ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
++ id: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required)
++ name: dir (required)
++ relevance: 1.34 (number, required) - Calculated item relevance based on the result name and number of hits
++ hits: 4 (number, required) - Number of users (child users) from who the item was found
++ users (object, required, fixed-type)
+    + count: 4 (number, required)
+    + user (Hinted user, required) - Base user from who the result name and path were picked from
++ type (File item type, required) - Directory content information (files and directories) is available from certain ADC users only
++ path: /home/airdcpp/share/dir/ (required) - Path in remote user's share
++ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (nullable)
 + dupe (Dupe, nullable)
-+ time: 1483611358 (number) - File creation/modification date. The oldest found date is shown for parent results. Available from certain ADC users only.
-+ slots (Slot count) - Accummulated slot counts from users
-+ connection: 42500000 (number) - Accummulated connection speed from users, bytes per second
-+ size: 62523525626 (number) - Size in bytes (not available for NMDC directory results)
++ time: 1483611358 (number, required) - File creation/modification date. The oldest found date is shown for parent results. Available from certain ADC users only.
++ slots (Slot count, required) - Accummulated slot counts from users
++ connection: 42500000 (number, required) - Accummulated connection speed from users, bytes per second
++ size: 62523525626 (number, required) - Size in bytes (zero for NMDC directory results)
 
 ### Child search result
 
@@ -2561,9 +2567,9 @@ Required permission: *search*
 Fired after all queued searches were sent.
 
 + Response 200 (application/json)
-    + Attributes
-        + sent: 4 (number) - Number of searches that were sent (this may also be 0 if all hubs were closed)
-        + search_id: 643345 - ID of the search that was sent
+    + Attributes (object, fixed-type)
+        + sent: 4 (number, required) - Number of searches that were sent (this may also be 0 if all hubs were closed)
+        + search_id: 643345 (required) - ID of the search that was sent
 
 ### Grouped result added [POST /search/{instance_id}/listeners/search_result_added]
 
@@ -2693,21 +2699,21 @@ Required permission: *admin*
 
 ### Session
 
-+ id: 143743423 (number) - Session ID (this is not the same as auth token that is sent only in the authentication response)
-+ ip: [::1] - Last IP address used for the connection (IPv4/IPv6)
-+ last_activity: 6236 (number) - Milliseconds since last session activity
-+ type: secure (enum[string])
++ id: 143743423 (number, required) - Session ID (this is not the same as auth token that is sent only in the authentication response)
++ ip: [::1] (required) - Last IP address used for the connection (IPv4/IPv6)
++ last_activity: 6236 (number, required) - Milliseconds since last session activity
++ type: secure (enum[string], required)
   + basic_http
   + plain
   + secure
-+ user (Web user) - Web user account used for authentication
++ user (Web user, required) - Web user account used for authentication
 
 ### Authentication info
 
-+ auth_token: `25793d1e-6d48-407c-9c27-a9dcbd2e1188` - Authorization token
-+ system_info (System info) - Generic information about the system that the application is running on
-+ user (Web user) - Current web user
-+ wizard_pending: false (boolean) - Whether completion of the initial configuration wizard is pending
++ auth_token: `25793d1e-6d48-407c-9c27-a9dcbd2e1188` (required) - Authorization token
++ system_info (System info, required) - Generic information about the system that the application is running on
++ user (Web user, required) - Current web user
++ wizard_pending: false (boolean, required) - Whether completion of the initial configuration wizard is pending
 
 
 # Group Settings
@@ -2724,20 +2730,20 @@ Settings API can be used for viewing and managing of web server and core applica
 
 + Response 200 (application/json)
     + Attributes (array[string, boolean, number])
-        + 100 (number)
-        + 0 (number)
+        + Sample
+            + 100 (number)
+            + 0 (number)
 
 ### Set setting values [POST /settings/set]
 
 Required permission: *settings_edit*
 
-+ Request (application/json)
++ Request Key-value listing of setting keys and their new values (application/json)
+
     + Attributes (object)
-    
-        Key-value listing of setting keys and their new values
-    
-        + download_limit_main: 0 (number)
-        + upload_limit_main: 250 (number)
+        + Sample
+            + download_limit_main: 0 (number)
+            + upload_limit_main: 250 (number)
 
 + Response 204
 
@@ -2773,15 +2779,15 @@ Get schema information of the specified settings.
 
 ### Setting definition base
 
-+ key: download_limit_main
-+ title: `Download limit (KiB/s, 0 = disabled)` - Setting field title
++ key: download_limit_main (required)
++ title: `Download limit (KiB/s, 0 = disabled)` (required) - Setting field title
 + help: Set the total speed limit for downloads (optional) - Additional help message
 + optional: false (boolean, optional) - Whether the setting is optional
-+ type (Setting type base) - Value type
+    + Default: false
++ type (Setting type base, required) - Value type
     + boolean - Boolean field
     + list - List with items defined by the 'item_type' field
 + item_type (Setting type base, optional) - List item value type. Required for 'list' type settings.
-    + struct - List items with subproperties configured in the 'definitions' field
 
 + options (array, optional) - Optional value selection options for enum-type settings. Options may also be specified for string and number lists when multiselect component should be used.
     + (object)
@@ -2790,12 +2796,13 @@ Get schema information of the specified settings.
             + (number)
         + name
 + min: 1 (number, optional) - Minimum allowed value (numeric types only), default is 0
+    + Default: 0
 + max: 100 (number, optional) - Maximum allowed value (numeric types only)
-+ default_value: 0 (Setting value) - Default value
++ default_value: 0 (Setting value) - Default value, required for non-optional settings
 
 ### Setting definition (Setting definition base)
 
-+ definitions (array[object]) - Property definitions for list items (required when using the 'list' type with 'struct' items)
++ definitions (array[object], optional) - Property definitions for struct items (required when using the 'list' type with 'struct' item type)
 
 ### Setting type base (enum[string])
 
@@ -2804,6 +2811,7 @@ Get schema information of the specified settings.
 + file_path - File path selector
 + directory_path - Directory path selector
 + text - Field for longer text content
++ struct - A value object, each child field must be configured in the 'definitions' field. Nested structs are not currently supported.
 
 ### Setting value (enum)
 
@@ -2973,8 +2981,8 @@ Validate a path of an existing file/directory.
 
 + Request (application/json)
     + Attributes (object, required)
-        + path: /home/airdcpp/share/Ubuntu/CD1/ - File/directory path
-        + skip_check_queue: false (boolean, optional) - Don't fail when checking files that are inside an incomplete bundlecomminicatio.
+        + path: /home/airdcpp/share/Ubuntu/CD1/ - File/directory path. Trailing slash is required for a directory path.
+        + skip_check_queue: false (boolean, optional) - Avoid failures when checking files that are inside an incomplete bundle
             + Default: false
 
 + Response 204
@@ -3399,7 +3407,7 @@ Required permission: *transfers*
 Required permission: *transfers*
 
 + Response 200 (application/json)
-    + Attributes (Transfer item)
+    + Attributes (Transfer item, fixed-type)
 
 ### Disconnect transfer [POST /transfers/{transfer_id}/disconnect]
 
@@ -3423,11 +3431,11 @@ Required permission: *transfers*
 ### Get transferred bytes [POST /transfers/tranferred_bytes]
 
 + Response 200 (application/json)
-    + Attributes
-        + session_downloaded: 5325235 (number)
-        + session_uploaded 6768544233 (number)
-        + start_total_downloaded: 5543652344 (number)
-        + start_total_uploaded: 6433254263622 (number)
+    + Attributes (object, fixed-type)
+        + session_downloaded: 5325235 (number, required)
+        + session_uploaded 6768544233 (number, required)
+        + start_total_downloaded: 5543652344 (number, required)
+        + start_total_uploaded: 6433254263622 (number, required)
     
 
 ## Event listeners [/transfers/listeners]
@@ -3439,7 +3447,7 @@ Required permission: *transfers*
 A new transfer connection was added.
 
 + Response 200 (application/json)
-    + Attributes (Transfer item)
+    + Attributes (Transfer item, fixed-type)
 
 ### Transfer updated [POST /transfers/listeners/transfer_updated]
 
@@ -3455,26 +3463,26 @@ This listener generates a large number of event messages. If you are interested 
 Transferring of a new file chunk transfer was started.
 
 + Response 200 (application/json)
-    + Attributes (Transfer item)
+    + Attributes (Transfer item, fixed-type)
 
 ### Transfer completed [POST /transfers/listeners/transfer_completed]
 
 The current file chunk transfer was completed successfully.
 
 + Response 200 (application/json)
-    + Attributes (Transfer item)
+    + Attributes (Transfer item, fixed-type)
 
 ### Transfer failed [POST /transfers/listeners/transfer_failed]
 
 Transfer failed (such as connection was closed or there are no slots available)
 
 + Response 200 (application/json)
-    + Attributes (Transfer item)
+    + Attributes (Transfer item, fixed-type)
 
 ### Transfer removed [POST /transfers/listeners/transfer_removed]
 
 + Response 200 (application/json)
-    + Attributes (Transfer item)
+    + Attributes (Transfer item, fixed-type)
 
 ### Transfer statistics [POST /transfers/listeners/transfer_statistics]
 
@@ -3496,31 +3504,31 @@ Only the values that have changed after the last event are sent.
 
 ## Data Structures
 
-### Transfer item
+### Transfer item (object, fixed-type)
 
-+ id: 83425443
-+ name: Ubuntu 14.04.iso - Local file name
-+ target: /home/airdcpp/share/Ubuntu/Ubuntu 14.04.iso - Local file path
-+ download: true (boolean) - Whether it's a download (false = upload)
-+ type (File type) - Content type 'filelist' is also used here
-+ size: 625235256 (number) - Segment size in bytes
-+ bytes_transferred: 452124 (number)
-+ time_started: 1483277168 (number)
-+ speed: 524324 (number) - Current transfer speed, bytes per second
-+ seconds_left: 632576 (number) - Seconds left based on the current transfer speed
++ id: 83425443 (required)
++ name: Ubuntu 14.04.iso (required) - Local file name
++ target: /home/airdcpp/share/Ubuntu/Ubuntu 14.04.iso (required) - Local file path
++ download: true (boolean, required) - Whether it's a download (false = upload)
++ type (File type, required) - Content type 'filelist' is also used here
++ size: 625235256 (number, required) - Segment size in bytes
++ bytes_transferred: 452124 (number, required)
++ time_started: 1483277168 (number, required)
++ speed: 524324 (number, required) - Current transfer speed, bytes per second
++ seconds_left: 632576 (number, required) - Seconds left based on the current transfer speed
 + encryption (Encryption, nullable)
-+ ip (IP)
-+ user (Hinted user)
-+ status
-    + id (enum[string])
++ ip (IP, nullable)
++ user (Hinted user, required)
++ status (object, required, fixed-type)
+    + id (enum[string], required)
         + waiting
         + finished
         + running
         + failed
-    + str: `Running (42.3%)`
-    + finished: false (boolean)
-+ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
-+ flags (array[Transfer flag])
+    + str: `Running (42.3%)` (required)
+    + finished: false (boolean, required)
++ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required) - File TTH
++ flags (array[Transfer flag], required)
 + queue_file_id: 743457 (number, nullable) - ID of the queued file (not available for uploads)
 
 ### Transfer flag (enum[string])
@@ -3865,19 +3873,19 @@ Fired when the file is ready for viewing
 
 ## Data Structures
 
-### View file
+### View file (object, fixed-type)
 
-+ id: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
-+ name: Ubuntu 14.04.nfo
-+ size: 9552 (number) - Size in bytes
-+ type (File type)
-+ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
-+ text: false (boolean) - Is the file viewed as text
-+ time_opened: 1483277168 (number) - Time when the file was opened for viewing
-+ read: false (boolean) - Has the file been marked as read
-+ download_state (Downloadable item state) - Current download state of the remote user file. Not available for local files.
-+ content_ready: true (boolean) - Whether the file content is ready to be viewed
-+ mime_type: string;
++ id: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required)
++ name: Ubuntu 14.04.nfo (required)
++ size: 9552 (number, required) - Size in bytes
++ type (File type, required)
++ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required) - File TTH
++ text: false (boolean, required) - Is the file viewed as text
++ time_opened: 1483277168 (number, required) - Time when the file was opened for viewing
++ read: false (boolean, required) - Has the file been marked as read
++ download_state (Downloadable item state, required) - Current download state of the remote user file. Not available for local files.
++ content_ready: true (boolean, required) - Whether the file content is ready to be viewed
++ mime_type: text/x-nfo (required)
 
 
 
@@ -3886,40 +3894,40 @@ Fired when the file is ready for viewing
 
 ## Data Structures
 
-### Grouped path
+### Grouped path (object, fixed-type)
 
-+ name: Videos
-+ paths: /home/airdcpp/share/Videos/, /mnt/disk2/share/Videos/ (array[string])
++ name: Videos (required)
++ paths: /home/airdcpp/share/Videos/, /mnt/disk2/share/Videos/ (array[string], required)
 
-### Search query
+### Search query (object, fixed-type)
 
-+ pattern: Ubuntu - Search string. All words must be found from the full file/directory path (partial match)
-+ file_type (File content ID)
++ pattern: Ubuntu (optional) - Search string. All words must be found from the full file/directory path (partial match)
++ file_type (File content ID, optional) - [Custom search types](#reference/searching/search-types) type IDs are also valid
     + any
     + tth
     + directory
     + file
-+ extensions: iso, img - Allowed file extensions (files only)
-+ min_size: 50000000 - Minimum file size (files only)
-+ max_size: 100000000 - Maximum file size (files only)
-+ excluded: server, iot - List of strings that should not be found from the file/directory path (partial match)
++ extensions: iso, img (optional) - Allowed file extensions (files only)
++ min_size: 50000000 (optional) - Minimum file size (files only)
++ max_size: 100000000 (optional) - Maximum file size (files only)
++ excluded: server, iot (optional) - List of strings that should not be found from the file/directory path (partial match)
 
-### Download params (object)
+### Download params (object, fixed-type)
 
 + target_name: Ubuntu (required)
-+ target_directory: /home/airdcpp/share/ - Destination path where the bundle will be created. If no path is provided, the default download directory will be used.
++ target_directory: /home/airdcpp/share/ (optional) - Destination path where the bundle will be created. If no path is provided, the default download directory will be used.
 + priority (Queue priority ID, optional) - Bundle priority. Auto priority will be used if not specified.
 
-### Downloadable item state
+### Downloadable item state (object, fixed-type)
 
-+ id (enum[string])
++ id (enum[string], required)
     + download_failed
     + download_pending
     + downloading
     + loading
     + downloaded
-+ str: `Downloading (45.4%)`
-+ time_finished: 0 (number) - Time when the item finished downloading (0 = not finished)
++ str: `Downloading (45.4%)` (required)
++ time_finished: 0 (number, required) - Time when the item finished downloading (0 = not finished)
 
 ### Directory download state (enum)
 
@@ -3928,14 +3936,14 @@ Fired when the file is ready for viewing
 + failed - Failed to queue bundle
 
 
-### Encryption
+### Encryption (object, fixed-type)
 
-+ str: `TLSv1.2 / ECDHE-RSA-AES128-GCM-SHA256` - TLS version and cipher
-+ trusted: false (boolean) - Indicates whether there's a matching keyprint set for the hub
++ str: `TLSv1.2 / ECDHE-RSA-AES128-GCM-SHA256` (required) - TLS version and cipher
++ trusted: false (boolean, required) - Indicates whether there's a matching keyprint set for the hub
 
-### Dupe
+### Dupe (object, fixed-type)
 
-+ id (enum[string])
++ id (enum[string], required)
     + share_partial
     + share_full
     + queue_partial - Bundle item that has not finished downloading yet
@@ -3943,7 +3951,7 @@ Fired when the file is ready for viewing
     + finished_partial - Bundle item that has finished downloading
     + finished_full
     + share_queue
-+ paths: /home/airdcpp/share/dir/, /mnt/disk2/dir/ - An array of local paths for this item
++ paths: `/home/airdcpp/share/dir/, /mnt/disk2/dir/` (required) - An array of local paths for this item
 
 ### Priority ID (enum[number])
 
@@ -3975,16 +3983,16 @@ Fired when the file is ready for viewing
 + (File type)
 + (Drive type)
 
-### File type
+### File type (object, fixed-type)
 
 + id: file
 + str: iso
 + content_type (File content ID)
     + other
 
-### Drive type
+### Drive type (object, fixed-type)
 
-+ id (enum[string])
++ id (enum[string], required)
     + removable - Removable device
     + drive_fixed - Local drive
     + drive_remote - Network drive
@@ -3998,76 +4006,75 @@ Fired when the file is ready for viewing
 + picture
 + video
 + filelist
-+ other
 
-### Folder type
+### Folder type (object, fixed-type)
 
-+ id: directory
-+ str: `2 folders, 49 files`
-+ files: 49 (number)
-+ directories: 2 (number)
++ id: directory (required)
++ str: `2 folders, 49 files` (required)
++ files: 49 (number, required)
++ directories: 2 (number, required)
 
-### Filesystem item
+### Filesystem item (object, fixed-type)
 
-+ name: myfile1.log
-+ type (Filesystem item type) - Directory content information is not available here
++ name: myfile1.log (required)
++ type (Filesystem item type, required) - Directory content information is not available here
 + size: 6382343 (number) - Size in bytes (available for files only)
 
 
-### Chat message info
+### Chat message info (object, fixed-type)
 
-+ total: 100 (number)
-+ unread (Unread chat info)
++ total: 100 (number, required)
++ unread (Unread chat info, required)
 
-### Log message info
+### Log message info (object, fixed-type)
 
-+ total: 100 (number)
-+ unread (Unread log info)
++ total: 100 (number, required)
++ unread (Unread log info, required)
 
-### Unread chat info
+### Unread chat info (object, fixed-type)
 
-+ user: 2 (number) - Number of unread user messages
-+ bot: 12 (number) - Number of unread bot messages
-+ status: 0 (number) - Number of unread status messages
++ user: 2 (number, required) - Number of unread user messages
++ bot: 12 (number, required) - Number of unread bot messages
++ status: 0 (number, required) - Number of unread status messages
 
-### Unread log info
+### Unread log info (object, fixed-type)
 
-+ info: 6 (number)
-+ warning: 3 (number)
-+ error: 1 (number)
++ info: 6 (number, required)
++ warning: 3 (number, required)
++ error: 1 (number, required)
 
-### Chat message request
+### Chat message request (object, fixed-type)
 
 + text: Hello there (required)
 + third_person: false (boolean, optional) - Indicate that the message was sent as third person (/me)
     + Default: false
 
-### Status message request
+### Status message request (object, fixed-type)
 
 + text: `[10]APITester: ISO file(s) over 500 MB in share (/Ubuntu/Ubuntu 14.04.iso)` (required)
-+ severity: info (Severity)
++ severity: info (Severity, required)
 
-### Chat message
+### Chat message (object, fixed-type)
 
-+ id: 1 (number)
-+ time: 1483277168 (number)
-+ text: Hello there
-+ third_person: false (boolean)  - Indicate that the message was sent as third person (/me)
-+ is_read: false (boolean)
-+ from (Hub user) - Sender of the message
++ id: 1 (number, required)
++ time: 1483277168 (number, required)
++ text: Hello there (required)
++ third_person: false (boolean, required)  - Indicate that the message was sent as third person (/me)
++ is_read: false (boolean, required)
++ from (Hub user, required) - Sender of the message
 + reply_to (Hub user, optional) - User to who the reply is being send to. This may differ from the the sender if the message was received from a bot/chatroom. This field is generally not available with hub messages.
 + to (Hub user, optional) - Receiver of the message. This is generally your own user unless the message was received from a bot/chatroom. This field is generally not available with hub messages.
     + nick: Developer
     + cid: 76NLOTOBZVTWXOHIWKCXB27W46ULOI7EAUZUTTI
     + description: Just writing scripts
 
-### Status message
+### Status message (object, fixed-type)
 
-+ id: 2 (number)
-+ time: 1483277168 (number)
-+ text: `Connecting to adcs://myhub.com:6423 ...`
-+ severity: info (Severity)
-+ is_read: false (boolean)
++ id: 2 (number, required)
++ time: 1483277168 (number, required)
++ text: `Connecting to adcs://myhub.com:6423 ...` (required)
++ severity: info (Severity, required)
++ is_read: false (boolean, required)
 
 ### Severity (enum[string])
 
@@ -4078,48 +4085,48 @@ Fired when the file is ready for viewing
 
 
 
-### User
+### User (object, fixed-type)
 
-+ cid: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA
-+ nicks: `[Developer, [100]Developer]` 
-+ hub_names: `[Demo hub, Dev hub]`
-+ hub_urls: adcs://myhub.com:6423, adc://devhub.com:1234
-+ flags (array[User flag])
++ cid: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA (required)
++ nicks: `[Developer, [100]Developer]` (required)
++ hub_names: `[Demo hub, Dev hub]` (required)
++ hub_urls: adcs://myhub.com:6423, adc://devhub.com:1234 (required)
++ flags (array[User flag], required)
 
-### Hinted user base
+### Hinted user base (object, fixed-type)
 
-+ cid: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA
-+ hub_url: adcs://myhub.com:6423 - URL of the hinted hub
++ cid: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA (required)
++ hub_url: adcs://myhub.com:6423 (required) - URL of the hinted hub
 
 ### Hinted user (Hinted user base)
 
-+ nicks: `Developer ([100]Developer)` - Nick in the hinted hub is shown first and possible other nicks are inside parentheses 
-+ hub_names: `Demo hub (Dev hub)` - Name of the hinted hub is shown first and possible other hub names are inside parentheses 
-+ flags (array[Hub user flag]) - Flags in the hinted hub. All flags are not displayed if the user is offline.
++ nicks: `Developer ([100]Developer)` (required) - Nick in the hinted hub is shown first and possible other nicks are inside parentheses 
++ hub_names: `Demo hub (Dev hub)` (required) - Name of the hinted hub is shown first and possible other hub names are inside parentheses 
++ flags (array[Hub user flag], required) - Flags in the hinted hub. All flags are not displayed if the user is offline.
 
-### Hub user (Hinted user base)
+### Hub user (Hinted user base, fixed-type)
 
-+ hub_name: Demo hub
-+ flags (array[Hub user flag])
-+ ip4 (object) - IPv4 address
-    + country_id: NL - Netherlands
-    + ip: 89.255.248.35
-    + str: NL - Netherlands (89.255.248.35)
-+ ip6 (IP) - IPv6 address
-+ nick: Share
++ hub_name: Demo hub (required)
++ flags (array[Hub user flag], required)
++ ip4 (object, fixed-type, nullable) - IPv4 address
+    + country_id: `NL - Netherlands` (required)
+    + ip: 89.255.248.35 (required)
+    + str: `NL - Netherlands (89.255.248.35)` (required)
++ ip6 (IP) - IPv6 address (nullable)
++ nick: Share (required)
 + email: ""
-+ share_size: 728128900 (number) - Share size (bytes)
-+ upload_speed: 12500000 (number) - Upload speed (bytes/second)
-+ download_speed: 12500000 (number) - Download speed (bytes/second, ADC users only)
-+ file_count: 29 (number) - Total number of files shared by the user (ADC users only)
-+ description: Demo share
-+ tag: `<AirDC++w 1.3.1-44-g616c,M:P-,H:0/0/1,S:19>`
++ share_size: 728128900 (number, required) - Share size (bytes)
++ upload_speed: 12500000 (number, required) - Upload speed (bytes/second)
++ download_speed: 12500000 (number, required) - Download speed (bytes/second, ADC users only)
++ file_count: 29 (number, required) - Total number of files shared by the user (ADC users only)
++ description: Demo share (required)
++ tag: `<AirDC++w 1.3.1-44-g616c,M:P-,H:0/0/1,S:19>` (required)
 
-### IP
+### IP (object, fixed-type)
 
-+ country: NL - Netherlands
-+ ip: 2a00:1a48:1261::168
-+ str: NL - Netherlands (2a00:1a48:1261::168)
++ country: `NL - Netherlands` (required)
++ ip: 2a00:1a48:1261::168 (required)
++ str: `NL - Netherlands (2a00:1a48:1261::168)` (required)
 
 ### User flag (enum[string])
 
