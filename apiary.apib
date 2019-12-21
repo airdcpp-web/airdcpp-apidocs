@@ -245,7 +245,7 @@ Required permission: *favorite_hubs_view*
 + id: 64723743 (number, required)
 + auto_connect: true (boolean, required) - Automatically connect to this hub on startup
 + connect_state (object, required)
-    + id: connected (enum[string])
+    + id: connected (enum[string], sample)
         + connecting
         + connected
         + disconnected
@@ -1256,7 +1256,7 @@ Hook is fired for each outgoing hub chat message and can be used to prevent cert
 + id: 5 (number, required)
 + hub_url: adcs://myhub.com:6423 (required)
 + connect_state (object, required, fixed-type)
-    + id: connected (enum[string])
+    + id: connected (enum[string], sample)
         + connecting - Connecting to the hub in processed
         + password - Password was requested by the hub and there is no saved one. The 'password' can be used to post one.
         + connected
@@ -1570,7 +1570,7 @@ Note that private chat session may not exist for announcement-like messages that
 + id: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA (required)
 + user (Hinted user, required)
 + ccpm_state (object, required)
-    + id: connected (enum[string])
+    + id: connected (enum[string], sample)
         + connecting
         + connected
         + disconnected
@@ -2094,7 +2094,7 @@ The hook is fired for each bundle that finishes downloading.
 + type (File item type, required)
 + sources (Queue bundle source, required)
 + status (object, required)
-    + id: queued (enum[string], required)
+    + id: queued (enum[string], required, sample)
          + new - Not added in queue yet
          + queued - Queued
          + download_error - Download can't be continued because of a fatal error (such as there is no available disk space)
@@ -2702,7 +2702,7 @@ Required permission: *admin*
 + id: 143743423 (number, required) - Session ID (this is not the same as auth token that is sent only in the authentication response)
 + ip: [::1] (required) - Last IP address used for the connection (IPv4/IPv6)
 + last_activity: 6236 (number, required) - Milliseconds since last session activity
-+ type: secure (enum[string], required)
++ type: secure (enum[string], required, sample)
   + basic_http
   + plain
   + secure
@@ -3376,7 +3376,7 @@ Required permission: *admin*
 + path_separator: / - System's native path separator character
 + client_version: `AirDC++w 2.0.0 armv7l` - Full application version string
 + client_started: 1483972366 (number) - Time when the application was started
-+ platform: linux (enum[string])
++ platform: linux (enum[string], sample)
   + win32
   + darwin
   + linux
