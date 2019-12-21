@@ -2,7 +2,7 @@ FORMAT: 1A
 
 # AirDC++ Web API
 
->Missing information, typos or other errors? You can help with improving the documentation by [editing it on Github](https://github.com/airdcpp-web/airdcpp-apidocs). 
+>Missing information, typos or other errors? You can help with improving the documentation by [editing it on Github](https://github.com/airdcpp-web/airdcpp-apidocs).
 
 >API-related bugs or feature requests? Please report them for the [AirDC++ Web Client project on Github](https://github.com/airdcpp-web/airdcpp-webclient/issues).
 
@@ -83,7 +83,7 @@ Required permission: *settings_edit*
     + Attributes
         + path: /home/airdcpp/share/Linux/ (required) - Directory path
         + name: Linux (optional) - Virtual display name for the directory. Multiple paths can be added with the same name. Name will be determined from the path if not specified.
-    
+
 + Response 200 (application/json)
     + Attributes (Favorite directory)
 
@@ -98,7 +98,7 @@ Required permission: *settings_edit*
 + Request (application/json)
     + Attributes
         + name: Linux - Virtual display name for the directory. Multiple paths can be added with the same name.
-    
+
 + Response 200 (application/json)
     + Attributes (Favorite directory)
 
@@ -167,7 +167,7 @@ Required permission: *favorite_hubs_edit*
 
 + Request (application/json)
     + Attributes (Favorite hub request)
-    
+
 + Response 200 (application/json)
     + Attributes (Favorite hub)
 
@@ -183,7 +183,7 @@ Required permission: *favorite_hubs_edit*
     + Attributes (Favorite hub request)
         + name: Demo hub (optional)
         + hub_url: adcs://myhub.com:6423 (optional)
-    
+
 + Response 200 (application/json)
     + Attributes (Favorite hub)
 
@@ -198,7 +198,7 @@ Required permission: *favorite_hubs_view*
 + Response 200 (application/json)
 
     + Attributes (Favorite hub)
-    
+
 ### Remove favorite hub [DELETE]
 
 Required permission: *favorite_hubs_edit*
@@ -209,7 +209,7 @@ Required permission: *favorite_hubs_edit*
 ## Event listeners [/favorite_hubs/listeners]
 
 Required permission: *favorite_hubs_view*
-    
+
 ### Favorite hub created [POST /favorite_hubs/listeners/favorite_hub_created]
 
 + Response 200 (application/json)
@@ -341,7 +341,7 @@ Required permission: *admin*
 
 ### Register unmanaged extension [POST]
 
-Register an extension from the calling session. The request payload should contain all required fields from package.json. 
+Register an extension from the calling session. The request payload should contain all required fields from package.json.
 
 Sending the whole package.json content is acceptable as well.
 
@@ -773,7 +773,7 @@ Required permission: *filelists_view*
 
 + id: 32 (number, required)
 + name: Ubuntu 14.04 (required)
-+ type (File item type, required) - Directory content information (files and directories) is available from certain users only 
++ type (File item type, required) - Directory content information (files and directories) is available from certain users only
 + path: /home/airdcpp/share/Ubuntu/Ubuntu 14.04/ (required) - Path in remote user's share
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (nullable) - Available for files only
 + dupe (Dupe, nullable)
@@ -809,7 +809,7 @@ Required permission: *filelists_view*
 
 + Response 200 (application/json)
     + Attributes (array[Filelist item])
-    
+
 + Response 503
 
         Content of this directory is not yet available
@@ -874,7 +874,7 @@ Required permission: *filesystem_view*
         + path: /home/airdcpp/share/ (required) - Full path of the directory
         + directories_only: false (boolean, optional) - List directories only
             + Default: false
-            
+
 + Response 200 (application/json)
     + Attributes (array[Filesystem item])
 
@@ -885,7 +885,7 @@ Get disk space info for a set of directory paths
 + Request (application/json)
     + Attributes
         + paths: /home/airdcpp/share/dir/, /mnt/disk2/dir/ (array[string], required)
-            
+
 + Response 200 (application/json)
     + Attributes (array)
         + (object, fixed-type)
@@ -1019,7 +1019,7 @@ The following history types are available:
 
 + Parameters
     + history_type
-    
+
 + Response 200 (application/json)
     + Attributes (array[string])
         + ubuntu
@@ -1036,7 +1036,7 @@ Add a new string in the specified string array.
 + Request (application/json)
     + Attributes
         + string: ubuntu
-    
+
 + Response 204
 
 
@@ -1048,7 +1048,7 @@ Required permission: *settings_edit*
 
 + Parameters
     + history_type
-    
+
 + Response 204
 
 
@@ -1068,7 +1068,7 @@ Required permission: *settings_view*
 
 + Parameters
     + max_count: 0 - Maximum number of most recent sessions to return (0 = unlimited)
-    
+
 + Response 200 (application/json)
     + Attributes (array[History session])
 
@@ -1082,7 +1082,7 @@ Required permission: *settings_view*
     + Attributes
         + pattern: Demo (required)
         + max_results: 5 (number, required)
-    
+
 + Response 200 (application/json)
     + Attributes (array[History session])
 
@@ -1094,7 +1094,7 @@ Required permission: *settings_edit*
 
 + Parameters
     + history_type
-    
+
 + Response 204
 
 
@@ -1369,14 +1369,14 @@ Set the hub password. This should be used only when the hub is in *password* sta
 Required permission: *hubs_edit*
 
 + Request (application/json)
-    + Attributes 
+    + Attributes
         + password: myuniquepassword (required)
 
 + Response 204
 
 ### Follow redirect [POST /hubs/{session_id}/redirect]
 
-Follow the redirection requested by the hub. This should be used only when the hub is in *redirect* state. 
+Follow the redirection requested by the hub. This should be used only when the hub is in *redirect* state.
 
 Required permission: *hubs_edit*
 
@@ -1442,7 +1442,7 @@ Required permission: *hubs_view*
 
 ### Hub user updated [POST /hubs/{session_id}/listeners/hub_user_updated]
 
-Only the user ID and possibly changed fields are sent 
+Only the user ID and possibly changed fields are sent
 
 + Response 200 (application/json)
     + Attributes (Hub user)
@@ -1671,7 +1671,7 @@ Required permission: *private_chat_view*
 + Response 200 (application/json)
 
     + Attributes (Chat message)
-        
+
 ### Status message received [POST /private_chat/{session_id}/listeners/private_chat_status]
 
 + Response 200 (application/json)
@@ -1682,7 +1682,7 @@ Required permission: *private_chat_view*
 
 # Group Queue
 
-The download queue in AirDC++ is organized in bundles. A single bundle generally represents the item that was originally queued and it may be either a file or a directory. 
+The download queue in AirDC++ is organized in bundles. A single bundle generally represents the item that was originally queued and it may be either a file or a directory.
 
 The download order of queued bundles is determined based on their priorities.
 
@@ -2039,7 +2039,7 @@ Generic update event for other file status updates.
 
 ## Validation hooks [/queue/hooks]
 
-Bundle/file completion hooks can be used for performing various content validations. Possible error returned by the hook is saved for the respective item and is also visible to the user. 
+Bundle/file completion hooks can be used for performing various content validations. Possible error returned by the hook is saved for the respective item and is also visible to the user.
 
 `hook_validation_error` state is set for failed items and the full error is available from the `hook_error` status field. The [share](#reference/queue/bundle/share-a-failed-bundle) method can be used to revalidate failed bundles.
 
@@ -2074,7 +2074,7 @@ The hook is fired for each bundle that finishes downloading.
 + files_updated: 34 (number, required) - Number of existing files that were possibly updated (new source was added)
 + files_failed: 1 (number, required) - Number of files that could not be queued
 + error: `A file with different TTH root already exists in the queue (affected file(s): Ubuntu 14.04.nfo)` (nullable)
-+ bundle (Queue bundle add info, nullable) 
++ bundle (Queue bundle add info, nullable)
 
 ### Queue item base (object, fixed-type)
 
@@ -2166,7 +2166,7 @@ The hook is fired for each bundle that finishes downloading.
 Search matching in Direct Connect is a distibuted operation: search queries are sent to other hub users who match will match them against their own shared items. If you are in active connectivity
 mode, they will send the possible search results directly to you via UDP (passive results are sent via hubs instead).
 
-This also means that you can't simply just post a search and receive the results instantly as part of the response. Instead, you'll need to create a search instance for the search that will 
+This also means that you can't simply just post a search and receive the results instantly as part of the response. Instead, you'll need to create a search instance for the search that will
 take care of collecting results of that particular search and keeps them available to be fetched later.
 
 Basic code example for searching:
@@ -2210,19 +2210,19 @@ In a hub with 5000 users, the total amount of uncompressed data to be sent by th
 There's a huge variation of share sizes among the users. The only metrics that matters in terms of search matching performance is user's total file/directory count. Matching a share with 10000 files won't be a big deal,
 but the total matching time will be totally different with 5 million files.
 
-TTH searches are generally cheap since clients maintain an index of shared files by their TTH values from which the searches are matched from. 
+TTH searches are generally cheap since clients maintain an index of shared files by their TTH values from which the searches are matched from.
 
-When performing text searches with partial matching, no such index exists. Various clients use [bloom filters](https://en.wikipedia.org/wiki/Bloom_filter) to cheaply filter out text searches that are guaranteened not to match 
+When performing text searches with partial matching, no such index exists. Various clients use [bloom filters](https://en.wikipedia.org/wiki/Bloom_filter) to cheaply filter out text searches that are guaranteened not to match
 any shared items, that will work quite well especially with longer seach terms. If an average length of a shared item is 43 characters (43 bytes for ASCII-only names), the total amount of text to match with 5 million shared files
 would be 215 megabytes (given that the whole share needs to matched).
 
 
 ## Search queues
 
-Because of the performance considerations listed in the earlier section, hubs will generally limit the amount of searches that users may perform and spamming the hub with a large number of searches may cause the user 
-to get kicked out. 
+Because of the performance considerations listed in the earlier section, hubs will generally limit the amount of searches that users may perform and spamming the hub with a large number of searches may cause the user
+to get kicked out.
 
-Searches performed by the client will originate from many different sources (manual searches, searches for alternate queue sources and API scripts...). In order to prevent a large number of searches being sent within a short amount of time, 
+Searches performed by the client will originate from many different sources (manual searches, searches for alternate queue sources and API scripts...). In order to prevent a large number of searches being sent within a short amount of time,
 the application will maintain queues for outgoing searches on per-hub basis.
 
 The position of a search in the search queue is determined by its priority, which allows minimizing the waiting times for more urgent searches (such as manual ones made from the UI).
@@ -2239,7 +2239,7 @@ const instance = await socket.post('search')
 socket.addListener(`search/${instance.id}`, 'search_hub_searches_sent', searchInfo => {
   // Collect the results for 5 seconds before fetching them
   await sleep(5000)
-  
+
   // .... fetch and do something with them
 })
 
@@ -2356,7 +2356,7 @@ Required permission: *settings_edit*
         + extensions: js, ts, cpp, h (array, optional)
 + Response 200 (application/json)
     + Attributes (Search type)
-    
+
 
 ### Remove search type [DELETE]
 
@@ -2451,7 +2451,7 @@ Search files from all connected (or separately specified) hubs. This will cancel
 Required permission: *search*
 
 + Request (application/json)
-    + Attributes 
+    + Attributes
         + query (Search query, required)
         + priority (Priority ID, optional) - Priority in the outgoing search queue. Priorities above 'Normal' shouldn't be used for background searches to avoid delaying manual searches performed from the UI. Defaults to 'Low'.
             + Default: 2
@@ -2474,7 +2474,7 @@ Options specified in the 'options' field are available only with users having th
 Required permission: *search*
 
 + Request (application/json)
-    + Attributes 
+    + Attributes
         + query (Search query, required)
         + user (Hinted user base, required)
         + options (optional)
@@ -2529,7 +2529,7 @@ The bundle creation information (or possible errors) will be provided immediatel
 
 **Directory downloads**
 
-Before the bundle can be created, the application must download a filelist from the user to obtain the full directory content. 
+Before the bundle can be created, the application must download a filelist from the user to obtain the full directory content.
 
 In order to track the directory download progress (errors/queued bundled ID), use the [directory download event listeners](#reference/filelists/event-listeners) or [poll the returned directory download by ID](#reference/filelists/directory-download/get-directory-download).
 
@@ -2634,9 +2634,9 @@ Notify the application about user activity or ensure that HTTP session won't exp
 + Request (application/json)
     + Attributes
         + user_active: false (boolean, optional)
-        
+
           Specifies whether the user has been active since the last activity report. This information is used for calculating the away state of the application. Scripts that don't involve user interaction shouldn't provide this attribute.
-        
+
           + Default: false
 
 + Response 204
@@ -2648,10 +2648,10 @@ Invalidate the current session (log out). This method is not available when usin
 + Response 204
 
 ## Sessions [/sessions]
-        
+
 ### Get sessions [GET]
 
-Get a list of current web server sessionsURL 
+Get a list of current web server sessionsURL
 
 Required permission: *admin*
 
@@ -2773,7 +2773,7 @@ Get schema information of the specified settings.
     + Attributes (array)
         + (object)
             + download_limit_main (Setting definition)
-            
+
 
 ## Data Structures
 
@@ -2894,7 +2894,7 @@ ID of the uploaded file will be returned in the **Location** response header, wh
         + cid: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA (string) - Possible CID of the user who will only be able to download the file (file will be available to all users if no CID is specified)
 
 + Response 200 (application/json)
-    + Attributes 
+    + Attributes
         + magnet: magnet:?xt=urn:tree:tiger:CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y&xl=7524332&dn=image1.png - Magnet URI of the temp share item
         + item (Temp share item) - Create temp share item. If the item is null, a file with the same TTH was already found from the share.
 
@@ -2991,13 +2991,13 @@ Validate a path of an existing file/directory.
     Validation failed (non-temporary failure)
 
     + Body
-    
+
             Forbidden file extension
 
 + Response 409
 
     The path is inside an incomplete bundle (temporary failure)
-    
+
     + Body
 
             Directory is inside an unfinished bundle
@@ -3024,13 +3024,13 @@ Fired when share refresh (partial or full refresh) was completed.
 ### Excluded path added [POST /share/listeners/share_exclude_added]
 
 + Response 200 (application/json)
-    + Attributes 
+    + Attributes
         + path: /home/airdcpp/share/Videos/secret/
 
 ### Excluded path removed [POST /share/listeners/share_exclude_removed]
 
 + Response 200 (application/json)
-    + Attributes 
+    + Attributes
         + path: /home/airdcpp/share/Videos/secret/
 
 
@@ -3140,7 +3140,7 @@ Required permission: *settings_edit*
 
 ### Set default share profile [POST /share_profiles/{profile_id}/default]
 
-Set this profile as default. 
+Set this profile as default.
 
 Required permission: *settings_edit*
 
@@ -3215,7 +3215,7 @@ Required permission: *settings_edit*
 + Request (application/json)
     + Attributes (Share root request)
         + path: /home/airdcpp/share/Linux/Ubuntu 14.04/ (required) - Local directory path
-    
+
 + Response 200 (application/json)
     + Attributes (Share root)
 
@@ -3229,7 +3229,7 @@ Required permission: *settings_edit*
 
 + Request (application/json)
     + Attributes (Share root request)
-    
+
 + Response 200 (application/json)
     + Attributes (Share root)
 
@@ -3244,7 +3244,7 @@ Required permission: *settings_view*
 + Response 200 (application/json)
 
     + Attributes (Share root)
-    
+
 ### Remove share root [DELETE]
 
 Required permission: *settings_edit*
@@ -3255,7 +3255,7 @@ Required permission: *settings_edit*
 ## Event listeners [/share_roots/listeners]
 
 Required permission: *settings_view*
-    
+
 ### Share root created [POST /share_roots/listeners/share_root_created]
 
 + Response 200 (application/json)
@@ -3348,7 +3348,7 @@ Required permission: *admin*
 Required permission: *admin*
 
 + Response 204
-    
+
 
 ## Event listeners [/system/listeners]
 
@@ -3436,7 +3436,7 @@ Required permission: *transfers*
         + session_uploaded 6768544233 (number, required)
         + start_total_downloaded: 5543652344 (number, required)
         + start_total_uploaded: 6433254263622 (number, required)
-    
+
 
 ## Event listeners [/transfers/listeners]
 
@@ -3552,7 +3552,7 @@ Required permission: *settings_view*
 
 + Response 200 (application/json)
     + Attributes (array[Ignored user])
-    
+
 
 ### Add ignored user [POST /users/ignore/{cid}]
 
@@ -3560,7 +3560,7 @@ Required permission: *settings_edit*
 
 + Response 204
 
-    
+
 ### Remove ignored user [DELETE /users/ignore/{cid}]
 
 Required permission: *settings_edit*
@@ -3613,7 +3613,7 @@ Subscriptions related to connect state changes are tracked globally on per-user 
 ### User disconnected [POST /users/listeners/user_disconnected]
 
 + Response 200 (application/json)
-    + Attributes 
+    + Attributes
         + user (User)
         + went_offline: false (boolean) - true if the user isn't online in any hub
 
@@ -3657,7 +3657,7 @@ Required permission: *admin*
         + username: user1 (required)
         + password: userpassword (required)
         + permissions (array[Web permission], required) - List of permissions assigned for the user. Note: 'admin' permission gives access to all API methods.
-    
+
 + Response 200 (application/json)
     + Attributes (Web user)
 
@@ -3673,7 +3673,7 @@ Required permission: *admin*
     + Attributes
         + password: userpassword
         + permissions (array[Web permission]) - List of permissions assigned for the user. Note: 'admin' permission gives access to all API methods.
-    
+
 + Response 200 (application/json)
     + Attributes (Web user)
 
@@ -3698,7 +3698,7 @@ Required permission: *admin*
 ## Event listeners [/web_users/listeners]
 
 Required permission: *admin*
-    
+
 ### Web user created [POST /web_users/listeners/web_user_added]
 
 + Response 200 (application/json)
@@ -3760,14 +3760,14 @@ All viewed files that have completed downloading can be accessed via HTTP by usi
 
 `http(s)://<server address>/view/<file id>`
 
-Authentication information is required for accessing the file. 
+Authentication information is required for accessing the file.
 You may use the regular HTTP authorization header or alternatively add the query *`?auth_token=<authorization>`* after the URL.
 
 Example:
 
 `http://localhost:5600/view/ZMT6DPFKQGNGWO6I5Y6FKRHJJSL73DI5YAFGB6I?auth_token=417886b3-7419-48f1-a541-f308947db011`
 
-Warning: 
+Warning:
 
 Due to limitations of the embedded web server, the whole file content will be loaded in memory before uploading. This may cause stability issues
 on systems with low amount of memory. Therefore, it's recommended to use this API for viewing relatively small files.
@@ -3784,7 +3784,7 @@ Required permission: *view_files_view*
 
 ### Open file from remote user [POST]
 
-Open a new file from remote user. 
+Open a new file from remote user.
 
 Required permission: *view_files_edit*
 
@@ -3801,7 +3801,7 @@ Required permission: *view_files_edit*
 
 ### Open local file [POST /view_files/{tth}]
 
-Open a file that exists in share. 
+Open a file that exists in share.
 
 Required permission: *view_files_edit*
 
@@ -4100,8 +4100,8 @@ Fired when the file is ready for viewing
 
 ### Hinted user (Hinted user base)
 
-+ nicks: `Developer ([100]Developer)` (required) - Nick in the hinted hub is shown first and possible other nicks are inside parentheses 
-+ hub_names: `Demo hub (Dev hub)` (required) - Name of the hinted hub is shown first and possible other hub names are inside parentheses 
++ nicks: `Developer ([100]Developer)` (required) - Nick in the hinted hub is shown first and possible other nicks are inside parentheses
++ hub_names: `Demo hub (Dev hub)` (required) - Name of the hinted hub is shown first and possible other hub names are inside parentheses
 + flags (array[Hub user flag], required) - Flags in the hinted hub. All flags are not displayed if the user is offline.
 
 ### Hub user (Hinted user base, fixed-type)
