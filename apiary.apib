@@ -68,12 +68,12 @@ Get a list of all favorite directories.
 Required permission: *settings_view*
 
 + Response 200 (application/json)
-    + Attributes (array[Favorite directory])
+    + Attributes (array[Favorite directory], fixed-type)
 
 ### Get grouped paths [GET /favorite_directories/grouped_paths]
 
 + Response 200 (application/json)
-    + Attributes (array[Grouped path])
+    + Attributes (array[Grouped path], fixed-type)
 
 ### Create favorite directory [POST]
 
@@ -127,7 +127,7 @@ Required permission: *settings_view*
 ### Favorite directories updated [POST /favorite_hubs/listeners/favorite_hub_updated]
 
 + Response 200 (application/json)
-    + Attributes (array[Favorite directory])
+    + Attributes (array[Favorite directory], fixed-type)
 
 ## Data Structures
 
@@ -159,7 +159,7 @@ Required permission: *favorite_hubs_view*
     + count: 100 - Maximum number of items to return, must be larger than 0
 
 + Response 200 (application/json)
-    + Attributes (array[Favorite hub])
+    + Attributes (array[Favorite hub], fixed-type)
 
 ### Create favorite hub [POST]
 
@@ -278,7 +278,7 @@ Required permission: *events_view*
     + max_count: 0 - Maximum number of messages to return (starts from the latest ones, 0 = unlimited)
 
 + Response 200 (application/json)
-    + Attributes (array[Status message])
+    + Attributes (array[Status message], fixed-type)
 
 ### Add event [POST /events]
 
@@ -337,7 +337,7 @@ Get a list of all installed extensions.
 Required permission: *admin*
 
 + Response 200 (application/json)
-    + Attributes (array[Extension])
+    + Attributes (array[Extension], fixed-type)
 
 ### Register unmanaged extension [POST]
 
@@ -462,8 +462,8 @@ All event listeners from extension entities are also available to be used across
 + author: maksis (required)
 + running: true (boolean, required)
 + private: false (boolean, required) - Whether the extension is private (not published at npm)
-+ logs (array[Filesystem item], required)
-+ engines: node (array[string], required) - List of scripting engines supported by the extension
++ logs (array[Filesystem item], fixed-type, required)
++ engines: node (array[string], fixed-type, required) - List of scripting engines supported by the extension
 + managed: true (boolean, required) - Whether the extension is managed (installed locally)
 + has_settings: true (boolean, required) - Whether there settings available for configuring
 
@@ -495,7 +495,7 @@ Setting definitions can't be changed or removed after they have been posted (the
 Required permission: *admin*
 
 + Request (application/json)
-    + Attributes (array[Setting definition])
+    + Attributes (array[Setting definition], fixed-type)
 + Response 204
 
 
@@ -506,7 +506,7 @@ Get schema information of the extension-specific settings that have been posted 
 Required permission: *settings_view*
 
 + Response 200 (application/json)
-    + Attributes (array[Setting definition])
+    + Attributes (array[Setting definition], fixed-type)
 
 
 
@@ -591,7 +591,7 @@ Get a list of all filelist sessions.
 Required permission: *filelists_view*
 
 + Response 200 (application/json)
-    + Attributes (array[Filelist])
+    + Attributes (array[Filelist], fixed-type)
 
 ### Create remote filelist session [POST]
 
@@ -675,7 +675,7 @@ Get a list of all directory downloads.
 Required permission: *download*
 
 + Response 200 (application/json)
-    + Attributes (array[Directory download item])
+    + Attributes (array[Directory download item], fixed-type)
 
 
 ### Create directory download [POST]
@@ -808,7 +808,7 @@ Required permission: *filelists_view*
     + count: 100 - Maximum number of items to return, must be larger than 0
 
 + Response 200 (application/json)
-    + Attributes (array[Filelist item])
+    + Attributes (array[Filelist item], fixed-type)
     
 + Response 503
 
@@ -876,7 +876,7 @@ Required permission: *filesystem_view*
             + Default: false
             
 + Response 200 (application/json)
-    + Attributes (array[Filesystem item])
+    + Attributes (array[Filesystem item], fixed-type)
 
 ### Get disk space information [POST /filesystem/disk_info]
 
@@ -884,10 +884,10 @@ Get disk space info for a set of directory paths
 
 + Request (application/json)
     + Attributes
-        + paths: /home/airdcpp/share/dir/, /mnt/disk2/dir/ (array[string], required)
+        + paths: /home/airdcpp/share/dir/, /mnt/disk2/dir/ (array[string], required, fixed-type)
             
 + Response 200 (application/json)
-    + Attributes (array)
+    + Attributes (array[object], fixed-type)
         + (object, fixed-type)
             + path: /home/airdcpp/share/dir/ (required)
             + free_space: 81279320064 (number, required) - Free disk space in bytes
@@ -1021,7 +1021,7 @@ The following history types are available:
     + history_type
     
 + Response 200 (application/json)
-    + Attributes (array[string])
+    + Attributes (array[string], fixed-type)
         + ubuntu
         + videos
         + linux
@@ -1070,7 +1070,7 @@ Required permission: *settings_view*
     + max_count: 0 - Maximum number of most recent sessions to return (0 = unlimited)
     
 + Response 200 (application/json)
-    + Attributes (array[History session])
+    + Attributes (array[History session], fixed-type)
 
 ### Search session history [POST /histories/sessions/{history_type}/search]
 
@@ -1084,7 +1084,7 @@ Required permission: *settings_view*
         + max_results: 5 (number, required)
     
 + Response 200 (application/json)
-    + Attributes (array[History session])
+    + Attributes (array[History session], fixed-type)
 
 ### Clear session history [DELETE]
 
@@ -1125,7 +1125,7 @@ Get a list of all open sessions.
 Required permission: *hubs_view*
 
 + Response 200 (application/json)
-    + Attributes (array[Hub])
+    + Attributes (array[Hub], fixed-type)
 
 ### Create session [POST]
 
@@ -1347,7 +1347,7 @@ Required permission: *hubs_view*
     + count: 100 - Maximum number of items to return, must be larger than 0
 
 + Response 200 (application/json)
-    + Attributes (array[Hub user])
+    + Attributes (array[Hub user], fixed-type)
 
 ### Get user [GET /hubs/{session_id}/users/{cid}]
 
@@ -1464,7 +1464,7 @@ Only the user ID and possibly changed fields are sent
 Required permission: *private_chat_view*
 
 + Response 200 (application/json)
-    + Attributes (array[Private chat])
+    + Attributes (array[Private chat], fixed-type)
 
 ### Create session [POST]
 
@@ -1706,7 +1706,7 @@ Required permission: *queue_view*
     + count: 100 - Maximum number of items to return, must be larger than 0
 
 + Response 200 (application/json)
-    + Attributes (array[Queue bundle])
+    + Attributes (array[Queue bundle], fixed-type)
 
 ### Remove completed bundles [POST /queue/bundles/remove_completed]
 
@@ -1794,14 +1794,14 @@ Required permission: *queue_view*
     + count: 100 - Maximum number of items to return, must be larger than 0
 
 + Response 200 (application/json)
-    + Attributes (array[Queue file])
+    + Attributes (array[Queue file], fixed-type)
 
 ### Get bundle sources [GET /queue/bundles/{bundle_id}/sources]
 
 Required permission: *queue_view*
 
 + Response 200 (application/json)
-    + Attributes (array[Queue bundle source])
+    + Attributes (array[Queue bundle source], fixed-type)
 
 ### Remove bundle source [DELETE /queue/bundles/{bundle_id}/sources/{cid}]
 
@@ -1880,7 +1880,7 @@ Required permission: *queue_edit*
 Required permission: *queue_view*
 
 + Response 200 (application/json)
-    + Attributes (array[Queue source])
+    + Attributes (array[Queue source], fixed-type)
 
 ### Remove file source [DELETE /queue/files/{file_id}/sources/{cid}]
 
@@ -1895,9 +1895,9 @@ Required permission: *queue_view*
 + Response 200 (application/json)
     + Attributes
         + block_size: 524288 (number) - Block size of the tree used for validation (used for segment alignment). Total file size is used if there is no tree available.
-        + running (array[Queue segment]) - Running segments (entire segments)
-        + running_progress (array[Queue segment]) - Running segments (segment sizes based on the current progress)
-        + done (array[Queue segment]) - Completed segments
+        + running (array[Queue segment], fixed-type) - Running segments (entire segments)
+        + running_progress (array[Queue segment], fixed-type) - Running segments (segment sizes based on the current progress)
+        + done (array[Queue segment], fixed-type) - Completed segments
 
 
 ## Generic methods [/queue]
@@ -1913,7 +1913,7 @@ Get local paths for file/folder name/path or a TTH value.
             + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
 
 + Response 200 (application/json)
-    + Attributes (array[string])
+    + Attributes (array[string], fixed-type)
         + /home/airdcpp/share/Ubuntu/CD1/
         + /mnt/disk2/share/Videos/Ubuntu/CD1/
 
@@ -2268,7 +2268,7 @@ use some consideration regarding the number of searches that you really need to 
 Required permission: *search*
 
 + Response 200 (application/json)
-    + Attributes (array[Search instance])
+    + Attributes (array[Search instance], fixed-type)
 
 
 ### Create instance [POST]
@@ -2504,7 +2504,7 @@ Required permission: *search*
     + count: 100 - Maximum number of items to return, must be larger than 0
 
 + Response 200 (application/json)
-    + Attributes (array[Grouped search result])
+    + Attributes (array[Grouped search result], fixed-type)
 
 
 ### Get result [GET /search/{instance_id}/results/{result_id}]
@@ -2543,7 +2543,7 @@ Required permission: *download*
     + Attributes
         + One of (object)
             + bundle_info (Queue bundle add info) - Response for file downloads
-            + directory_downloads (array[Directory download item]) - Response for directory downloads
+            + directory_downloads (array[Directory download item], fixed-type) - Response for directory downloads
 
 
 ### Get child user results [GET /search/{instance_id}/results/{result_id}/children]
@@ -2553,7 +2553,7 @@ Get a list of individual user results.
 Required permission: *search*
 
 + Response 200 (application/json)
-    + Attributes (array[Child search result])
+    + Attributes (array[Child search result], fixed-type)
 
 
 ## Event listeners [/search/{instance_id}/listeners]
@@ -2656,7 +2656,7 @@ Get a list of current web server sessionsURL
 Required permission: *admin*
 
 + Response 200 (application/json)
-    + Attributes (array[Session])
+    + Attributes (array[Session], fixed-type)
 
 
 ## Session [/sessions/{session_id}]
@@ -2725,11 +2725,14 @@ Settings API can be used for viewing and managing of web server and core applica
 ### Get setting values [POST /settings/get]
 
 + Request (application/json)
-    + Attributes (array[string])
-        + keys: download_limit_main, upload_limit_main (array[string]) - Array of setting keys
+    + Attributes
+        + keys (array) - Array of setting keys
+            + Sample
+                + download_limit_main
+                + upload_limit_main
 
 + Response 200 (application/json)
-    + Attributes (array[string, boolean, number])
+    + Attributes (array[string, boolean, number], fixed-type)
         + Sample
             + 100 (number)
             + 0 (number)
@@ -2755,8 +2758,11 @@ Reset the specified settings to use their default values.
 Required permission: *settings_edit*
 
 + Request (application/json)
-    + Attributes (array[string])
-        + keys: download_limit_main, upload_limit_main (array[string]) - Array of setting keys
+    + Attributes
+        + keys (array) - Array of setting keys
+            + Sample
+                + download_limit_main
+                + upload_limit_main
 
 + Response 204
 
@@ -2767,11 +2773,14 @@ Get schema information of the specified settings.
 
 + Request (application/json)
     + Attributes
-        + keys: download_limit_main, upload_limit_main (array[string]) - Array of setting keys
+        + keys (array) - Array of setting keys
+            + Sample
+                + download_limit_main
+                + upload_limit_main
 
 + Response 200 (application/json)
-    + Attributes (array)
-        + (object)
+    + Attributes (object)
+        + Sample
             + download_limit_main (Setting definition)
             
 
@@ -2818,9 +2827,9 @@ Get schema information of the specified settings.
 + (string)
 + (number)
 + (boolean)
-+ (array[string])
-+ (array[number])
-+ (array[object])
++ (array[string], fixed-type)
++ (array[number], fixed-type)
++ (array[object], fixed-type)
 
 
 
@@ -2843,7 +2852,7 @@ Get schema information of the specified settings.
 Required permission: *share_view*
 
 + Response 200 (application/json)
-    + Attributes (array[string])
+    + Attributes (array[string], fixed-type)
         + /home/airdcpp/share/Videos/secret/
         + /mnt/disk2/share/Videos/secret/
 
@@ -2876,7 +2885,7 @@ Required permission: *share_edit*
 Required permission: *share_view*
 
 + Response 200 (application/json)
-    + Attributes (array[Temp share item])
+    + Attributes (array[Temp share item], fixed-type)
 
 ### Add temp share [POST]
 
@@ -2914,7 +2923,7 @@ Required permission: *share_edit*
 ### Grouped share roots [GET /share/grouped_root_paths]
 
 + Response 200 (application/json)
-    + Attributes (array[Grouped path])
+    + Attributes (array[Grouped path], fixed-type)
 
 ### Refresh whole share [POST /share/refresh]
 
@@ -2967,7 +2976,7 @@ Search for shared files.
         + share_profile: 7453466 (number, optional) - Items will be searched for from whole share if no profile is specified.
 
 + Response 200 (application/json)
-    + Attributes (array[Share item])
+    + Attributes (array[Share item], fixed-type)
 
 ### Stats [GET /share/stats]
 
@@ -3099,7 +3108,7 @@ Share profiles can be used to share different content in ADC hubs (hub preferenc
 ### List share profiles [GET]
 
 + Response 200 (application/json)
-    + Attributes (array[Share profile])
+    + Attributes (array[Share profile], fixed-type)
 
 ### Add share profile [POST]
 
@@ -3206,7 +3215,7 @@ Get a list of all shared root directories.
 Required permission: *settings_view*
 
 + Response 200 (application/json)
-    + Attributes (array[Share root])
+    + Attributes (array[Share root], fixed-type)
 
 ### Create share root [POST]
 
@@ -3290,7 +3299,7 @@ Only the updated properties are sent.
 + virtual_name: Ubuntu 14.04 - Name to show in filelist
 + incoming: true (boolean) - Incoming roots can be configured to use a different refresh interval.
     + Default: false
-+ profiles (array[Share profile basic])  - List of share profiles configured for this root.
++ profiles (array[Share profile basic], fixed-type)  - List of share profiles configured for this root.
 + type (Folder type)
 + size: 62523525626 (number) - Size in bytes
 + last_refresh_time: 1483611458 (number) - Time of last refresh
@@ -3397,7 +3406,7 @@ Transfer items represent individual transfer connections that may be reused to t
 Required permission: *transfers*
 
 + Response 200 (application/json)
-    + Attributes (array[Transfer item])
+    + Attributes (array[Transfer item], fixed-type)
 
 
 ## Transfer [/transfers/{transfer_id}]
@@ -3528,7 +3537,7 @@ Only the values that have changed after the last event are sent.
     + str: `Running (42.3%)` (required)
     + finished: false (boolean, required)
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required) - File TTH
-+ flags (array[Transfer flag], required)
++ flags (array[Transfer flag], fixed-type, required)
 + queue_file_id: 743457 (number, nullable) - ID of the queued file (not available for uploads)
 
 ### Transfer flag (enum[string])
@@ -3551,7 +3560,7 @@ Only the values that have changed after the last event are sent.
 Required permission: *settings_view*
 
 + Response 200 (application/json)
-    + Attributes (array[Ignored user])
+    + Attributes (array[Ignored user], fixed-type)
     
 
 ### Add ignored user [POST /users/ignore/{cid}]
@@ -3592,7 +3601,7 @@ Search users with nick matching the provided pattern. The most relevant match is
             + Default: true
 
 + Response 200 (application/json)
-    + Attributes (array[Hub user])
+    + Attributes (array[Hub user], fixed-type)
 
 ## Event listeners [/users/listeners]
 
@@ -3646,7 +3655,7 @@ Get a list of web users
 Required permission: *admin*
 
 + Response 200 (application/json)
-    + Attributes (array[Web user])
+    + Attributes (array[Web user], fixed-type)
 
 ### Create web user [POST]
 
@@ -3656,7 +3665,7 @@ Required permission: *admin*
     + Attributes
         + username: user1 (required)
         + password: userpassword (required)
-        + permissions (array[Web permission], required) - List of permissions assigned for the user. Note: 'admin' permission gives access to all API methods.
+        + permissions (array[Web permission], fixed-type, required) - List of permissions assigned for the user. Note: 'admin' permission gives access to all API methods.
     
 + Response 200 (application/json)
     + Attributes (Web user)
@@ -3672,7 +3681,7 @@ Required permission: *admin*
 + Request (application/json)
     + Attributes
         + password: userpassword
-        + permissions (array[Web permission]) - List of permissions assigned for the user. Note: 'admin' permission gives access to all API methods.
+        + permissions (array[Web permission], fixed-type) - List of permissions assigned for the user. Note: 'admin' permission gives access to all API methods.
     
 + Response 200 (application/json)
     + Attributes (Web user)
@@ -3719,7 +3728,7 @@ Required permission: *admin*
 ### Web user
 
 + username: user1
-+ permissions (array[Web permission]) - List of permissions assigned for the user. Note: 'admin' permission gives access to all API methods.
++ permissions (array[Web permission], fixed-type) - List of permissions assigned for the user. Note: 'admin' permission gives access to all API methods.
 + active_sessions: 1 (number)
 + last_login: 412412456 (number) - Time of the last successful login
 
@@ -3780,7 +3789,7 @@ on systems with low amount of memory. Therefore, it's recommended to use this AP
 Required permission: *view_files_view*
 
 + Response 200 (application/json)
-    + Attributes (array[View file])
+    + Attributes (array[View file], fixed-type)
 
 ### Open file from remote user [POST]
 
@@ -3897,7 +3906,7 @@ Fired when the file is ready for viewing
 ### Grouped path (object, fixed-type)
 
 + name: Videos (required)
-+ paths: /home/airdcpp/share/Videos/, /mnt/disk2/share/Videos/ (array[string], required)
++ paths: /home/airdcpp/share/Videos/, /mnt/disk2/share/Videos/ (array[string], fixed-type, required)
 
 ### Search query (object, fixed-type)
 
