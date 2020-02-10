@@ -795,7 +795,7 @@ Required permission: *filelists_view*
 
 # Group Filelist entities
 
-## Methods [/filelists/{session_id}/items]
+## Filelist items [/filelists/{session_id}/items]
 
 ### Get directory content [GET /filelists/{session_id}/items/{start}/{count}]
 
@@ -814,6 +814,23 @@ Required permission: *filelists_view*
 
         Content of this directory is not yet available
 
+## Filelist item [/filelists/{session_id}/items/{item_id}]
+
+### Get filelist item [GET]
+
+Get a single item by ID from the currently selected directory.
+
+**Minimum API feature level**: 1
+
+Required permission: *filelists_view*
+
++ Request (application/json)
+
++ Response 200 (application/json)
+
+    + Attributes (Filelist item)
+
+## Miscellaneous [/filelists/{session_id}/]
 
 ### Change directory [POST /filelists/{session_id}/directory]
 
@@ -1581,7 +1598,7 @@ Note that private chat session may not exist for announcement-like messages that
 ### Private chat message request (Chat message request)
 
 + user (Hinted user base, required)
-+ echo: false (boolean, optional) - Echo the sent message back to me (or in case of a chat room, to all chatroom members). This will always cause a new private chat session to be created and allows the message to be logged. Note that a private chat session will also be created if the other users replies to your message (or sends an away message). This flag should also be enabled when sending a message to a chat room and you want the message to be broadcasted to all chatroom members.
++ echo: false (boolean, optional) - Echo the sent message back to me (or in case of a chat room, to all chatroom members). This will always cause a new private chat session to be created and allows the message to be logged. Note that a private chat session will also be created if the recipient replies to your message (or sends an away message). This flag should also be enabled when sending a message to a chat room and you want the message to be broadcasted to all chatroom members.
     + Default: false
 
 
