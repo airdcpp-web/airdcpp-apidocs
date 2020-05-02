@@ -1368,13 +1368,21 @@ Required permission: *hubs_view*
 
 ### Get user [GET /hubs/{session_id}/users/{cid}]
 
-Get user information by CID.
+Get user information by global user CID.
 
 Required permission: *hubs_view*
 
 + Response 200 (application/json)
     + Attributes (Hub user)
 
+### Get user [GET /hubs/{session_id}/users/{id}]
+
+Get user information by hub user ID.
+
+Required permission: *hubs_view*
+
++ Response 200 (application/json)
+    + Attributes (Hub user)
 
 ## Miscellaneous [/hubs/{session_id}/]
 
@@ -2296,6 +2304,7 @@ Required permission: *search*
     + Attributes
         + expiration_minutes: 60 (number, optional) - Time in minutes after which the instance will be removed automatically (0 = no expiration). Counted from the time of creation.
             + Default: 60
+        + owner_suffix: mylabel (string, optional) - An optional label suffix for the owner ID that is saved for the session. See the `owner` field in the response for details about the generated owner ID format. **Minimum API feature level**: 4
 + Response 200 (application/json)
     + Attributes (Search instance)
 
@@ -2392,6 +2401,25 @@ All event listeners from search instances are also available to be used across a
 
 Required permission: *search*
 
+
+### Search instance created [POST /search/listeners/search_instance_created]
+
+Fired when a new instance is created
+
+**Minimum API feature level**: 4
+
++ Response 200 (application/json)
+    + Attributes (Search instance)
+
+### Search instance removed [POST /search/listeners/search_instance_removed]
+
+Fired when a search instance is removed
+
+**Minimum API feature level**: 4
+
++ Response 200 (application/json)
+    + Attributes (Search instance)
+
 ### Search types updated [POST /search/listeners/search_types_updated]
 
 Fired when search types are added/updated/removed
@@ -2405,13 +2433,15 @@ Fired when search types are added/updated/removed
 
 ### Search instance
 
-+ id: 0 (number, required)
-+ expires_in: 60000 (number, required) - Time in milliseconds until the instance expires
++ id: 1 (number, required)
++ expires_in: 60000 (number, required) - Time in milliseconds until the instance expires (0 if the instance doesn't expire)
 + current_search_id: 643345 (number, required) - ID of the previously sent search
++ owner: session:8327624587:webui (required) - Owner ID. Instances created via the API will use the following ID formats depending on the creator: `extension:extension_id[:custom_suffix]` (extension), `session:session_id[:custom_suffix]` (custom authenticated session), `basic_auth[:custom_suffix]` (basic auth). Instances not created via the API (e.g. search tabs in the Windows GUI) will have different owner IDs. **Minimum API feature level**: 4
 + queue_time: 0 (number, required) - Current queue time in milliseconds for the previously sent search (hub searches only)
 + queued_count: 0 (number, required) - Number of hub searches that haven't been sent yet (hub searches only)
 + result_count: 3153 (number, required) - Number of received results
 + searches_sent_ago: 47243 (number, required) - Milliseconds ellapsed since the previous search was sent
++ query (Search query, optional) - Current search query (not available if no searches have been performed in this search instance) **Minimum API feature level**: 4
 
 ### Search type (object, fixed-type)
 
@@ -2475,10 +2505,7 @@ Required permission: *search*
         + hub_urls: adcs://myhub.com:6423, mynmdchub.com (optional) - A list of hub URLs where the search should be sent to. Search will be sent to all connected hubs if this field is not provided.
 
 + Response 200 (application/json)
-    + Attributes
-        + queue_time: 5000 (number) - Current queue time for this search in milliseconds. Given that this is not a manual search, higher priority searches that are queued after this one may increase the waiting time even more.
-        + search_id: 643345 (number) - An individual search ID for this query
-        + queued_count: 3 (number) - Number of hubs for which the search was queued
+    + Attributes (Search queue info)
 
 ### Perform user search [POST /search/{instance_id}/user_search]
 
@@ -2579,6 +2606,15 @@ All event listeners from search instances are also available to be used across a
 
 Required permission: *search*
 
+### Hub searches queued [POST /search/{instance_id}/listeners/search_hub_searches_queued]
+
+Fired when hub new hub searches are queued.
+
+**Minimum API feature level**: 4
+
++ Response 200 (application/json)
+    + Attributes (Search queue info)
+
 ### Hub searches sent [POST /search/{instance_id}/listeners/search_hub_searches_sent]
 
 Fired after all queued searches were sent.
@@ -2587,6 +2623,7 @@ Fired after all queued searches were sent.
     + Attributes (object, fixed-type)
         + sent: 4 (number, required) - Number of searches that were sent (this may also be 0 if all hubs were closed)
         + search_id: 643345 (required) - ID of the search that was sent
+        + query (Search query, required) - Query that was sent **Minimum API feature level**: 4
 
 ### Grouped result added [POST /search/{instance_id}/listeners/search_result_added]
 
@@ -2634,6 +2671,7 @@ Associate socket with an existing session.
 
 + Response 200 (application/json)
     + Attributes (Authentication info)
+
 
 ## Current session [/sessions/self]
 
@@ -2731,6 +2769,13 @@ Required permission: *admin*
 + system_info (System info, required) - Generic information about the system that the application is running on
 + user (Web user, required) - Current web user
 + wizard_pending: false (boolean, required) - Whether completion of the initial configuration wizard is pending
+
+### Search queue info
+
++ queued_count: 4 (number, required) - Number of searches that were queued
++ query (Search query, required) - Query that was queued **Minimum API feature level**: 4
++ search_id: 643345 (required) - ID of the search that was queued
++ queue_time: 5000 (number, required) - Current queue time for this search in milliseconds. Given that this is not a manual search, higher priority searches that are queued after this one may increase the waiting time even more.
 
 
 # Group Settings
@@ -3066,7 +3111,9 @@ Validation hooks are fired for each file/directory that is found while refreshin
 
 ### File validation hook [POST /share/hooks/share_file_validation_hook]
 
-The hook is fired for each file that is being validated (rejected files won't be shared).
+The hook is fired for each file that is being validated (rejected files won't be shared). 
+
+It's generally better to use the new file validation hook instead for faster refresh times.
 
 + Response 200 (application/json)
     + Attributes
@@ -3075,11 +3122,40 @@ The hook is fired for each file that is being validated (rejected files won't be
 
 ### Directory validation hook [POST /share/hooks/share_directory_validation_hook]
 
-The hook is fired for each directory that is being validated (rejected directories won't be shared).
+The hook is fired for each directory that is being validated, excluding share roots. Rejected directories won't be shared.
+
+It's generally better to use the new directory validation hook instead for faster refresh times.
 
 + Response 200 (application/json)
     + Attributes
         + path: /home/airdcpp/share/Ubuntu/CD1/ - Full directory path
+
+### New file validation hook [POST /share/hooks/new_share_file_validation_hook]
+
+The hook is fired for each new file that isn't currently in share (rejected files won't be shared).
+
+**Minimum API feature level**: 4
+
++ Response 200 (application/json)
+    + Attributes
+        + path: /home/airdcpp/share/Ubuntu/CD1/Ubuntu CD1.iso - Full file path
+        + new_parent: false - Whether the parent of this file is a new directory that wasn't shared before
+        + size: 62523525626 (number) - File size (bytes)
+
+### New directory validation hook [POST /share/hooks/new_share_directory_validation_hook]
+
+The hook is fired for each new directory that isn't currently in share, excluding share roots. Rejected directories won't be shared.
+
+This hook is fired recursively for all new parents and their children. 
+
+If you are performing operations that only need to be run for the parent, check `new_parent` flag in the hook data that will be `false` for the topmost directory in the hierarchy.
+
+**Minimum API feature level**: 4
+
++ Response 200 (application/json)
+    + Attributes
+        + path: /home/airdcpp/share/Ubuntu/CD1/ - Full directory path
+        + new_parent: false - Whether the parent of this directory was also a new directory
 
 
 ## Data Structures
@@ -3620,6 +3696,21 @@ Search users with nick matching the provided pattern. The most relevant match is
 + Response 200 (application/json)
     + Attributes (array[Hub user], fixed-type)
 
+### Search hinted user [POST /users/search_hinted_user]
+
+Search a user by CID and hub hint. If the user is not found from the hinted hub, the method falls back to returning the user information from any hub that he's connected to.
+
+**Minimum API feature level**: 4
+
++ Request (application/json)
+    + Attributes
+        + cid: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required) - User's CID
+        + hub_url: adcs://myhub.com:6423 (required) - Hub URL
+
++ Response 200 (application/json)
+    + Attributes (Hinted user)
+    
+
 ## Event listeners [/users/listeners]
 
 Subscriptions related to connect state changes are tracked globally on per-user basis and sent users are not bound to any hub. If you want to track hub level user connect state changes, you should use the Hub API listeners instead.
@@ -4113,6 +4204,7 @@ Fired when the file is ready for viewing
 
 ### User (object, fixed-type)
 
++ id: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA (required) - **Minimum API feature level**: 4
 + cid: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA (required)
 + nicks: `[Developer, [100]Developer]` (required)
 + hub_names: `[Demo hub, Dev hub]` (required)
@@ -4132,6 +4224,7 @@ Fired when the file is ready for viewing
 
 ### Hub user (Hinted user base, fixed-type)
 
++ id: 3752894 (number, required) - **Minimum API feature level**: 4
 + hub_name: Demo hub (required)
 + flags (array[Hub user flag], required)
 + ip4 (object, fixed-type, nullable) - IPv4 address
