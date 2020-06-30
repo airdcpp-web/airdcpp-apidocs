@@ -1477,6 +1477,156 @@ Only the user ID and possibly changed fields are sent
 + Response 200 (application/json)
     + Attributes (Hub user)
 
+# Group Menus
+
+**Minimum API feature level**: 4
+
+Menu API allows extension (or other API users) to add their own context menu items for various different item types.
+
+There are no specific permissions required for using this API module, but it's usually good to check that you have the required permission to call the respective item getter for the menu type before adding listeners/hooks.
+
+
+### Menu types
+
+#### Item types without a parent entity
+
+The following menu types don't have a parent entity and you can call the respective item getter method with each ID in the `selected_ids` list.
+
+##### extension
+
+Item getter: [Get extension](#reference/extensions/extension-entity/get-extension)
+
+*Note that your extension will also receive menu events targeting other extensions. If you want add menu items only for your own extension, remember to check that the item ID list includes the ID of your own extesion.*
+
+##### favorite_hub
+
+Item getter: [Get favorite hub](#reference/favorite-hubs/favorite-hub/get-favorite-hub)
+
+##### hinted_user
+
+Item getter: [Find hinted user](#reference/users/miscellaneous/search-hinted-user)
+
+*The most common menu type for displaying user-related context menus (e.g. for search results, transfers, queue sources, filelists, private messages)*
+
+##### queue_bundle
+
+Item getter: [Get bundle](#reference/queue/bundle/get-bundle)
+
+##### queue_file
+
+Item getter: [Get file](#reference/queue/files/get-file)
+
+##### share_root
+
+Item getter: [Get share root](#reference/share-roots/share-root/get-share-root)
+
+##### transfer
+
+Item getter: [Get transfer](#reference/transfers/transfer/get-transfer)
+
+##### user
+
+Item getter: [Get user](#reference/users/miscellaneous/get-user)
+
+*Less commonly being used menu type with users that aren't bound to any hub (e.g. ignored users)*
+
+
+
+#### Entity-specific item types
+
+The following menu types have an `entity_id` field set, which contains the parent entity needed when calling the item getter method.
+
+##### grouped_search_result
+
+Item getter: [Get grouped search result](#reference/search-instances/results/get-result)
+
+##### hub_user
+
+Item getter: [Get hub user](#reference/hub-sessions/users/get-user)
+ 
+*User context menu type bound to a specific hub session with no fallback (e.g. hub's user list)*
+
+##### filelist_item
+
+Item getter: [Get filelist item](#reference/filelist-entities/filelist-item/get-filelist-item)
+
+
+### Flow
+
+1. User wants to open a context menu for specified items and the UI calls the [List menu items](#reference/menus/menus/list-menu-items) API method to get the available menu items to show
+2. Extensions that have a [Menu item selected](#reference/menus/hooks/menu-item-selected) hook registered for the specified menu type are being requested to send the available menu items for the requested items
+3. User selects a menu item provided by an extension and the UI calls the [Select menu item](#reference/menus/menus/select-menu-item) API method to inform the extension about the selection
+4. Extension receives the [Menu item selected](#reference/menus/event-listeners/menu-item-selected) listener event, after which it can perform the wanted action for the selected item
+
+
+## Menus [/menus]
+
+### List menu items [POST /menus/{menu_type}/list]
+
+Get a list of available context menu items for specified items that can be shown in the context menu.
+
++ Request (application/json)
+    + Attributes (Context menu item ids)
++ Response 200 (application/json)
+    + Attributes (array[Context menu item], fixed-type)
+
+
+### Select menu item [POST /menus/{menu_type}/select]
+
+Post a select action when a user selects a specific menu item from the context menu.
+
++ Request (application/json)
+    + Attributes (Context menu item selection)
+
++ Response 204
+
+
+
+
+## Event listeners [/menus/listeners]
+
+### Menu item selected [POST /menus/listeners/{menu_type}_menuitem_selected]
+
++ Response 200 (application/json)
+    + Attributes (Context menu item selection)
+
+
+## Hooks [/menus/hooks]
+
+### List menu items [POST /menus/hooks/{menu_item}_list_menuitems]
+
+Hook is fired when the user attempts to list menu items for a specific menu type.
+
++ Request (application/json)
+    + Attributes (Context menu item ids)
+
++ Response 200 (application/json)
+    + Attributes
+        + menuitems (array[Context menu item])
+
+
+## Data Structures
+
+### Context menu item (object, fixed-type)
+
++ id: scan_share (required) - Menu item ID as defined by the hook
++ title: Scan share for missing files (required) - Menu item title to show to the user
++ icon (object, optional) - iconset-to-icon mapping of icon to shown for the menu item. Use the key "semantic" when defining icons for the Web UI and see https://semantic-ui.com/elements/icon.html for available icons to use (see the "Definitions" tab for information about available icon colors and other attributes). The Windows GUI doesn't currently support icons for menu items.
+    + Sample
+        + semantic: yellow broom
+
+
+### Context menu item ids (object, fixed-type)
+
++ selected_ids: 155214176, 53872534 (array[number]) - IDs of the selected item entities
++ entity_id: 1 (number, optional) - ID of the parent entity, must be provided for menu types that are bound to a specific entity
+
+### Context menu item selection (Context menu item ids, fixed-type)
+
++ hook_id: `airdcpp-release-validator` (string, required) - Hook ID of the selected menu item, field hook_id from the list response
++ menuitem_id: scan_share (required) - ID of the selected menu item, field id from the list response
+
+
 
 
 
@@ -1872,6 +2022,13 @@ Required permission: *queue_edit*
 
 
 ## Files [/queue/files/{file_id}]
+
+### Get file [GET]
+
+Required permission: *queue_view*
+
++ Response 200 (application/json)
+    + Attributes (Queue file)
 
 ### Remove file from queue [POST /queue/files/{file_id}/remove]
 
