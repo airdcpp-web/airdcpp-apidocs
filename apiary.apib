@@ -1259,6 +1259,8 @@ Hook is fired for each incoming hub chat message and can be used to prevent cert
 
 Hook is fired for each outgoing hub chat message and can be used to prevent certain messages from being sent to the hub.
 
+**Note:** Handling of chat commands with this hook has been deprecated and will be removed in the next API version. Use the [hub_text_command](#reference/hub-sessions/event-listeners/hub-text-command) event listener for handling chat commands instead.
+
 + Response 200 (application/json)
     + Attributes
         + text: Hello world
@@ -1477,6 +1479,15 @@ Only the user ID and possibly changed fields are sent
 + Response 200 (application/json)
     + Attributes (Hub user)
 
+### Hub text command [POST /hubs/{session_id}/listeners/hub_text_command]
+
+**Minimum API feature level**: 4
+
+Fired after a chat command (text starting with /) was submitted to the application
+
++ Response 200 (application/json)
+    + Attributes (Chat command info)
+
 # Group Menus
 
 **Minimum API feature level**: 4
@@ -1559,16 +1570,20 @@ Item getter: [Get filelist item](#reference/filelist-entities/filelist-item/get-
 4. Extension receives the [Menu item selected](#reference/menus/event-listeners/menu-item-selected) listener event, after which it can perform the wanted action for the selected item
 
 
-## Menus [/menus]
+## Menus [/menus/{menu_type}]
+
++ Parameters
+    + menu_type - Menu type (available menu types are listed above)
 
 ### List menu items [POST /menus/{menu_type}/list]
 
 Get a list of available context menu items for specified items that can be shown in the context menu.
 
+
 + Request (application/json)
     + Attributes (Context menu item ids)
 + Response 200 (application/json)
-    + Attributes (array[Context menu item], fixed-type)
+    + Attributes (array[Context menu item], fixed-type, required)
 
 
 ### Select menu item [POST /menus/{menu_type}/select]
@@ -1583,7 +1598,10 @@ Post a select action when a user selects a specific menu item from the context m
 
 
 
-## Event listeners [/menus/listeners]
+## Event listeners [/menus/listeners/{menu_type}]
+
++ Parameters
+    + menu_type - Menu type (available menu types are listed above)
 
 ### Menu item selected [POST /menus/listeners/{menu_type}_menuitem_selected]
 
@@ -1591,18 +1609,21 @@ Post a select action when a user selects a specific menu item from the context m
     + Attributes (Context menu item selection)
 
 
-## Hooks [/menus/hooks]
+## Hooks [/menus/hooks/{menu_type}]
+
++ Parameters
+    + menu_type - Menu type (available menu types are listed above)
 
 ### List menu items [POST /menus/hooks/{menu_item}_list_menuitems]
 
-Hook is fired when the user attempts to list menu items for a specific menu type.
+Hook is fired when the user attempts to list menu items for a specific menu type. The response represents the data to be returned by the hook (list of context menu items).
 
 + Request (application/json)
     + Attributes (Context menu item ids)
-
+        + permissions (array[Web permission], fixed-type, required) - Permissions of the user who requested the items
 + Response 200 (application/json)
     + Attributes
-        + menuitems (array[Context menu item])
+        + menuitems (array[Context menu item], fixed-type)
 
 
 ## Data Structures
@@ -1618,13 +1639,14 @@ Hook is fired when the user attempts to list menu items for a specific menu type
 
 ### Context menu item ids (object, fixed-type)
 
-+ selected_ids: 155214176, 53872534 (array[number]) - IDs of the selected item entities
++ selected_ids: 155214176, 53872534 (array[number], required) - IDs of the selected item entities
 + entity_id: 1 (number, optional) - ID of the parent entity, must be provided for menu types that are bound to a specific entity
 
 ### Context menu item selection (Context menu item ids, fixed-type)
 
 + hook_id: `airdcpp-release-validator` (string, required) - Hook ID of the selected menu item, field hook_id from the list response
 + menuitem_id: scan_share (required) - ID of the selected menu item, field id from the list response
++ permissions (array[Web permission], fixed-type, required) - Permissions of the user who performed the click
 
 
 
@@ -1733,6 +1755,8 @@ Note that private chat session won't exist yet for private messages received fro
 Hook is fired for each outgoing private chat message and can be used to prevent certain messages from being sent.
 
 Note that private chat session may not exist for announcement-like messages that sent via the API.
+
+**Note:** Handling of chat commands with this hook has been deprecated and will be removed in the next API version. Use the [private_chat_text_command](#reference/private-chat-sessions/event-listeners/private-chat-text-command) event listener for handling chat commands instead.
 
 + Response 200 (application/json)
     + Attributes (Private chat message request)
@@ -1844,7 +1868,6 @@ Required permission: *private_chat_view*
 ### Chat message received [POST /private_chat/{session_id}/listeners/private_chat_message]
 
 + Response 200 (application/json)
-
     + Attributes (Chat message)
         
 ### Status message received [POST /private_chat/{session_id}/listeners/private_chat_status]
@@ -1852,6 +1875,14 @@ Required permission: *private_chat_view*
 + Response 200 (application/json)
     + Attributes (Status message)
 
+### Private chat text command [POST /hubs/{session_id}/listeners/private_chat_text_command]
+
+**Minimum API feature level**: 4
+
+Fired after a chat command (text starting with /) was submitted to the application
+
++ Response 200 (application/json)
+    + Attributes (Chat command info)
 
 
 
@@ -4322,6 +4353,12 @@ Fired when the file is ready for viewing
 + text: Hello there (required)
 + third_person: false (boolean, optional) - Indicate that the message was sent as third person (/me)
     + Default: false
+
+### Chat command info
+
++ command: rvalidator (required) - The main command
++ args: scan, /home/share (array[string], required) - Possible arguments
++ permissions (array[Web permission], fixed-type, required) - Permissions of the submitter of the command
 
 ### Status message request (object, fixed-type)
 
