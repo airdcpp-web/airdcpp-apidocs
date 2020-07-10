@@ -2970,30 +2970,39 @@ Required permission: *admin*
 
 Settings API can be used for viewing and managing of web server and core application settings.
 
+[Available core setting keys](https://github.com/airdcpp-web/airdcpp-webclient/blob/master/airdcpp-webapi/api/CoreSettings.h)
+
+[Available API setting keys](https://github.com/airdcpp-web/airdcpp-webclient/blob/master/airdcpp-webapi/web-server/WebServerSettings.cpp)
+
 ## Settings [/settings]
 
 ### Get setting values [POST /settings/get]
 
+Get setting values by keys
+
 + Request (application/json)
     + Attributes
-        + keys (array) - Array of setting keys
+        + keys (array, required) - Array of setting keys
             + Sample
                 + download_limit_main
                 + upload_limit_main
+        + value_mode (Setting value mode)
 
 + Response 200 (application/json)
-    + Attributes (array[string, boolean, number], fixed-type)
+    + Attributes (array[string, boolean, number], fixed-type, required)
         + Sample
             + 100 (number)
             + 0 (number)
 
 ### Set setting values [POST /settings/set]
 
+Update setting values
+
 Required permission: *settings_edit*
 
 + Request Key-value listing of setting keys and their new values (application/json)
 
-    + Attributes (object)
+    + Attributes (object, required)
         + Sample
             + download_limit_main: 0 (number)
             + upload_limit_main: 250 (number)
@@ -3009,7 +3018,7 @@ Required permission: *settings_edit*
 
 + Request (application/json)
     + Attributes
-        + keys (array) - Array of setting keys
+        + keys (array, required) - Array of setting keys
             + Sample
                 + download_limit_main
                 + upload_limit_main
@@ -3081,6 +3090,12 @@ Get schema information of the specified settings.
 + (array[number], fixed-type)
 + (array[object], fixed-type)
 
+
+### Setting value mode (enum)
+
++ current - Return the currently active value (auto/manual)
++ force_manual - Return manually set values even when auto detection is enabled
++ force_auto - Return auto values (if possible) even when auto detection has not been enabled
 
 
 ### Connectivity mode (enum[number])
@@ -4420,6 +4435,7 @@ Fired when the file is ready for viewing
 
 + id: 3752894 (number, required) - **Minimum API feature level**: 4
 + hub_name: Demo hub (required)
++ hub_session_id: 2 (number, required) - **Minimum API feature level**: 4
 + flags (array[Hub user flag], required)
 + ip4 (object, fixed-type, nullable) - IPv4 address
     + country_id: `NL - Netherlands` (required)
