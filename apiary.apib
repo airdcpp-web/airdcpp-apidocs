@@ -239,6 +239,11 @@ Required permission: *favorite_hubs_view*
 + connection_mode_v6 (Connectivity mode, nullable) - IPv6 connectivity mode (defaults to global value if not set)
 + connection_ip_v4: 89.255.248.35 (nullable) - IPv4 address (defaults to global value if not set)
 + connection_ip_v6: 2a00:1a48:1261::168 (nullable) - IPv6 address (defaults to global value if not set)
++ show_joins: false (boolean, nullable) - Show joining/parting users **Minimum API feature level**: 5 (defaults to global value if not set)
++ fav_show_joins: true (boolean, nullable) - Show joining/parting favorite users **Minimum API feature level**: 5 (defaults to global value if not set)
++ use_hub_chat_notify: false (boolean, nullable) - Show notification on new chat messages **Minimum API feature level**: 5 (defaults to global value if not set)
++ away_message: I'm away (string, nullable) - Custom away message **Minimum API feature level**: 5 (defaults to global value if not set)
++ log_main: false (boolean, nullable) - Log main chat **Minimum API feature level**: 5 (defaults to global value if not set)
 
 ### Favorite hub (Favorite hub base, fixed-type)
 
@@ -1219,6 +1224,19 @@ Required permission: *hubs_view*
 + Response 200 (application/json)
     + Attributes (Hub)
 
+### Update session [PATCH]
+
+Required permission: *hubs_edit*
+
+**Minimum API feature level**: 5 
+
+Update hub setting values. If the hub exists in favorites, the respective settings are also being updated for the favorite hub entry.
+
++ Request (application/json)
+    + Attributes (Hub settings, required)
+
++ Response 204
+
 ### Remove session [DELETE]
 
 Required permission: *hubs_edit*
@@ -1292,11 +1310,19 @@ Hook is fired for each outgoing hub chat message and can be used to prevent cert
 + favorite_hub: 64723743 (number, required) - Favorite hub ID (0 = no favorite hub)
 + message_counts (Chat message info, required)
 + encryption (Encryption, nullable) - Available only for connected ADCS hubs
++ settings (Hub settings, required) - **Minimum API feature level**: 5 
+    + nick: My nick - My current nick in the hub (defaults to favorite hub/global value if not set)
 
 ### Hub counts
 
 + share_size: 832572352 (number)
 + user_count: 3 (number)
+
+### Hub settings
+
++ show_joins: false (boolean, nullable) - Show joining/parting users (defaults to favorite hub/global value if not set)
++ fav_show_joins: true (boolean, nullable) - Show joining/parting favorite users (defaults to favorite hub/global value if not set)
++ use_hub_chat_notify: false (boolean, nullable) - Show notification on new chat messages (defaults to favorite hub/global value if not set)
 
 
 # Group Hub sessions
@@ -1582,6 +1608,7 @@ Get a list of available context menu items for specified items that can be shown
 
 + Request (application/json)
     + Attributes (Context menu item ids)
+        + supports (array[Context menu feature], fixed-type, optional) - Features supported by the implementation. **Minimum API feature level**: 5
 + Response 200 (application/json)
     + Attributes (array[Context menu item], fixed-type, required)
 
@@ -1592,6 +1619,7 @@ Post a select action when a user selects a specific menu item from the context m
 
 + Request (application/json)
     + Attributes (Context menu item selection)
+        + supports (array[Context menu feature], fixed-type, optional) - Features supported by the implementation. **Minimum API feature level**: 5
 
 + Response 204
 
@@ -1607,6 +1635,7 @@ Post a select action when a user selects a specific menu item from the context m
 
 + Response 200 (application/json)
     + Attributes (Context menu item selection)
+        + supports (array[Context menu feature], fixed-type, required) - Features supported by the implementation that performed the selection. **Minimum API feature level**: 5
 
 
 ## Hooks [/menus/hooks/{menu_type}]
@@ -1621,6 +1650,7 @@ Hook is fired when the user attempts to list menu items for a specific menu type
 + Request (application/json)
     + Attributes (Context menu item ids)
         + permissions (array[Web permission], fixed-type, required) - Permissions of the user who requested the items
+        + supports (array[Context menu feature], fixed-type, required) - Features supported by the implementation that requested the listing. **Minimum API feature level**: 5
 + Response 200 (application/json)
     + Attributes
         + menuitems (array[Context menu item], fixed-type)
@@ -1635,7 +1665,10 @@ Hook is fired when the user attempts to list menu items for a specific menu type
 + icon (object, optional) - iconset-to-icon mapping of icon to shown for the menu item. Use the key "semantic" when defining icons for the Web UI and see https://semantic-ui.com/elements/icon.html for available icons to use (see the "Definitions" tab for information about available icon colors and other attributes). The Windows GUI doesn't currently support icons for menu items.
     + Sample
         + semantic: yellow broom
-
++ urls (array[string], optional) - List of URLs that the requester should open if the menu is selected (and the `url` feature is supported by it). Note that the menu item selection event will not be fired for menu items that open URLs. **Minimum API feature level**: 5
+    + Sample
+        + https://www.google.com/search?q=selected_item1_name
+        + https://www.google.com/search?q=selected_item2_name
 
 ### Context menu item ids (object, fixed-type)
 
@@ -1648,7 +1681,9 @@ Hook is fired when the user attempts to list menu items for a specific menu type
 + menuitem_id: scan_share (required) - ID of the selected menu item, field id from the list response
 + permissions (array[Web permission], fixed-type, required) - Permissions of the user who performed the click
 
+### Context menu feature (enum[string])
 
++ url - Support for opening URL links
 
 
 
@@ -1960,7 +1995,8 @@ Required permission: *queue_edit*
 
 + Request (application/json)
     + Attributes (Download params)
-        + time: 1483611358 - Original directory creation/modify time (optional)
+        + time: 1483611358 - Original directory creation/modify time (number, optional)
+        + user (Hinted user base, optional) - Possible source user for this directory
         + files (array)
             + (object)
                 + name: `CD1/Ubuntu 16.04.iso` (required) - File name that may also contain subdirectories relative to the main bundle path
@@ -3079,6 +3115,8 @@ Get schema information of the specified settings.
 + file_path - File path selector
 + directory_path - Directory path selector
 + text - Field for longer text content
++ hub_url - Hub URL **Minimum API feature level**: 5
++ hinted_user - Hinted user (with properties `nicks`, `hub_url` and `cid`) **Minimum API feature level**: 5
 + struct - A value object, each child field must be configured in the 'definitions' field. Nested structs are not currently supported.
 
 ### Setting value (enum)
@@ -3086,10 +3124,15 @@ Get schema information of the specified settings.
 + (string)
 + (number)
 + (boolean)
++ (Offline hinted user)
 + (array[string], fixed-type)
 + (array[number], fixed-type)
 + (array[object], fixed-type)
 
+
+### Offline hinted user (Hinted user base)
+
++ nicks: `Developer ([100]Developer)` (required) - Nick in the hinted hub is shown first and possible other nicks are inside parentheses
 
 ### Setting value mode (enum)
 
@@ -4353,6 +4396,7 @@ Fired when the file is ready for viewing
 
 ### Unread chat info (object, fixed-type)
 
++ mentions: 1 (number, required) - Number of messages mentioned your nick  **Minimum API feature level**: 5
 + user: 2 (number, required) - Number of unread user messages
 + bot: 12 (number, required) - Number of unread bot messages
 + status: 0 (number, required) - Number of unread status messages
@@ -4380,13 +4424,10 @@ Fired when the file is ready for viewing
 + text: `[10]APITester: ISO file(s) over 500 MB in share (/Ubuntu/Ubuntu 14.04.iso)` (required)
 + severity: info (Severity, required)
 
-### Chat message (object, fixed-type)
+### Chat message (Message base, fixed-type)
 
-+ id: 1 (number, required)
-+ time: 1483277168 (number, required)
 + text: Hello there (required)
 + third_person: false (boolean, required)  - Indicate that the message was sent as third person (/me)
-+ is_read: false (boolean, required)
 + from (Hub user, required) - Sender of the message
 + reply_to (Hub user, optional) - User to who the reply is being send to. This may differ from the the sender if the message was received from a bot/chatroom. This field is generally not available with hub messages.
 + to (Hub user, optional) - Receiver of the message. This is generally your own user unless the message was received from a bot/chatroom. This field is generally not available with hub messages.
@@ -4394,13 +4435,27 @@ Fired when the file is ready for viewing
     + cid: 76NLOTOBZVTWXOHIWKCXB27W46ULOI7EAUZUTTI
     + description: Just writing scripts
 
-### Status message (object, fixed-type)
+### Status message (Message base, fixed-type)
 
-+ id: 2 (number, required)
-+ time: 1483277168 (number, required)
 + text: `Connecting to adcs://myhub.com:6423 ...` (required)
 + severity: info (Severity, required)
+
+### Message base
+
++ id: 251 (number, required)
++ time: 1483277168 (number, required)
++ highlights (array[Message highlight], required) - Highlighted strings in the message text **Minimum API feature level**: 5
 + is_read: false (boolean, required)
+
+### Message highlight (object, fixed-type)
+
++ text: `magnet:?xt=urn:tree:tiger:DLR6W54ODCVTHIVWJ2C24L64KPQ6MLQQ5PF7FBQ&xl=85058&dn=volcano.jpg` (required)
++ type: url (Highlight type, required) - Highlight type
++ position (object, fixed-type, required) - Start and end index of the highlighted string in the chat message text. **Note:** positions are based on a UTF-8 encoded text. Programming languages that will use different encoding for strings (e.g. JavaScript) should first convert the message text to UTF-8 before matching the positions.
+    + start: 11 (number, required)
+    + end: 100 (number, required)
++ dupe (Dupe, nullable) - Dupe information for release names/magnet links
++ content_type: picture (File content ID, nullable) - Content type for magnet links
 
 ### Severity (enum[string])
 
@@ -4409,6 +4464,12 @@ Fired when the file is ready for viewing
 + warning
 + error
 
+### Highlight type (enum[string])
+
++ url - URL (e.g. web or magnet URL)
++ release - Release name
++ me - My own nick
++ temp_share - Magnet link for a file in own share
 
 
 ### User (object, fixed-type)
