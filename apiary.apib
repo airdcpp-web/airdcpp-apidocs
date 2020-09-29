@@ -968,6 +968,16 @@ Required permission: *settings_edit*
 
 + Response 204
 
+### Get stats [GET /hash/stats]
+
+Get the current hashing status
+
+**Minimum API feature level**: 5 
+
+Required permission: *settings_view*
+
++ Response 200 (application/json)
+    + Attributes (Hash stats)
 
 ## Event listeners [/hash/listeners]
 
@@ -988,9 +998,9 @@ Required permission: *settings_view*
         + duration: 32574 (number, required) - Time in milliseconds that was spent on hashing the directory
         + hasher_id: 0 (number, required) - ID of the hasher
 
-### Hashing finished [POST /hash/listeners/hasher_finished]
+### Hasher finished [POST /hash/listeners/hasher_finished]
 
-A single hasher has finished.
+A single hasher thread has finished hashing. If you need to know whether there are any hashers running, you can call the stats endpoint and check the files left.
 
 + Response 200 (application/json)
     + Attributes (object, fixed-type)
@@ -1006,11 +1016,7 @@ A single hasher has finished.
 Only the properties that have changed since the last event are sent.
 
 + Response 200 (application/json)
-    + Attributes (object)
-        + hash_speed: 4367623 (number) - Total current hashing speed, bytes per second
-        + hash_bytes_left: 52 (number) - Total number of bytes remaining to be hashed
-        + hash_files_left: 4 (number) - Total number of files remaining to be hashed
-        + hashers: 2 (number) - Number of hashing threads running
+    + Attributes (Hash stats)
 
 
 ## Data Structures
@@ -1021,6 +1027,13 @@ Only the properties that have changed since the last event are sent.
 + file_index_size: 2143207 (number, required) - Size of the file index database on disk (bytes)
 + hash_store_size: 446720235 (number, required) - Size of the hash store database on disk (bytes)
 
+### Hash stats
+
++ hash_speed: 4367623 (number) - Total current hashing speed, bytes per second
++ hash_bytes_left: 52 (number) - Total number of bytes remaining to be hashed
++ hash_files_left: 4 (number) - Total number of files remaining to be hashed
++ hashers: 2 (number) - Number of hashing threads running
++ pause_forced: false (boolean) - Whether the hashing has currently been paused manually/or because of filelist refresh **Minimum API feature level**: 5 
 
 # Group History
 
@@ -1262,16 +1275,18 @@ Required permission: *hubs_view*
     + Attributes (Hub)
 
 
-## Validation hooks [/hubs/hooks]
+## Message hooks [/hubs/hooks]
 
-Hooks should be used for validation purposes only. If just want to be notified about new hub messages, you should use [event listeners](#reference/hub-sessions/event-listeners) instead.
+If just want to be notified about new hub messages, you should use [event listeners](#reference/hub-sessions/event-listeners) instead.
 
 ### Incoming chat message [POST /hubs/hooks/hub_incoming_message_hook]
 
-Hook is fired for each incoming hub chat message and can be used to prevent certain messages from being displayed to the user.
+Hook is fired for each incoming hub chat message. It can be used for adding message highlights or preventing certain messages from being displayed to the user.
 
-+ Response 200 (application/json)
++ Request (application/json)
     + Attributes (Chat message)
++ Response 200 (application/json)
+    + Attributes (Incoming chat message hook response, fixed-type, optional)
 
 ### Outgoing chat message [POST /hubs/hooks/hub_outgoing_message_hook]
 
@@ -1376,6 +1391,15 @@ Required permission: *hubs_edit*
     + Attributes (Status message request)
 
 + Response 204
+
+### Get message highlight [GET /hubs/{session_id}/messages/highlights/{highlight_id}]
+
+**Minimum API feature level**: 5
+
+Required permission: *hubs_view*
+
++ Response 200 (application/json)
+    + Attributes (Message highlight)
 
 
 ## Users [/hubs/{session_id}/users]
@@ -1587,6 +1611,18 @@ Item getter: [Get hub user](#reference/hub-sessions/users/get-user)
 
 Item getter: [Get filelist item](#reference/filelist-entities/filelist-item/get-filelist-item)
 
+##### hub_message_highlight
+
+**Minimum API feature level**: 5
+
+Item getter: [Get hub message highlight](#reference/hub-sessions/messages/get-message-highlight)
+
+##### private_chat_message_highlight
+
+**Minimum API feature level**: 5
+
+Item getter: [Get private message highlight](#reference/private-chat-sessions/messages/get-message-highlight)
+
 
 ### Flow
 
@@ -1605,7 +1641,6 @@ Item getter: [Get filelist item](#reference/filelist-entities/filelist-item/get-
 
 Get a list of available context menu items for specified items that can be shown in the context menu.
 
-
 + Request (application/json)
     + Attributes (Context menu item ids)
         + supports (array[Context menu feature], fixed-type, optional) - Features supported by the implementation. **Minimum API feature level**: 5
@@ -1620,6 +1655,7 @@ Post a select action when a user selects a specific menu item from the context m
 + Request (application/json)
     + Attributes (Context menu item selection)
         + supports (array[Context menu feature], fixed-type, optional) - Features supported by the implementation. **Minimum API feature level**: 5
+        + form_definitions (array[Setting definition]) - Possible definitions for the form was displayed (and the `forms` feature is supported by the requester). Must be supplied together with `form_values`. **Minimum API feature level**: 5
 
 + Response 204
 
@@ -1669,6 +1705,7 @@ Hook is fired when the user attempts to list menu items for a specific menu type
     + Sample
         + https://www.google.com/search?q=selected_item1_name
         + https://www.google.com/search?q=selected_item2_name
++ form_definitions (array[Setting definition]) - Possible definitions for a form that will be displayed if the menu item is selected (and the `forms` feature is supported by the requester). Entered form values will be available in the selection event data. **Minimum API feature level**: 5
 
 ### Context menu item ids (object, fixed-type)
 
@@ -1680,6 +1717,11 @@ Hook is fired when the user attempts to list menu items for a specific menu type
 + hook_id: `airdcpp-release-validator` (string, required) - Hook ID of the selected menu item, field hook_id from the list response
 + menuitem_id: scan_share (required) - ID of the selected menu item, field id from the list response
 + permissions (array[Web permission], fixed-type, required) - Permissions of the user who performed the click
++ form_values 
+    + Attributes (object) - Entered form values if `form_definitions` was set for the menu item (and the requester supports viewing of forms). Must be supplied together with `form_definitions`. **Minimum API feature level**: 5
+        + Sample
+            + form_key1: false (boolean)
+            + form_key2: Test
 
 ### Context menu feature (enum[string])
 
@@ -1772,18 +1814,20 @@ Required permission: *private_chat_view*
     + Attributes (Private chat)
 
 
-## Validation hooks [/private_chat/hooks]
+## Message hooks [/private_chat/hooks]
 
-Hooks should be used for validation purposes only. If just want to be notified about new private messages, you should use [event listeners](#reference/private-chat-sessions/event-listeners) instead.
+If just want to be notified about new private messages, you should use [event listeners](#reference/private-chat-sessions/event-listeners) instead.
 
 ### Incoming chat message [POST /private_chat/hooks/private_chat_incoming_message_hook]
 
-Hook is fired for each incoming private chat message and can be used to prevent certain messages from being displayed to the user.
+Hook is fired for each incoming private chat message. It can be used for adding message highlights or preventing certain messages from being displayed to the user.
 
 Note that private chat session won't exist yet for private messages received from new users.
 
-+ Response 200 (application/json)
++ Request (application/json)
     + Attributes (Chat message)
++ Response 200 (application/json)
+    + Attributes (Incoming chat message hook response, fixed-type, optional)
 
 ### Outgoing chat message [POST /private_chat/hooks/private_chat_outgoing_message_hook]
 
@@ -1821,7 +1865,7 @@ Note that private chat session may not exist for announcement-like messages that
 
 # Group Private chat sessions
 
-## Methods [/private_chat/{session_id}/]
+## Messages [/private_chat/{session_id}/messages]
 
 ### Get messages [GET /private_chat/{session_id}/messages/{max_count}]
 
@@ -1870,6 +1914,17 @@ Required permission: *private_chat_edit*
 Required permission: *private_chat_view*
 
 + Response 204
+
+### Get message highlight [GET /private_chat/{session_id}/messages/highlights/{highlight_id}]
+
+**Minimum API feature level**: 5
+
+Required permission: *private_chat_view*
+
++ Response 200 (application/json)
+    + Attributes (Message highlight)
+
+## Direct enrypted connection [/private_chat/{session_id}/ccpm]
 
 ### Initiate CCPM connection [POST /private_chat/{session_id}/ccpm]
 
@@ -3226,18 +3281,19 @@ Required permission: *share_edit*
 + Response 204
 
 
-## Generic methods [/share]
-
-### Grouped share roots [GET /share/grouped_root_paths]
-
-+ Response 200 (application/json)
-    + Attributes (array[Grouped path], fixed-type)
+## Refresh methods [/share/refresh]
 
 ### Refresh whole share [POST /share/refresh]
 
 Required permission: *share_edit*
 
-+ Response 204
++ Request (application/json)
+    + Attributes
+        + priority_type: normal (Share refresh priority, optional) - Optional refresh priority type. **Minimum API feature level**: 5
+            + Default: normal
+
++ Response 200 (application/json)
+    + Attributes (Share refresh queue info)
 
 ### Refresh real paths [POST /share/refresh/paths]
 
@@ -3246,8 +3302,11 @@ Required permission: *share_edit*
 + Request (application/json)
     + Attributes
         + paths: /home/airdcpp/share/Videos/video1/, /home/airdcpp/share/Videos/video2/ (required) - Paths to refresh (they all must be found from share)
+        + priority_type: normal (Share refresh priority, optional) - Optional refresh priority type. **Minimum API feature level**: 5
+            + Default: normal
 
-+ Response 204
++ Response 200 (application/json)
+    + Attributes (Share refresh queue info)
 
 ### Refresh virtual path [POST /share/refresh/virtual]
 
@@ -3256,8 +3315,53 @@ Required permission: *share_edit*
 + Request (application/json)
     + Attributes
         + path: /Videos/ (required) - Virtual path to refresh
+        + priority_type: normal (Share refresh priority, optional) - Optional refresh priority type. **Minimum API feature level**: 5
+
++ Response 200 (application/json)
+    + Attributes (Share refresh queue info)
+
+
+### Abort refresh [DELETE /share/refresh]
+
+Abort the running (and possible queued) refresh tasks
+
+**Minimum API feature level**: 5
+
+Required permission: *share_edit*
 
 + Response 204
+
+### List refresh tasks [GET /share/refresh/tasks]
+
+Returns a list of all refresh tasks (running/queued)
+
+**Minimum API feature level**: 5
+
+Required permission: *share_view*
+
++ Response 200 (application/json)
+    + Attributes (array[Share refresh task])
+
+### Abort refresh task [DELETE /share/refresh/tasks/{task_id}]
+
+Abort a running/queued refresh task by task ID. Task's `canceled` property will be set to `true`.
+
+**Minimum API feature level**: 5
+
+Required permission: *share_edit*
+
++ Parameters
+    + task_id: 51864326 (required) - Refresh task ID
+
++ Response 204
+
+
+## Generic methods [/share]
+
+### Grouped share roots [GET /share/grouped_root_paths]
+
++ Response 200 (application/json)
+    + Attributes (array[Grouped path], fixed-type)
 
 ### Get dupe paths [POST /share/find_dupe_paths]
 
@@ -3337,6 +3441,7 @@ Fired when share refresh (partial or full refresh) was completed.
 
 + Response 200 (application/json)
     + Attributes (Share refresh info)
+        + hash_bytes_queued: 4674386 (number) - Bytes queued for hashing during the refresh. **Minimum API feature level**: 5
 
 ### Excluded path added [POST /share/listeners/share_exclude_added]
 
@@ -3406,15 +3511,45 @@ If you are performing operations that only need to be run for the parent, check 
 
 ## Data Structures
 
+### Share refresh type (enum[string])
+
++ add_directory - A new share directory was scanned and is now visible in shared
++ add_bundle - Downloaded bundle was added in share
++ refresh_all - Whole share was refreshed
++ refresh_directories - Custom share paths were refreshed
++ refresh_incoming - Share roots marked as incoming were refreshed
+
+### Share refresh priority (enum[string])
+
++ normal - No specific priority
++ manual - Manually initiated refresh
++ scheduled - Scheduled background refresh
+
+### Share queue result (enum[string])
+
++ started - Refresh was started instantly
++ queued - Refresh task was queued (there are other tasks running before it)
++ exists - The same paths are already queued for refreshing
+
 ### Share refresh info
 
 + real_paths: /home/airdcpp/share/, /mnt/disk2/share/ (array)
-+ type (enum[string])
-    + add_directory - A new share directory was scanned and is now visible in shared
-    + add_bundle - Downloaded bundle was added in share
-    + refresh_all - Whole share was refreshed
-    + refresh_directories - Custom share paths were refreshed
-    + refresh_incoming - Share roots marked as incoming were refreshed
++ type (Share refresh type)
+
+### Share refresh queue info
+
++ task (object, optional) - Created refresh task. Null if the supplied paths have already been queued for refreshing. **Minimum API feature level**: 5
+    + id: 57342 (number) - Refresh task ID
++ result (Share queue result, required) - **Minimum API feature level**: 5
+
+### Share refresh task
+
++ id: 57342 (number)
++ real_paths: /home/airdcpp/share/, /mnt/disk2/share/ (array) - Real paths to refresh
++ type (Share refresh type)
++ priority_type (Share refresh priority)
++ running (boolean) - Whether the task is currently running
++ canceled (boolean) - Whether the task has been canceled (queued tasks won't be removed from the task list immediately after they have been canceled)
 
 ### Share item
 
@@ -3648,6 +3783,7 @@ Only the updated properties are sent.
         + refresh_pending
         + refresh_running
     + str: Normal
+    + refresh_task_id: 73467623 (number, optional) - Possible refresh task ID. **Minimum API feature level**: 5
 
 
 # Group System
@@ -4450,12 +4586,24 @@ Fired when the file is ready for viewing
 ### Message highlight (object, fixed-type)
 
 + text: `magnet:?xt=urn:tree:tiger:DLR6W54ODCVTHIVWJ2C24L64KPQ6MLQQ5PF7FBQ&xl=85058&dn=volcano.jpg` (required)
-+ type: url (Highlight type, required) - Highlight type
++ type: link_url (Message highlight type, required) - Highlight type
++ tag: magnet (required) - Additional identifier tag for the highligh
 + position (object, fixed-type, required) - Start and end index of the highlighted string in the chat message text. **Note:** positions are based on a UTF-8 encoded text. Programming languages that will use different encoding for strings (e.g. JavaScript) should first convert the message text to UTF-8 before matching the positions.
     + start: 11 (number, required)
     + end: 100 (number, required)
 + dupe (Dupe, nullable) - Dupe information for release names/magnet links
 + content_type: picture (File content ID, nullable) - Content type for magnet links
+
+### Hook message highlight
+
++ start: 5 (number, required) - Start index of the highlighted word in a UTF-8 encoded text
++ end: 42 (number, required) - End index of the highlighted word in a UTF-8 encoded text
++ tag: my-custom-highlight (optional) - Possible additional identifier tag for the highlight (will default to hook subscriber ID)
++ type: link_text (Message highlight type, required)
+
+### Incoming chat message hook response
+
++ highlights (array[Hook message highlight]) - Possible message highlights. **Minimum API feature level**: 5
 
 ### Severity (enum[string])
 
@@ -4464,12 +4612,12 @@ Fired when the file is ready for viewing
 + warning
 + error
 
-### Highlight type (enum[string])
+### Message highlight type (enum[string])
 
-+ url - URL (e.g. web or magnet URL)
-+ release - Release name
-+ me - My own nick
-+ temp_share - Magnet link for a file in own share
++ link_text - Text to be formatted as a link with a context menu for additional actions (with the possibility to add custom menu items)
++ link_url - URL (e.g. web or magnet URL)
++ bold - Text to be bolded (without additional actions)
++ user - User nick
 
 
 ### User (object, fixed-type)
