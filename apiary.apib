@@ -1030,10 +1030,13 @@ Only the properties that have changed since the last event are sent.
 ### Hash stats
 
 + hash_speed: 4367623 (number) - Total current hashing speed, bytes per second
-+ hash_bytes_left: 52 (number) - Total number of bytes remaining to be hashed
++ hash_bytes_added: 48338786 (number) - Total number of bytes that have been queued for hashing (will be reset after all files have finished hashing)
++ hash_bytes_left: 526253 (number) - Total number of bytes remaining to be hashed
++ hash_files_added: 5323 (number) - Total number of files that have been queued for hashing (will be reset after all files have finished hashing)
 + hash_files_left: 4 (number) - Total number of files remaining to be hashed
 + hashers: 2 (number) - Number of hashing threads running
 + pause_forced: false (boolean) - Whether the hashing has currently been paused manually/or because of filelist refresh **Minimum API feature level**: 5 
++ max_hash_speed: 352754 - Configured maximum hash speed (MB/s)
 
 # Group History
 
@@ -2347,6 +2350,8 @@ Bundle/file completion hooks can be used for performing various content validati
 
 `hook_validation_error` state is set for failed items and the full error is available from the `hook_error` status field. The [share](#reference/queue/bundle/share-a-failed-bundle) method can be used to revalidate failed bundles.
 
+Returned error messages should generally be relatively short so that they will fit the bundle/file status column in the UI (more detailed errors can be logged separately).
+
 **Note that the hooks should be used for content validation purposes only**. If you just want to know when a file/bundle has completed downloading, you should use the respective status event listeners ([bundles](#reference/queue/bundle-event-listeners/bundle-status-changed), [files](#reference/queue/file-event-listeners/file-status-changed)) and check the ID of the new status instead.
 
 
@@ -3351,7 +3356,7 @@ Abort a running/queued refresh task by task ID. Task's `canceled` property will 
 Required permission: *share_edit*
 
 + Parameters
-    + task_id: 51864326 (required) - Refresh task ID
+    + task_id: 51864326 (number, required) - Refresh task ID
 
 + Response 204
 
@@ -3433,6 +3438,15 @@ Required permission: *settings_view*
 Fired when share refresh (partial or full refresh) was queued.
 
 + Response 200 (application/json)
+    + Attributes (Legacy share refresh info)
+
+### Share refresh started [POST /share/listeners/share_refresh_started]
+
+Fired when a queued share refresh (partial or full refresh) was started.
+
+**Minimum API feature level**: 5
+
++ Response 200 (application/json)
     + Attributes (Share refresh info)
 
 ### Share refresh completed [POST /share/listeners/share_refresh_completed]
@@ -3440,8 +3454,11 @@ Fired when share refresh (partial or full refresh) was queued.
 Fired when share refresh (partial or full refresh) was completed.
 
 + Response 200 (application/json)
-    + Attributes (Share refresh info)
-        + hash_bytes_queued: 4674386 (number) - Bytes queued for hashing during the refresh. **Minimum API feature level**: 5
+    + Attributes (Legacy share refresh info)
+        + results - Information about the scanned share directory content. **Minimum API feature level**: 5
+            + directory_counts (Share file item count)
+            + file_counts (Share file item count)
+            + hash_bytes_queued: 4674386 (number) - Bytes queued for hashing during the refresh.
 
 ### Excluded path added [POST /share/listeners/share_exclude_added]
 
@@ -3464,7 +3481,7 @@ Validation hooks are fired for each file/directory that is found while refreshin
 
 The hook is fired for each file that is being validated (rejected files won't be shared). 
 
-It's generally better to use the new file validation hook instead for faster refresh times.
+It's generally better to use the new file validation hook instead for faster refresh times. It's usually also better not to report validation errors directly to the user and let the caller of the hook to handle the returned errors instead to avoid possible spam.
 
 + Response 200 (application/json)
     + Attributes
@@ -3475,7 +3492,7 @@ It's generally better to use the new file validation hook instead for faster ref
 
 The hook is fired for each directory that is being validated, excluding share roots. Rejected directories won't be shared.
 
-It's generally better to use the new directory validation hook instead for faster refresh times.
+It's generally better to use the new directory validation hook instead for faster refresh times. It's usually also better not to report validation errors directly to the user and let the caller of the hook to handle the returned errors instead to avoid possible spam.
 
 + Response 200 (application/json)
     + Attributes
@@ -3484,6 +3501,8 @@ It's generally better to use the new directory validation hook instead for faste
 ### New file validation hook [POST /share/hooks/new_share_file_validation_hook]
 
 The hook is fired for each new file that isn't currently in share (rejected files won't be shared).
+
+It's usually also better not to report validation errors directly to the user and let the caller of the hook to handle the returned errors instead to avoid possible spam.
 
 **Minimum API feature level**: 4
 
@@ -3501,6 +3520,8 @@ This hook is fired recursively for all new parents and their children.
 
 If you are performing operations that only need to be run for the parent, check `new_parent` flag in the hook data that will be `false` for the topmost directory in the hierarchy.
 
+It's usually also better not to report validation errors directly to the user and let the caller of the hook to handle the returned errors instead to avoid possible spam.
+
 **Minimum API feature level**: 4
 
 + Response 200 (application/json)
@@ -3510,6 +3531,12 @@ If you are performing operations that only need to be run for the parent, check 
 
 
 ## Data Structures
+
+### Share file item count
+
++ skipped: 3 (number) - Number of items that were ignored (e.g. because of share excluding options, validation hooks or other settings)
++ new: 2 (number) - Number of new items found (weren't shared earlier)
++ existing: 135 (number) - Number of existing items found (were shared earlier)
 
 ### Share refresh type (enum[string])
 
@@ -3531,10 +3558,15 @@ If you are performing operations that only need to be run for the parent, check 
 + queued - Refresh task was queued (there are other tasks running before it)
 + exists - The same paths are already queued for refreshing
 
+### Legacy share refresh info
+
++ task (Share refresh task, required) - Share refresh task.  **Minimum API feature level**: 5
++ real_paths: /home/airdcpp/share/, /mnt/disk2/share/ (array, required) - **Deprecated property that will be removed in the next major API version**, use the task object instead
++ type (Share refresh type, required) - **Deprecated property that will be removed in the next major API version**, use the task object instead
+
 ### Share refresh info
 
-+ real_paths: /home/airdcpp/share/, /mnt/disk2/share/ (array)
-+ type (Share refresh type)
++ task (Share refresh task, required) - Share refresh task
 
 ### Share refresh queue info
 
