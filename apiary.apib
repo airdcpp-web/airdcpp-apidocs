@@ -2211,12 +2211,12 @@ Required permission: *queue_view*
 
 ### Get dupe paths [POST /queue/find_dupe_paths]
 
-Get local paths for file/folder name/path or a TTH value.
+Get local paths for a folder name/path or a TTH value.
 
 + Request (application/json)
     + Attributes (object, required)
         + One of
-            + path: /apps/Ubuntu/CD1/ - Individual file/folder name or path. Partial paths may also be supplied (e.g. Ubuntu/CD1/). The application will attempt to determine the relevant section from end to match.
+            + path: /apps/Ubuntu/CD1/ - Individual folder name or path. Partial paths may also be supplied (e.g. Ubuntu/CD1/). The application will attempt to determine the relevant section from end to match. Local directory paths will be returned.
             + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
 
 + Response 200 (application/json)
@@ -3288,6 +3288,8 @@ Required permission: *share_edit*
 
 ## Refresh methods [/share/refresh]
 
+Share refresh tasks are queued and run sequentially.
+
 ### Refresh whole share [POST /share/refresh]
 
 Required permission: *share_edit*
@@ -3302,11 +3304,13 @@ Required permission: *share_edit*
 
 ### Refresh real paths [POST /share/refresh/paths]
 
+Refresh one or many real paths (root share paths or their subdirectories). Subdirectories that don't exist in share are also accepted.
+
 Required permission: *share_edit*
 
 + Request (application/json)
     + Attributes
-        + paths: /home/airdcpp/share/Videos/video1/, /home/airdcpp/share/Videos/video2/ (required) - Paths to refresh (they all must be found from share)
+        + paths: /home/airdcpp/share/Videos/video1/, /home/airdcpp/share/Videos/video2/ (required) - Real paths to refresh
         + priority_type: normal (Share refresh priority, optional) - Optional refresh priority type. **Minimum API feature level**: 5
             + Default: normal
 
@@ -3314,6 +3318,8 @@ Required permission: *share_edit*
     + Attributes (Share refresh queue info)
 
 ### Refresh virtual path [POST /share/refresh/virtual]
+
+Refresh a virtual share path (path in the filelist, relative to the share root). Works only with directories that already exist in share.
 
 Required permission: *share_edit*
 
@@ -3370,12 +3376,12 @@ Required permission: *share_edit*
 
 ### Get dupe paths [POST /share/find_dupe_paths]
 
-Get local paths for file/folder name/path or a TTH value.
+Get local paths for folder name/path or a TTH value.
 
 + Request (application/json)
     + Attributes (object, required)
         + One of
-            + path: /apps/Ubuntu/CD1/ - Individual file/folder name or path. Partial paths may also be supplied (e.g. Ubuntu/CD1/). The application will attempt to determine the relevant section from end to match.
+            + path: /apps/Ubuntu/CD1/ - Individual folder name or path. Partial paths may also be supplied (e.g. Ubuntu/CD1/). The application will attempt to determine the relevant section from the end to match. Local directory paths will be returned.
             + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - File TTH
 
 + Response 200 (application/json)
