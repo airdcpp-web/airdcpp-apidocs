@@ -489,7 +489,13 @@ Required permission: *admin*
 
 + Response 204
 
+### Initialization completed [POST /extensions/{extension_id}/ready]
 
+Notify the application that the extension has been initialized and it's ready to process hooks and event listeners. Should be called only by the extension with its own ID. 
+
+This method should be used only if the ```airdcpp.signalReady``` package.json boolean is ```true``` (read the [extension specification documentation](https://github.com/airdcpp-web/airdcpp-extensions) for more information about the flag).
+
++ Response 204
 
 ### Post setting definitions [POST /extensions/{extension_id}/settings/definitions]
 
@@ -695,6 +701,8 @@ Required permission: *download*
     + Attributes (Download params, fixed-type)
         + user (Hinted user base, required)
         + list_path: /Share/Ubuntu/ (required)
+        + log_bundle_errors: true (boolean, optional) - Whether errors during bundle creation should be shown in the event log. **Minimum API feature level**: 6
+            + Default: true
 + Response 200 (application/json)
     + Attributes (Directory download item)
 
@@ -1717,18 +1725,18 @@ Hook is fired when the user attempts to list menu items for a specific menu type
 
 ### Context menu item selection (Context menu item ids, fixed-type)
 
-+ hook_id: `airdcpp-release-validator` (string, required) - Hook ID of the selected menu item, field hook_id from the list response
-+ menuitem_id: scan_share (required) - ID of the selected menu item, field id from the list response
++ hook_id: `airdcpp-release-validator` (required) - Hook ID of the selected menu item, field `hook_id` from the list response
++ menuitem_id: scan_share (required) - ID of the selected menu item, field `id` from the list response
 + permissions (array[Web permission], fixed-type, required) - Permissions of the user who performed the click
-+ form_values 
-    + Attributes (object) - Entered form values if `form_definitions` was set for the menu item (and the requester supports viewing of forms). Must be supplied together with `form_definitions`. **Minimum API feature level**: 5
-        + Sample
-            + form_key1: false (boolean)
-            + form_key2: Test
++ form_values (object, optional) - Entered form values if `form_definitions` was set for the menu item and the requester supports viewing of forms. Must be supplied together with `form_definitions`. **Minimum API feature level**: 5
+    + Sample
+        + form_key1: false (boolean)
+        + form_key2: Test
 
 ### Context menu feature (enum[string])
 
-+ url - Support for opening URL links
++ urls - Support for opening URL links
++ form - Support displaying of forms to request user input after clicking of a menu item
 
 
 
@@ -2053,14 +2061,9 @@ Required permission: *queue_edit*
 
 + Request (application/json)
     + Attributes (Download params)
-        + time: 1483611358 - Original directory creation/modify time (number, optional)
+        + time: 1483611358 (number, optional) - Original directory creation/modify time
         + user (Hinted user base, optional) - Possible source user for this directory
-        + files (array)
-            + (object)
-                + name: `CD1/Ubuntu 16.04.iso` (required) - File name that may also contain subdirectories relative to the main bundle path
-                + priority (Queue priority ID, optional) - File priority
-                + size: 576345234 (number, required) - File size in bytes
-                + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required)
+        + files (array[Bundle file info], fixed-type) - Bundle content
 
 + Response 200 (application/json)
     + Attributes (Queue directory bundle add info)
@@ -2369,8 +2372,54 @@ The hook is fired for each bundle that finishes downloading.
 + Response 200 (application/json)
     + Attributes (Queue bundle)
 
+### Add source [POST /queue/hooks/queue_add_source_hook]
+
+The hook is fired for all queue item sources (for bundles, filelists and viewed files). Returning an error will prevent the source from being added.
+
+**Minimum API feature level**: 6
+
++ Response 200 (application/json)
+    + Attributes
+        + user (Hinted user)
+
+### Add directory bundle [POST /queue/hooks/queue_add_directory_bundle_hook]
+
+The hook is fired for directory bundles being queued. 
+
+**Minimum API feature level**: 6
+
++ Response 200 (application/json)
+    + Attributes
+        + target_directory: /home/airdcpp/share/ - Bundle parent directory
+        + byndle_data (Bundle directory info)
+
+### Add bundle file [POST /queue/hooks/queue_add_bundle_file_hook]
+
+The hook is fired for each directory bundle file and file bundle that is going to be added in queue. 
+
+**Minimum API feature level**: 6
+
++ Response 200 (application/json)
+    + Attributes
+        + target_directory: /home/airdcpp/share/Ubuntu/ - Bundle target path (including bundle name for directory bundles)
+        + file_data (Bundle file info)
+
 
 ## Data Structures
+
+### Bundle file info
+
++ name: `CD1/Ubuntu 16.04.iso` (required) - File name that may also contain subdirectories relative to the main bundle path
++ priority (Queue priority ID, optional) - File priority
++ size: 576345234 (number, required) - File size in bytes
++ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required)
++ time: 1483611358 (number, optional) - File creation/modification date. **Minimum API feature level**: 6
+
+### Bundle directory info
+
++ name: `Ubuntu` (required) - Bundle name
++ priority (Queue priority ID, optional) - Bundle priority
++ time: 1483611358 (number, optional) - Directory creation/modification date. **Minimum API feature level**: 6
 
 ### Queue bundle add info (object, fixed-type)
 
@@ -3172,7 +3221,8 @@ Get schema information of the specified settings.
 
 + number - Numeric (integer) field
 + string - Regular string field
-+ file_path - File path selector
++ file_path - File path selector for new or existing files
++ existing_file_path - File path selector for existing files
 + directory_path - Directory path selector
 + text - Field for longer text content
 + hub_url - Hub URL **Minimum API feature level**: 5
@@ -3244,7 +3294,7 @@ Required permission: *share_edit*
 
 + Response 204
 
-## Temp shared files [/temp_shares]
+## Temp shared files [/share/temp_shares]
 
 **Minimum API feature level**: 2
 
@@ -3267,7 +3317,7 @@ ID of the uploaded file will be returned in the **Location** response header, wh
     + Attributes
         + file_id: 51864326 (string, required) - ID of the uploaded file
         + name: image1.png (string, required) - Display name
-        + hub_url: adcs://myhub.com:6423 (string, required) - URL of the hub where the file will be shared. This will be only used to check existing TTH matches from the share profile used in the specified hub.
+        + hub_url: adcs://myhub.com:6423 (string) - URL of the hub where the file will be shared. This will be only used to check existing TTH matches from the share profile used in the specified hub. This parameter was required before feature level 6.
         + cid: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA (string) - Possible CID of the user who will only be able to download the file (file will be available to all users if no CID is specified)
 
 + Response 200 (application/json)
@@ -3407,9 +3457,23 @@ Required permission: *share_view*
 
 + Response 200 (application/json)
 
+### Is path shared [POST /share/is_path_shared]
+
+Checked whether the supplied real path currently exists in share. Won't perform any disk access.
+
+**Minimum API feature level**: 6
+
++ Request (application/json)
+    + Attributes (object, required)
+        + path: /home/airdcpp/share/Ubuntu/CD1/ - Real path of the file/directory
+
++ Response 200
+    + Attributes (object, fixed-type, required)
+        + is_shared: true (boolean) - Whether the path exists in share
+
 ### Validate path [GET /share/validate_path]
 
-Validate a path of an existing file/directory.
+Check whether a file/directory that exists on disk can be added in share (or is shared already). Works only with paths that are inside a shared directory.
 
 + Request (application/json)
     + Attributes (object, required)
@@ -3426,6 +3490,14 @@ Validate a path of an existing file/directory.
     
             Forbidden file extension
 
++ Response 404
+
+    The supplied file/directory path doesn't exist on disk
+
+    + Body
+    
+            Path doesn't exist
+
 + Response 409
 
     The path is inside an incomplete bundle (temporary failure)
@@ -3433,6 +3505,15 @@ Validate a path of an existing file/directory.
     + Body
 
             Directory is inside an unfinished bundle
+
++ Response 417
+
+    The path isn't inside a shared directory
+    
+    + Body
+
+            The path isn't inside a shared directory
+
 
 
 ## Event listeners [/share/listeners]
@@ -4321,7 +4402,7 @@ Required permission: *view_files_view*
 
 ### Open file from remote user [POST]
 
-Open a new file from remote user. 
+Open a new file from remote user.
 
 Required permission: *view_files_edit*
 
@@ -4338,7 +4419,7 @@ Required permission: *view_files_edit*
 
 ### Open local file [POST /view_files/{tth}]
 
-Open a file that exists in share. 
+Open a file that exists in share.
 
 Required permission: *view_files_edit*
 
@@ -4611,8 +4692,9 @@ Fired when the file is ready for viewing
 
 ### Status message (Message base, fixed-type)
 
-+ text: `Connecting to adcs://myhub.com:6423 ...` (required)
++ text: `File list refresh initiated` (required)
 + severity: info (Severity, required)
++ label: Share (optional) - Additional classification text for the message, may be empty for hub status messages. **Minimum API feature level**: 6
 
 ### Message base
 
