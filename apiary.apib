@@ -2635,8 +2635,8 @@ Required permission: *search*
 
 + Request (application/json)
     + Attributes
-        + expiration_minutes: 60 (number, optional) - Time in minutes after which the instance will be removed automatically (0 = no expiration). Counted from the time of creation.
-            + Default: 60
+        + expiration: 30 (number, optional) - Time in minutes after which the instance will be removed automatically (0 = no expiration). Counted from the time of creation.
+            + Default: 30
         + owner_suffix: mylabel (string, optional) - An optional label suffix for the owner ID that is saved for the session. See the `owner` field in the response for details about the generated owner ID format. **Minimum API feature level**: 4
 + Response 200 (application/json)
     + Attributes (Search instance)
