@@ -55,6 +55,16 @@ Websocket connector for Javascript (Node.js/web browsers) for remote/browser-sid
 - [Release validator extension (JavaScript)](https://github.com/maksis/airdcpp-release-validator)
 - [AirDC++ Web UI (JavaScript)](https://github.com/airdcpp-web/airdcpp-webui)
 
+### Support
+
+**Developer hub**
+
+You may join the developer hub at adcs://web-dev.airdcpp.net:1511
+
+**GitHub**
+
+[Issue tracker](https://github.com/airdcpp-web/airdcpp-webclient/issues)
+
 
 # Group Favorite directories
 
@@ -1305,11 +1315,12 @@ Hook is fired for each outgoing hub chat message and can be used to prevent cert
 
 **Note:** Handling of chat commands with this hook has been deprecated and will be removed in the next API version. Use the [hub_text_command](#reference/hub-sessions/event-listeners/hub-text-command) event listener for handling chat commands instead.
 
-+ Response 200 (application/json)
++ Request (application/json)
     + Attributes
         + text: Hello world
         + hub_url: adcs://myhub.com:6423
         + session_id: 5 (number)
++ Response 204
 
 
 ## Data Structures
@@ -1848,8 +1859,9 @@ Note that private chat session may not exist for announcement-like messages that
 
 **Note:** Handling of chat commands with this hook has been deprecated and will be removed in the next API version. Use the [private_chat_text_command](#reference/private-chat-sessions/event-listeners/private-chat-text-command) event listener for handling chat commands instead.
 
-+ Response 200 (application/json)
++ Request (application/json)
     + Attributes (Private chat message request)
++ Response 204
 
 
 ## Data Structures
@@ -2227,6 +2239,22 @@ Get local paths for a folder name/path or a TTH value.
         + /home/airdcpp/share/Ubuntu/CD1/
         + /mnt/disk2/share/Videos/Ubuntu/CD1/
 
+### Is path queued [DELETE /queue/check_path_queued]
+
+Checked whether the supplied real path (file/directory) currently exists in queue.
+
+**Minimum API feature level**: 7
+
++ Request (application/json)
+    + Attributes (object, required)
+        + path: /home/airdcpp/Downloads/Ubuntu/CD1/ - Real path of the file/directory (trailing slash must exist for directories)
+
++ Response 200
+    + Attributes (object, fixed-type, required)
+        + bundle (object, fixed-type, optional) - Possible bundle information for the path (null if the path is not queued)
+            + id: 63634 (number, optional) - Possible bundle ID for the path
+            + completed: true (boolean) - All files have finished downloaded and the content was verified
+
 ### Remove source [DELETE /queue/sources/{cid}]
 
 Remove source from all queued files.
@@ -2362,15 +2390,17 @@ Returned error messages should generally be relatively short so that they will f
 
 The hook is fired for each bundle file that finishes downloading.
 
-+ Response 200 (application/json)
++ Request (application/json)
     + Attributes (Queue file)
++ Response 204
 
 ### Bundle finished [POST /queue/hooks/queue_bundle_finished_hook]
 
 The hook is fired for each bundle that finishes downloading.
 
-+ Response 200 (application/json)
++ Request (application/json)
     + Attributes (Queue bundle)
++ Response 204
 
 ### Add source [POST /queue/hooks/queue_add_source_hook]
 
@@ -2378,32 +2408,40 @@ The hook is fired for all queue item sources (for bundles, filelists and viewed 
 
 **Minimum API feature level**: 6
 
-+ Response 200 (application/json)
++ Request (application/json)
     + Attributes
         + user (Hinted user)
++ Response 204
 
-### Add directory bundle [POST /queue/hooks/queue_add_directory_bundle_hook]
+### Add bundle [POST /queue/hooks/queue_add_bundle_hook]
 
-The hook is fired for directory bundles being queued. 
+The hook is fired for file and directory bundles being queued. Bundle target directory and priority can be changed by the hook. Rejected bundles will not be queued.
 
-**Minimum API feature level**: 6
+**Minimum API feature level**: 7
 
-+ Response 200 (application/json)
++ Request (application/json)
     + Attributes
         + target_directory: /home/airdcpp/share/ - Bundle parent directory
-        + byndle_data (Bundle directory info)
+        + bundle_data (Bundle add data)
++ Response 200 (application/json)
+    + Attributes
+        + target_directory: /home/airdcpp/share/ (optional) - New target directory
+        + priority (Queue priority ID, optional) - New bundle priority
+
 
 ### Add bundle file [POST /queue/hooks/queue_add_bundle_file_hook]
 
-The hook is fired for each directory bundle file and file bundle that is going to be added in queue. 
+The hook is fired for directory bundle files and file bundles that are being added in queue. File priority can be changed by the hook. Rejected files will not be queued.
 
 **Minimum API feature level**: 6
 
-+ Response 200 (application/json)
++ Request (application/json)
     + Attributes
         + target_directory: /home/airdcpp/share/Ubuntu/ - Bundle target path (including bundle name for directory bundles)
         + file_data (Bundle file info)
-
++ Response 200 (application/json)
+    + Attributes
+        + priority (Queue priority ID, optional) - New file priority. **Minimum API feature level**: 7
 
 ## Data Structures
 
@@ -2415,11 +2453,12 @@ The hook is fired for each directory bundle file and file bundle that is going t
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required)
 + time: 1483611358 (number, optional) - File creation/modification date. **Minimum API feature level**: 6
 
-### Bundle directory info
+### Bundle add data
 
 + name: `Ubuntu` (required) - Bundle name
 + priority (Queue priority ID, optional) - Bundle priority
-+ time: 1483611358 (number, optional) - Directory creation/modification date. **Minimum API feature level**: 6
++ time: 1483611358 (number, optional) - Directory creation/modification date. 
++ type (File item type, required) - Directory content info is not available for directory bundles. **Minimum API feature level**: 7
 
 ### Queue bundle add info (object, fixed-type)
 
@@ -3457,7 +3496,7 @@ Required permission: *share_view*
 
 + Response 200 (application/json)
 
-### Is path shared [POST /share/is_path_shared]
+### Is path shared [POST /share/check_path_shared]
 
 Checked whether the supplied real path currently exists in share. Won't perform any disk access.
 
@@ -3570,10 +3609,11 @@ The hook is fired for each file that is being validated (rejected files won't be
 
 It's generally better to use the new file validation hook instead for faster refresh times. It's usually also better not to report validation errors directly to the user and let the caller of the hook to handle the returned errors instead to avoid possible spam.
 
-+ Response 200 (application/json)
++ Request (application/json)
     + Attributes
         + path: /home/airdcpp/share/Ubuntu/CD1/Ubuntu CD1.iso - Full file path
         + size: 62523525626 (number) - File size (bytes)
++ Response 204
 
 ### Directory validation hook [POST /share/hooks/share_directory_validation_hook]
 
@@ -3581,9 +3621,10 @@ The hook is fired for each directory that is being validated, excluding share ro
 
 It's generally better to use the new directory validation hook instead for faster refresh times. It's usually also better not to report validation errors directly to the user and let the caller of the hook to handle the returned errors instead to avoid possible spam.
 
-+ Response 200 (application/json)
++ Request (application/json)
     + Attributes
         + path: /home/airdcpp/share/Ubuntu/CD1/ - Full directory path
++ Response 204
 
 ### New file validation hook [POST /share/hooks/new_share_file_validation_hook]
 
@@ -3593,11 +3634,12 @@ It's usually also better not to report validation errors directly to the user an
 
 **Minimum API feature level**: 4
 
-+ Response 200 (application/json)
++ Request (application/json)
     + Attributes
         + path: /home/airdcpp/share/Ubuntu/CD1/Ubuntu CD1.iso - Full file path
         + new_parent: false - Whether the parent of this file is a new directory that wasn't shared before
         + size: 62523525626 (number) - File size (bytes)
++ Response 204
 
 ### New directory validation hook [POST /share/hooks/new_share_directory_validation_hook]
 
@@ -3611,10 +3653,11 @@ It's usually also better not to report validation errors directly to the user an
 
 **Minimum API feature level**: 4
 
-+ Response 200 (application/json)
++ Request (application/json)
     + Attributes
         + path: /home/airdcpp/share/Ubuntu/CD1/ - Full directory path
         + new_parent: false - Whether the parent of this directory was also a new directory
++ Response 204
 
 
 ## Data Structures
