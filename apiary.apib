@@ -39,14 +39,19 @@ See [communication-protocols.md on GitHub](https://github.com/airdcpp-web/airdcp
 
 Extension starter project for JavaScript
 
-**[airdcpp-extensions](https://github.com/airdcpp-web/airdcpp-extensions)**
-
-Extension specifications
-
 **[airdcpp-apisocket-js](https://github.com/airdcpp-web/airdcpp-apisocket-js)**
 
 Websocket connector for Javascript (Node.js/web browsers) for remote/browser-side communication
 
+### Resources
+
+**[airdcpp-extensions](https://github.com/airdcpp-web/airdcpp-extensions)**
+
+Extension specifications
+
+**[Hooks vs event listeners](https://github.com/airdcpp-web/airdcpp-apidocs/blob/master/communication-protocols.md#action-hooks)**
+
+The difference of hooks and event listeners explained
 
 ### Usage examples
 
@@ -996,6 +1001,21 @@ Required permission: *settings_view*
 
 + Response 200 (application/json)
     + Attributes (Hash stats)
+
+### Rename path [POST /hash/rename_path]
+
+Change the path of a previously hashed file in the database. This method can be used to avoid rehashing files that have been moved to a different location.
+
+**Minimum API feature level**: 7 
+
+Required permission: *settings_edit*
+
++ Request (application/json)
+    + Attributes
+        + old_path: /home/airdcpp/share/Ubuntu/Ubuntu.iso - Path of the file that currently exists in the hash database.
+        + new_path: /home/airdcpp/share/Ubuntu/Ubuntu_20.04.iso - New path for the file. The file must exist on the disk and the size must be equal to the old file.
+
++ Response 204
 
 ## Event listeners [/hash/listeners]
 
@@ -2239,7 +2259,7 @@ Get local paths for a folder name/path or a TTH value.
         + /home/airdcpp/share/Ubuntu/CD1/
         + /mnt/disk2/share/Videos/Ubuntu/CD1/
 
-### Is path queued [DELETE /queue/check_path_queued]
+### Is path queued [POST /queue/check_path_queued]
 
 Checked whether the supplied real path (file/directory) currently exists in queue.
 
@@ -4074,7 +4094,11 @@ Required permission: *transfers*
 
 ## Generic methods [/transfers/stats]
 
-### Get transferred bytes [POST /transfers/tranferred_bytes]
+### Get transferred bytes [GET /transfers/tranferred_bytes]
+
+Get transferred bytes (session and total)
+
+Required permission: *transfers*
 
 + Response 200 (application/json)
     + Attributes (object, fixed-type)
@@ -4082,6 +4106,15 @@ Required permission: *transfers*
         + session_uploaded 6768544233 (number, required)
         + start_total_downloaded: 5543652344 (number, required)
         + start_total_uploaded: 6433254263622 (number, required)
+
+### Get transfer stats [GET /transfers/stats]
+
+Get various transfer stats
+
+Required permission: *transfers*
+
++ Response 200 (application/json)
+    + Attributes (Transfer stats, fixed-type)
     
 
 ## Event listeners [/transfers/listeners]
@@ -4135,17 +4168,7 @@ Transfer failed (such as connection was closed or there are no slots available)
 Only the values that have changed after the last event are sent.
 
 + Response 200 (application/json)
-    + Attributes
-        + speed_down: 0 (number)
-        + speed_up: 754324 (number)
-        + limit_down: 0 (number)
-        + limit_up: 0 (number)
-        + upload_bundles: 1 (number)
-        + download_bundles: 0 (number)
-        + uploads: 2 (number)
-        + downloads: 0 (number)
-        + session_downloaded: 5325235 (number)
-        + session_uploaded 6768544233 (number)
+    + Attributes (Transfer stats, fixed-type)
 
 
 ## Data Structures
@@ -4186,6 +4209,19 @@ Only the values that have changed after the last event are sent.
 + T - TTH validation is enabled (downloads only)
 + Z - Compressed file transfer
 + C - Chunked file transfer
+
+### Transfer stats
+
++ speed_down: 0 (number)
++ speed_up: 754324 (number)
++ limit_down: 0 (number)
++ limit_up: 0 (number)
++ upload_bundles: 1 (number)
++ download_bundles: 0 (number)
++ uploads: 2 (number)
++ downloads: 0 (number)
++ session_downloaded: 5325235 (number)
++ session_uploaded: 6768544233 (number)
 
 
 # Group Users
