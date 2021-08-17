@@ -1,4 +1,5 @@
 FORMAT: 1A
+HOST: http://127.0.0.1:5600/api/v1
 
 # AirDC++ Web API
 
@@ -24,12 +25,23 @@ First documented API version
 
 When communicating with the API locally, you can write an extension that is managed by the application itself (see the [Resources section](#resources) below)
 
-You may also access the API from external sources (such as shell scripts or command line). For example, the following terminal command can be used to rescan all your shared files:
+You may also access the API from external sources (such as shell scripts or command line).
+
+### API base URL (HTTP)
+
+When connecting to the API via HTTP, all paths in this documentation should be prefixed with `http(s)://SERVER_IP:PORT/api/v1/`. 
+
+When calling the API locally from the same computer, the base URL would be `http://127.0.0.1:5600/api/v1/` if the server is configured to use the default HTTP port.
+
+### Example CURL command (HTTP)
+
+The following terminal command can be used to rescan all your shared files:
 
 `curl -H "Content-Type: application/json" -X POST -u myusername:mypassword http://localhost:5600/api/v1/share/refresh`
 
-See [communication-protocols.md on GitHub](https://github.com/airdcpp-web/airdcpp-apidocs/blob/master/communication-protocols.md) for more information about the raw HTTP/WebSocket protocol.
+### Communication protocol details
 
+See [communication-protocols.md on GitHub](https://github.com/airdcpp-web/airdcpp-apidocs/blob/master/communication-protocols.md) for more information about the raw HTTP/WebSocket protocol.
 
 ## Resources
 
@@ -802,7 +814,7 @@ Required permission: *filelists_view*
 + id: 32 (number, required)
 + name: Ubuntu 14.04 (required)
 + type (File item type, required) - Directory content information (files and directories) is available from certain users only 
-+ path: /home/airdcpp/share/Ubuntu/Ubuntu 14.04/ (required) - Path in remote user's share
++ path: /Ubuntu/Ubuntu 14.04/ (required) - Path in remote user's share
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (nullable) - Available for files only
 + dupe (Dupe, nullable)
 + time: 1483611358 (number, required) - File creation/modification date (available from certain users only)
@@ -2580,11 +2592,14 @@ The hook is fired for directory bundle files and file bundles that are being add
 
 ## Introduction
 
-Search matching in Direct Connect is a distibuted operation: search queries are sent to other hub users who match will match them against their own shared items. If you are in active connectivity
-mode, they will send the possible search results directly to you via UDP (passive results are sent via hubs instead).
+Search matching in Direct Connect is a distributed operation: search queries are sent to other hub users who match will match them against their own shared items. If you are in active connectivity
+mode, they will send the possible search results directly to you via UDP (passive results are sent via hubs instead). 
 
-This also means that you can't simply just post a search and receive the results instantly as part of the response. Instead, you'll need to create a search instance for the search that will 
+Processing the search query may be done by thousands of different clients all over the world with varying types of hardware and internet connection speeds, so it's far from an enterprise-level environment in terms of speed and reliability. This also means that you can't simply just post a search and receive the complete list of results instantly as part of the response. Instead, you'll need to create a search instance for the search that will 
 take care of collecting results of that particular search and keeps them available to be fetched later.
+
+There is no clear answer to the question that how long it is necessary wait for all the search results to arrive after all connected hubs have forwarded the search to their users, but generally it's good to wait as long as you reasonably can. The waiting period can usually be longer for background searches, while searches that were initiated 
+by the user who's waiting to see the results usually provide a better user experience with shorter waiting periods (you may also use the listeners for newly received search results in such cases to eliminate the waiting period).
 
 Basic code example for searching:
 
@@ -2596,7 +2611,7 @@ const instance = await api.post('search')
 // Post the search
 const searchInfo = await api.post(`search/${instance.id}/hub_search`, {
   query: {
-    pattern: pattern,
+    pattern: 'Ubuntu',
   },
 })
 
@@ -2653,7 +2668,7 @@ When using Websockets, there's a 'search_hub_searches_sent' that will be fired a
 const instance = await socket.post('search')
 
 // Add listener for the 'searches sent' event before performing the actual search
-socket.addListener(`search/${instance.id}`, 'search_hub_searches_sent', searchInfo => {
+socket.addListener(`search/${instance.id}`, 'search_hub_searches_sent', async (searchInfo) => {
   // Collect the results for 5 seconds before fetching them
   await sleep(5000)
   
@@ -2663,7 +2678,7 @@ socket.addListener(`search/${instance.id}`, 'search_hub_searches_sent', searchIn
 // Perform the search
 socket.post(`search/${instance.id}/hub_search`, {
   query: {
-    pattern: pattern,
+    pattern: 'Ubuntu',
   },
   priority: 1, // Lowest (1-5)
 })
@@ -4599,15 +4614,24 @@ Fired when the file is ready for viewing
 ### Search query (object, fixed-type)
 
 + pattern: Ubuntu (optional) - Search string. All words must be found from the full file/directory path (partial match)
-+ file_type (File content ID, optional) - [Custom search types](#reference/searching/search-types) type IDs are also valid
-    + any
-    + tth
-    + directory
-    + file
-+ extensions: iso, img (optional) - Allowed file extensions (files only)
++ file_type (Search file type, optional)
+
+    [Custom search type](#reference/searching/search-types) IDs are also valid. `file_type` and `extensions` fields should not be used together as they conflict with each other. 
+    
+    
+    Note that specific file types are being matched based on a list of file extensions defined either by the responding client (NMDC hubs) or your client (ADC hubs). The most typical extension list used by the clients in NMDC hubs can be found from the [ADC protocol extension specs](https://adc.sourceforge.io/ADC-EXT.html#_sega_grouping_of_file_extensions_in_sch).
+
++ extensions: mp3, flac (optional) - Allowed file extensions (files only). `file_type` and `extensions` fields should not be used together as they conflict with each other.
 + min_size: 50000000 (optional) - Minimum file size (files only)
 + max_size: 100000000 (optional) - Maximum file size (files only)
 + excluded: server, iot (optional) - List of strings that should not be found from the file/directory path (partial match)
+
+### Search file type (File content ID)
+
++ any
++ tth
++ directory
++ file
 
 ### Download params (object, fixed-type)
 
@@ -4648,7 +4672,7 @@ Fired when the file is ready for viewing
     + finished_partial - Bundle item that has finished downloading
     + finished_full
     + share_queue
-+ paths: `/home/airdcpp/share/dir/, /mnt/disk2/dir/` (required) - An array of local paths for this item
++ paths: `/home/airdcpp/share/dir/`, `/mnt/disk2/dir/` (array[string], required) - An array of local paths for this item
 
 ### Priority ID (enum[number])
 
