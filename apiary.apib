@@ -2668,7 +2668,7 @@ When using Websockets, there's a 'search_hub_searches_sent' that will be fired a
 const instance = await socket.post('search')
 
 // Add listener for the 'searches sent' event before performing the actual search
-socket.addListener(`search/${instance.id}`, 'search_hub_searches_sent', async (searchInfo) => {
+await socket.addListener(`search/${instance.id}`, 'search_hub_searches_sent', async (searchInfo) => {
   // Collect the results for 5 seconds before fetching them
   await sleep(5000)
   
@@ -2676,7 +2676,7 @@ socket.addListener(`search/${instance.id}`, 'search_hub_searches_sent', async (s
 })
 
 // Perform the search
-socket.post(`search/${instance.id}/hub_search`, {
+await socket.post(`search/${instance.id}/hub_search`, {
   query: {
     pattern: 'Ubuntu',
   },
@@ -2691,6 +2691,55 @@ HTTP users may also check the search instance object to see the current queue ti
 
 Note that the application may also choose reject new searches in order to prevent the search queue from growing indefinitely. Therefore, you should
 use some consideration regarding the number of searches that you really need to perform.
+
+
+## Manual searches
+
+When you are performing searches from an UI and the user is waiting to see them, you may not want to wait for several seconds while the results are being collected. You can add them in your UI as soon as they are being received (which is what the included Web UI does as well).
+
+```javascript
+
+// Create a new search instance
+const instance = await socket.post('search');
+
+// Add all listeners before performing the search
+
+// We want to get notified about every new result in order to make the user experience better
+await socket.addListener(`search/${instance.id}`, 'search_result_added', async (groupedResult) => {
+  // ...add the received result in the UI 
+  // (it's probably a good idea to have some kind of throttling for the UI updates as there can be thousands of results)
+})
+
+// We also want to update the existing items in our list when new hits arrive for the previously listed files/directories
+await socket.addListener(`search/${instance.id}`, 'search_result_updated', async (groupedResult) => {
+  // ...update properties of the existing result in the UI
+})
+
+// We need to show something to the user in case the search won't yield any results so that he won't be waiting forever)
+// Wait for 5 seconds for any results to arrive after the searches were sent to the hubs
+await socket.addListener(`search/${instance.id}`, 'search_hub_searches_sent', async (searchInfo) => {
+  await sleep(5000)
+
+  // The search can now be considered to be "complete"
+
+  // Check the number of received results (in real use cases we should know that even without calling the API)
+  const currentInstance = await socket.get(`search/${instance.id}`);
+  if (currentInstance.result_count === 0) {
+    // ...nothing was received, show an informative message to the user
+  }
+
+  // If there's an "in progress" indicator in the UI, that could also be disabled here
+})
+
+// Finally, perform the actual search
+await socket.post(`search/${instance.id}/hub_search`, {
+  query: {
+    pattern: 'Ubuntu',
+  },
+  priority: 5, // High priority as we don't wait any longer than it's necessary
+});
+
+```
 
 
 ## Search instances [/search]
