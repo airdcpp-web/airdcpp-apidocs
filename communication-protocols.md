@@ -34,7 +34,7 @@ Authentication happens through [Session API's authentication method](http://docs
 
 The token should be sent in the `Authorization` HTTP header when making requests:
 
-```Authorization: 25793d1e-6d48-407c-9c27-a9dcbd2e1188```
+```Authorization: Bearer 25793d1e-6d48-407c-9c27-a9dcbd2e1188``` (replace the token with the one from the previous step)
 
 
 ## WebSockets
