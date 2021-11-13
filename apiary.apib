@@ -1796,7 +1796,7 @@ Required permission: *private_chat_view*
 
 ### Create session [POST]
 
-Create a new API session by providing the web user credentials.
+Create a new private chat session with the wanted user.
 
 Required permission: *private_chat_edit*
 
@@ -2668,12 +2668,12 @@ When using Websockets, there's a 'search_hub_searches_sent' that will be fired a
 const instance = await socket.post('search')
 
 // Add listener for the 'searches sent' event before performing the actual search
-await socket.addListener(`search/${instance.id}`, 'search_hub_searches_sent', async (searchInfo) => {
+await socket.addListener(`search`, 'search_hub_searches_sent', async (searchInfo) => {
   // Collect the results for 5 seconds before fetching them
   await sleep(5000)
   
   // .... fetch and do something with them
-})
+}, instance.id)
 
 // Perform the search
 await socket.post(`search/${instance.id}/hub_search`, {
@@ -2705,19 +2705,19 @@ const instance = await socket.post('search');
 // Add all listeners before performing the search
 
 // We want to get notified about every new result in order to make the user experience better
-await socket.addListener(`search/${instance.id}`, 'search_result_added', async (groupedResult) => {
+await socket.addListener(`search`, 'search_result_added', async (groupedResult) => {
   // ...add the received result in the UI 
   // (it's probably a good idea to have some kind of throttling for the UI updates as there can be thousands of results)
-})
+}, instance.id)
 
 // We also want to update the existing items in our list when new hits arrive for the previously listed files/directories
-await socket.addListener(`search/${instance.id}`, 'search_result_updated', async (groupedResult) => {
+await socket.addListener(`search`, 'search_result_updated', async (groupedResult) => {
   // ...update properties of the existing result in the UI
-})
+}, instance.id)
 
 // We need to show something to the user in case the search won't yield any results so that he won't be waiting forever)
 // Wait for 5 seconds for any results to arrive after the searches were sent to the hubs
-await socket.addListener(`search/${instance.id}`, 'search_hub_searches_sent', async (searchInfo) => {
+await socket.addListener(`search`, 'search_hub_searches_sent', async (searchInfo) => {
   await sleep(5000)
 
   // The search can now be considered to be "complete"
@@ -2729,14 +2729,14 @@ await socket.addListener(`search/${instance.id}`, 'search_hub_searches_sent', as
   }
 
   // If there's an "in progress" indicator in the UI, that could also be disabled here
-})
+}, instance.id)
 
 // Finally, perform the actual search
 await socket.post(`search/${instance.id}/hub_search`, {
   query: {
     pattern: 'Ubuntu',
   },
-  priority: 5, // High priority as we don't wait any longer than it's necessary
+  priority: 5, // High priority as we don't want to wait any longer than it's necessary
 });
 
 ```
@@ -3106,7 +3106,9 @@ Session API provides methods for authentication and generic session management
 
 ### Create session [POST]
 
-Create a new API session by providing the web user credentials.
+Create a new API session by providing the web user credentials. 
+
+This endpoint should be called when communicating the API over [websockets](https://github.com/airdcpp-web/airdcpp-apidocs/blob/master/communication-protocols.md#websockets) or [HTTP with session-based authentication](https://github.com/airdcpp-web/airdcpp-apidocs/blob/master/communication-protocols.md#session-based-authentication). It is not necessary to call this endpoint when communication with the API over [HTTP with basic authentication](https://github.com/airdcpp-web/airdcpp-apidocs/blob/master/communication-protocols.md#basic-authentication).
 
 + Request (application/json)
     + Attributes
@@ -3119,7 +3121,7 @@ Create a new API session by providing the web user credentials.
 
 ### Socket [POST /sessions/socket]
 
-Associate socket with an existing session.
+Associate socket with an existing session. This endpoint can be called only via an active websocket.
 
 + Request (application/json)
     + Attributes
