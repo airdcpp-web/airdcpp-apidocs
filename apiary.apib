@@ -268,7 +268,7 @@ Required permission: *favorite_hubs_view*
 + connection_ip_v6: 2a00:1a48:1261::168 (nullable) - IPv6 address (defaults to global value if not set)
 + show_joins: false (boolean, nullable) - Show joining/parting users **Minimum API feature level**: 5 (defaults to global value if not set)
 + fav_show_joins: true (boolean, nullable) - Show joining/parting favorite users **Minimum API feature level**: 5 (defaults to global value if not set)
-+ use_hub_chat_notify: false (boolean, nullable) - Show notification on new chat messages **Minimum API feature level**: 5 (defaults to global value if not set)
++ use_main_chat_notify: false (boolean, nullable) - Show notification on new chat messages **Minimum API feature level**: 5 (defaults to global value if not set)
 + away_message: I'm away (string, nullable) - Custom away message **Minimum API feature level**: 5 (defaults to global value if not set)
 + log_main: false (boolean, nullable) - Log main chat **Minimum API feature level**: 5 (defaults to global value if not set)
 
@@ -319,7 +319,7 @@ Send a new event message.
 Required permission: *events_edit*
 
 + Request (application/json)
-    + Attributes (Status message request)
+    + Attributes (Event message request)
 
 + Response 204
 
@@ -341,7 +341,7 @@ Required permission: *events_view*
 
 + Response 200 (application/json)
     + Attributes (Log message info)
-
+    
 
 ## Event listeners [/events/listeners]
 
@@ -356,6 +356,14 @@ Required permission: *events_view*
 
 + Response 200 (application/json)
     + Attributes (Status message)
+
+## Data Structures
+
+### Event message request (object, fixed-type)
+
++ text: `[10]APITester: ISO file(s) over 500 MB in share (/Ubuntu/Ubuntu 14.04.iso)` (required)
++ severity: info (Severity, required)
+
 
 # Group Extensions
 
@@ -720,7 +728,7 @@ Required permission: *download*
 
 Queue all content inside the specified location. Recursive partial filelist will be downloaded from ADC users and full list is used with NMDC users.
 
-To track the results (errors/queued bundled ID), use the event listeners or poll the returned directory download by ID.
+To track the results (errors/queued bundle ID), use the event listeners or poll the returned directory download by ID.
 
 Required permission: *download*
 
@@ -1024,8 +1032,8 @@ Required permission: *settings_edit*
 
 + Request (application/json)
     + Attributes
-        + old_path: /home/airdcpp/share/Ubuntu/Ubuntu.iso - Path of the file that currently exists in the hash database.
-        + new_path: /home/airdcpp/share/Ubuntu/Ubuntu_20.04.iso - New path for the file. The file must exist on the disk and the size must be equal to the old file.
+        + old_path: /home/airdcpp/share/Ubuntu/Ubuntu.iso - Path of the file that currently exists in the hash database. The file doesn't have to exist on disk.
+        + new_path: /home/airdcpp/share/Ubuntu/Ubuntu_20.04.iso - New path for the file. The file must exist on the disk and the size must be equal to the old file. It is not required for the new path to be inside a shared directory.
 
 + Response 204
 
@@ -1375,7 +1383,7 @@ Hook is fired for each outgoing hub chat message and can be used to prevent cert
 + identity (object, required, fixed-type)
     + name: Demo hub (required)
     + description: Demo hub for AirDC++ Web Client (required)
-+ share_profile (Share profile, required)
++ share_profile (Share profile basic, required)
 + favorite_hub: 64723743 (number, required) - Favorite hub ID (0 = no favorite hub)
 + message_counts (Chat message info, required)
 + encryption (Encryption, nullable) - Available only for connected ADCS hubs
@@ -1391,7 +1399,7 @@ Hook is fired for each outgoing hub chat message and can be used to prevent cert
 
 + show_joins: false (boolean, nullable) - Show joining/parting users (defaults to favorite hub/global value if not set)
 + fav_show_joins: true (boolean, nullable) - Show joining/parting favorite users (defaults to favorite hub/global value if not set)
-+ use_hub_chat_notify: false (boolean, nullable) - Show notification on new chat messages (defaults to favorite hub/global value if not set)
++ use_main_chat_notify: false (boolean, nullable) - Show notification on new chat messages (defaults to favorite hub/global value if not set)
 
 
 # Group Hub sessions
@@ -1701,6 +1709,17 @@ Get a list of available context menu items for specified items that can be shown
 + Response 200 (application/json)
     + Attributes (array[Context menu item], fixed-type, required)
 
+### List grouped menus [POST /menus/{menu_type}/list_grouped]
+
+**Minimum API feature level**: 8
+
+Get a list of grouped menus for the specified items that can be shown in the context menu.
+
++ Request (application/json)
+    + Attributes (Context menu item ids)
+        + supports (array[Context menu feature], fixed-type, optional) - Features supported by the implementation.
++ Response 200 (application/json)
+    + Attributes (array[Context menu], fixed-type, required)
 
 ### Select menu item [POST /menus/{menu_type}/select]
 
@@ -1744,6 +1763,10 @@ Hook is fired when the user attempts to list menu items for a specific menu type
 + Response 200 (application/json)
     + Attributes
         + menuitems (array[Context menu item], fixed-type)
+        + title: Share scanner - Menu title (will default to the name of the hook subscriber)
+        + icon (object, optional) - iconset-to-icon mapping of icon to shown for the menu item. Use the key "semantic" when defining icons for the Web UI and see https://semantic-ui.com/elements/icon.html for available icons to use (see the "Definitions" tab for information about available icon colors and other attributes). The Windows GUI doesn't currently support icons for menu items.
+            + Sample
+                + semantic: yellow broom
 
 
 ## Data Structures
@@ -1760,6 +1783,15 @@ Hook is fired when the user attempts to list menu items for a specific menu type
         + https://www.google.com/search?q=selected_item1_name
         + https://www.google.com/search?q=selected_item2_name
 + form_definitions (array[Setting definition]) - Possible definitions for a form that will be displayed if the menu item is selected (and the `forms` feature is supported by the requester). Entered form values will be available in the selection event data. **Minimum API feature level**: 5
+
+### Context menu (object, fixed-type)
+
++ id: airdcpp-share-scanner (required) - Menu ID as defined by the hook
++ title: Share scanner (required) - Menu title to show to the user
++ icon (object, optional) - iconset-to-icon mapping of icon to shown for the menu item. Use the key "semantic" when defining icons for the Web UI and see https://semantic-ui.com/elements/icon.html for available icons to use (see the "Definitions" tab for information about available icon colors and other attributes). The Windows GUI doesn't currently support icons for menu items.
+    + Sample
+        + semantic: yellow broom
++ items (array[Context menu item], fixed-type, required) - List of context menu items
 
 ### Context menu item ids (object, fixed-type)
 
@@ -2020,7 +2052,7 @@ Required permission: *private_chat_view*
 + Response 200 (application/json)
     + Attributes (Status message)
 
-### Private chat text command [POST /hubs/{session_id}/listeners/private_chat_text_command]
+### Private chat text command [POST /private_chat/{session_id}/listeners/private_chat_text_command]
 
 **Minimum API feature level**: 4
 
@@ -2285,7 +2317,7 @@ Checked whether the supplied real path (file/directory) currently exists in queu
     + Attributes (object, fixed-type, required)
         + bundle (object, fixed-type, optional) - Possible bundle information for the path (null if the path is not queued)
             + id: 63634 (number, optional) - Possible bundle ID for the path
-            + completed: true (boolean) - All files have finished downloaded and the content was verified
+            + completed: true (boolean) - All files have finished downloading and the content was verified
 
 ### Remove source [DELETE /queue/sources/{cid}]
 
@@ -2534,14 +2566,10 @@ The hook is fired for directory bundle files and file bundles that are being add
          + completed - All completion hooks have completed successfully
          + shared - The bundle has been added in share
     + failed: false (boolean, required) - Whether the bundle is in an error state
-    + downloaded: false (boolean, required) - All files have finished downloaded (states 'downloaded' and above)
-    + completed: false (boolean, required) - All files have finished downloaded and the content was verified (states 'completed' and 'shared')
+    + downloaded: false (boolean, required) - All files have finished downloading (states 'downloaded' and above)
+    + completed: false (boolean, required) - All files have finished downloading and the content was verified (states 'completed' and 'shared')
     + str: `Running (42.3%)` (required)
-    + hook_error (nullable)
-        + hook_id: share_scanner
-        + hook_name: Share scanner
-        + error_id: files_missing
-        + str: 42 missing files
+    + hook_error (Hook error, nullable)
 
 ### Queue file (Queue item base, fixed-type)
 
@@ -2551,11 +2579,28 @@ The hook is fired for directory bundle files and file bundles that are being add
 + type (File type, required)
 + bundle: 83425443 (number, required) - Bundle (0 = no bundle)
 + status (object, required, fixed-type)
+    + id: queued (enum[string], required)
+         + new - Not added in queue yet
+         + queued - Queued
+         // + recheck
+         + downloaded - All files have completed downloading
+         + completion_validation_running - The bundle is being validated by custom completion hooks
+         + completion_validation_error - An error was triggered by a custom completion hook. See the field 'hook_error' for more detailed information
+         + completed - All completion hooks have completed successfully
     + str: `Running (42.3%)` (required)
     + downloaded: false (boolean, required) - All file segments have finished downloading
     + completed: false (boolean, required) - All file segments have finished downloading and the item has been renamed to use its final name (and possibly verified)
+    + failed: false (boolean, required) - Whether the file is in an error state
+    + hook_error (Hook error, nullable)
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required) - File TTH
 + sources (Queue source info, required)
+
+### Hook error
+
++ hook_id: share_scanner
++ hook_name: Share scanner
++ error_id: files_missing
++ str: 42 missing files
 
 ### Queue segment (object, fixed-type)
 
@@ -4120,7 +4165,7 @@ Required permission: *admin*
 
 Tranfer API manages download and upload connections. In addition to regular file transfers, filelist and TTH tranfers are listed as well.
 
-Transfer items represent individual transfer connections that may be reused to transfer multiple different files (or file chunks).
+Transfer items represent individual transfer connections that may be reused to transfer multiple different files (or file chunks). If you want to track the download progress of the entire file, it's better to use the [queue API](#reference/queue) instead.
 
 ## Transfers [/transfers]
 
@@ -4805,10 +4850,11 @@ Fired when the file is ready for viewing
 
 ### Unread chat info (object, fixed-type)
 
-+ mentions: 1 (number, required) - Number of messages mentioned your nick  **Minimum API feature level**: 5
++ mention: 1 (number, required) - Number of messages mentioned your nick  **Minimum API feature level**: 5
 + user: 2 (number, required) - Number of unread user messages
 + bot: 12 (number, required) - Number of unread bot messages
-+ status: 0 (number, required) - Number of unread status messages
++ status: 4 (number, required) - Number of unread status messages
++ verbose: 0 (number, required) - Number of unread verbose messages **Minimum API feature level**: 8
 
 ### Unread log info (object, fixed-type)
 
@@ -4827,11 +4873,26 @@ Fired when the file is ready for viewing
 + command: rvalidator (required) - The main command
 + args: scan, /home/share (array[string], required) - Possible arguments
 + permissions (array[Web permission], fixed-type, required) - Permissions of the submitter of the command
++ owner: session:8327624587 - **Minimum API feature level**: 8 
+ID of the sender of the command (generally UI instance). This can be used for sending the possible status message response only to the sender instead of having it propagated to all active sessions. 
+
 
 ### Status message request (object, fixed-type)
 
-+ text: `[10]APITester: ISO file(s) over 500 MB in share (/Ubuntu/Ubuntu 14.04.iso)` (required)
++ text: `Forbidden files were found from the user [10]APITester (/Ubuntu/Ubuntu 14.04.iso)` (required)
 + severity: info (Severity, required)
++ type: private (Status message type) - **Minimum API feature level**: 8
+    + Default: system
++ owner: session:8327624587 - **Minimum API feature level**: 8 
+The receiving instance of the message that is currently provided only for the chat text command event. The message will be delivered only to the specific owner (generally UI instance), bypassing message cache and logging. 
+
+### Status message type (enum[string])
+
++ system - System message (e.g. simple informative application messages or warnings/errors)
++ server - Server message (e.g. connection status changes, hub-related messages)
++ private - Text that can be longer and should be easier to read (e.g. responses to chat commands). Won't be logged in the log file.
++ log - Message that should be displayed with no timestamps (e.g. chat history)
++ spam - Similar to "verbose" severity but should not be logged in the log file or saved in the message log (e.g. kick messages)
 
 ### Chat message (Message base, fixed-type)
 
@@ -4849,6 +4910,8 @@ Fired when the file is ready for viewing
 + text: `File list refresh initiated` (required)
 + severity: info (Severity, required)
 + label: Share (optional) - Additional classification text for the message, may be empty for hub status messages. **Minimum API feature level**: 6
++ type: system (Status message type, required) - **Minimum API feature level**: 8
+    + Default: system
 
 ### Message base
 
@@ -4882,6 +4945,7 @@ Fired when the file is ready for viewing
 ### Severity (enum[string])
 
 + notify - Notify events are not stored by the application (they are generally real-time notifications related to a recent activity)
++ verbose - **Minimum API feature level**: 8
 + info
 + warning
 + error
@@ -4910,8 +4974,9 @@ Fired when the file is ready for viewing
 
 ### Hinted user (Hinted user base)
 
-+ nicks: `Developer ([100]Developer)` (required) - Nick in the hinted hub is shown first and possible other nicks are inside parentheses 
-+ hub_names: `Demo hub (Dev hub)` (required) - Name of the hinted hub is shown first and possible other hub names are inside parentheses 
++ nicks: `Developer ([100]Developer)` (required) - Nick in the hinted hub is shown first and possible other nicks are inside parentheses
++ hub_names: `Demo hub (Dev hub)` (required) - Name of the hinted hub is shown first and possible other hub names are inside parentheses
++ hub_urls: adcs://myhub.com:6423, adc://devhub.com:1234 (required) - All hub URLs for the user (including the hinted URL)
 + flags (array[Hub user flag], required) - Flags in the hinted hub. All flags are not displayed if the user is offline.
 
 ### Hub user (Hinted user base, fixed-type)
