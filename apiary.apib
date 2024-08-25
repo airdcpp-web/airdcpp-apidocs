@@ -802,6 +802,36 @@ Required permission: *filelists_view*
         + directory_download (Directory download item, required)
         + error: The directory is empty (required)
 
+## Hooks [/filelists/hooks]
+
+Note that running of the hooks may take quite a long time for huge filelists and the application may choose to skip them for performance reasons. The hooks won't be fired for background filelists that are only being matched against queue.
+
+### Load directory [POST /filelists/hooks/filelist_load_directory]
+
+The hook is fired for filelist directories when they are being loaded.
+
+**Minimum API feature level**: 9
+
++ Request (application/json)
+    + Attributes
+        + directory (Filelist item, required) - Directory
+        + filelist_id: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA (required) (string)
++ Response 204
+
+
+### Load directory [POST /filelists/hooks/filelist_load_file]
+
+The hook is fired for filelist files when they are being loaded.
+
+**Minimum API feature level**: 9
+
++ Request (application/json)
+    + Attributes
+        + directory (Filelist item, required) - File
+        + filelist_id: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA (required) (string)
++ Response 204
+
+
 ## Data Structures
 
 ### Filelist (object, fixed-type)
@@ -1041,10 +1071,27 @@ Required permission: *settings_edit*
 
 Required permission: *settings_view*
 
-### Database status updated [POST /hash/listeners/hash_database_status]
+### Hashing of a file finished [POST /hash/listeners/hasher_file_hashed]
+
+**Minimum API feature level**: 9
 
 + Response 200 (application/json)
-    + Attributes (Hash database status)
+    + Attributes (object, fixed-type)
+        + path: /home/airdcpp/share/Ubuntu/ubuntu.iso (required) - File path
+        + size: 43676423 (number, required) - Size of the file
+        + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required) - File TTH
+        + hasher_id: 0 (number, required) - ID of the hasher
+
+### Hashing of a file finished [POST /hash/listeners/hasher_file_failed]
+
+**Minimum API feature level**: 9
+
++ Response 200 (application/json)
+    + Attributes (object, fixed-type)
+        + path: /home/airdcpp/share/Ubuntu/ubuntu.iso (required) - File path
+        + error_id: crc_error (required) - Error ID (crc_error for a failed SFV check, io_error if there's an error when reading the file)
+        + message: calculated CRC32 does not match the one found in SFV file (required) - Error message
+        + hasher_id: 0 (number, required) - ID of the hasher
 
 ### Hashing of a directory finished [POST /hash/listeners/hasher_directory_finished]
 
@@ -1076,6 +1123,12 @@ Only the properties that have changed since the last event are sent.
 + Response 200 (application/json)
     + Attributes (Hash stats)
 
+### Database status updated [POST /hash/listeners/hash_database_status]
+
+Fired when the database maintenance starts/finishes
+
++ Response 200 (application/json)
+    + Attributes (Hash database status)
 
 ## Data Structures
 
@@ -1383,6 +1436,7 @@ Hook is fired for each outgoing hub chat message and can be used to prevent cert
 + identity (object, required, fixed-type)
     + name: Demo hub (required)
     + description: Demo hub for AirDC++ Web Client (required)
+    + supports: BASE, TIGR, KEYP, OSNR, UCM0, UCMD (array, required) - [ADC protocol ](https://adc.sourceforge.io/ADC.html) features supported by the hub (empty for NMDC hubs). **Minimum API feature level**: 9
 + share_profile (Share profile basic, required)
 + favorite_hub: 64723743 (number, required) - Favorite hub ID (0 = no favorite hub)
 + message_counts (Chat message info, required)
@@ -1728,7 +1782,7 @@ Post a select action when a user selects a specific menu item from the context m
 + Request (application/json)
     + Attributes (Context menu item selection)
         + supports (array[Context menu feature], fixed-type, optional) - Features supported by the implementation. **Minimum API feature level**: 5
-        + form_definitions (array[Setting definition]) - Possible definitions for the form was displayed (and the `forms` feature is supported by the requester). Must be supplied together with `form_values`. **Minimum API feature level**: 5
+        + `form_definitions` (array[Setting definition]) - Possible definitions for the form was displayed (and the `forms` feature is supported by the requester). Must be supplied together with `form_values`. **Minimum API feature level**: 5
 
 + Response 204
 
@@ -1786,7 +1840,7 @@ Hook is fired when the user attempts to list menu items for a specific menu type
 
 ### Context menu (object, fixed-type)
 
-+ id: airdcpp-share-scanner (required) - Menu ID as defined by the hook
++ id: `airdcpp-share-scanner` (required) - Menu ID as defined by the hook
 + title: Share scanner (required) - Menu title to show to the user
 + icon (object, optional) - iconset-to-icon mapping of icon to shown for the menu item. Use the key "semantic" when defining icons for the Web UI and see https://semantic-ui.com/elements/icon.html for available icons to use (see the "Definitions" tab for information about available icon colors and other attributes). The Windows GUI doesn't currently support icons for menu items.
     + Sample
@@ -1800,10 +1854,10 @@ Hook is fired when the user attempts to list menu items for a specific menu type
 
 ### Context menu item selection (Context menu item ids, fixed-type)
 
-+ hook_id: `airdcpp-release-validator` (required) - Hook ID of the selected menu item, field `hook_id` from the list response
-+ menuitem_id: scan_share (required) - ID of the selected menu item, field `id` from the list response
++ `hook_id`: `airdcpp-release-validator` (required) - Hook ID of the selected menu item, field `hook_id` from the list response
++ `menuitem_id`: scan_share (required) - ID of the selected menu item, field `id` from the list response
 + permissions (array[Web permission], fixed-type, required) - Permissions of the user who performed the click
-+ form_values (object, optional) - Entered form values if `form_definitions` was set for the menu item and the requester supports viewing of forms. Must be supplied together with `form_definitions`. **Minimum API feature level**: 5
++ `form_values` (object, optional) - Entered form values if `form_definitions` was set for the menu item and the requester supports viewing of forms. Must be supplied together with `form_definitions`. **Minimum API feature level**: 5
     + Sample
         + form_key1: false (boolean)
         + form_key2: Test
@@ -2929,6 +2983,36 @@ Fired when search types are added/updated/removed
 
 + Response 204
 
+### Incoming search [POST /search/listeners/search_incoming search]
+
+Fired when a new search is received and it has been matched against the share.
+
+**Minimum API feature level**: 9
+
++ Response 200 (application/json)
+    + Attributes
+        + hub (required) - Which hub the search was received from
+            + id: 3 (number, required)
+            + name: Hub name (required)
+            + hub_url: adcs://hub.com:6232 (required)
+        + user (Hub user) - The user who performed the search. Note that this will be available only for searches that were received via an ADC hub. The sender of the search is not known for active NMDC searches.
+        + query (Incoming search query, required)
+        + results (array[User search result])
+
+## Hooks [/search/hooks]
+
+### Incoming user result [POST /search/hooks/search_incoming_user_result]
+
+The hook is fired for all incoming individual search results, also for the ones that are only used for matching alternate sources in queue and not tied to a search instance.
+
+**Minimum API feature level**: 9
+
++ Request (application/json)
+    + Attributes (User search result)
++ Response 204
+
+
+
 
 ## Data Structures
 
@@ -2944,6 +3028,22 @@ Fired when search types are added/updated/removed
 + searches_sent_ago: 47243 (number, required) - Milliseconds ellapsed since the previous search was sent
 + query (Search query, optional) - Current search query (not available if no searches have been performed in this search instance) **Minimum API feature level**: 4
 
+### Search item type
+
++ any
++ tth
++ directory
++ file
+
+### Incoming search query
+
++ pattern: Ubuntu - Search string. All words must be found from the full file/directory path (partial match)
++ file_type (Search item type, required)
++ extensions: mp3, flac (optional) - Allowed file extensions
++ min_size: 50000000 (optional) - Minimum file size
++ max_size: 100000000 (optional) - Maximum file size
++ excluded: server, iot (optional) - List of strings that should not be found from the file/directory path
+
 ### Search type (object, fixed-type)
 
 + id: audio (required)
@@ -2955,30 +3055,36 @@ Fired when search types are added/updated/removed
 ### Grouped search result
 
 + id: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required)
-+ name: dir (required)
++ name: Ubuntu (required)
 + relevance: 1.34 (number, required) - Calculated item relevance based on the result name and number of hits
 + hits: 4 (number, required) - Number of users (child users) from who the item was found
 + users (object, required, fixed-type)
     + count: 4 (number, required)
     + user (Hinted user, required) - Base user from who the result name and path were picked from
 + type (File item type, required) - Directory content information (files and directories) is available from certain ADC users only
-+ path: /home/airdcpp/share/dir/ (required) - Path in remote user's share
++ path: /home/airdcpp/share/Ubuntu/ (required) - Path in remote user's share
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (nullable)
 + dupe (Dupe, nullable)
-+ time: 1483611358 (number, required) - File creation/modification date. The oldest found date is shown for parent results. Available from certain ADC users only.
++ time: 1483611358 (number) - File creation/modification date. The oldest found date is shown for parent results. Available from certain ADC users only.
 + slots (Slot count, required) - Accummulated slot counts from users
-+ connection: 42500000 (number, required) - Accummulated connection speed from users, bytes per second
++ connection: 42500000 (number) - Accummulated connection speed from users, bytes per second
 + size: 62523525626 (number, required) - Size in bytes (zero for NMDC directory results)
 
-### Child search result
+### User search result
 
-+ id: 427 (number)
-+ path: /Linux/Ubuntu 14.04/ - Path in remote user's share
-+ user (Hinted user)
-+ slots (Slot count)
++ id: 427 (number, required)
++ user (Hinted user, required)
++ slots (Slot count, required)
 + time: 1483611358 (number) - File creation/modification date. Available from certain ADC users only.
 + connection: 12500000 (number)  - Connection speed, bytes per second
-+ ip (IP)
++ ip (IP, required)
+
++ name: Ubuntu 14.04 (required) - **Minimum API feature level**: 9
++ path: /Linux/Ubuntu 14.04/ (required) - Path in remote user's share.
++ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (nullable) - **Minimum API feature level**: 9
++ dupe (Dupe, nullable) - **Minimum API feature level**: 9
++ size: 62523525626 (number, required) - Size in bytes (zero for NMDC directory results). **Minimum API feature level**: 9
++ type (File item type, required) - Directory content information (files and directories) is available from certain ADC users only. **Minimum API feature level**: 9
 
 ### Slot count
 
@@ -3098,7 +3204,7 @@ Get a list of individual user results.
 Required permission: *search*
 
 + Response 200 (application/json)
-    + Attributes (array[Child search result], fixed-type)
+    + Attributes (array[User search result], fixed-type)
 
 
 ## Event listeners [/search/{instance_id}/listeners]
@@ -3139,7 +3245,7 @@ Fired after all queued searches were sent.
 ### User result received [POST /search/{instance_id}/listeners/search_user_result]
 
 + Response 200 (application/json)
-    + Attributes (Child search result)
+    + Attributes (User search result)
 
 
 
@@ -3586,6 +3692,54 @@ Required permission: *share_edit*
 
 + Response 204
 
+## Share tree [/share/tree]
+
+### Get directory [POST /share/directories/by_real]
+
+Get information of a shared directory by real path
+
+**Minimum API feature level**: 9
+
++ Request (application/json)
+    + Attributes (object, required)
+        + path: /home/airdcpp/share/Ubuntu/CD1/ - Real path of the directory
+
++ Response 200 (application/json)
+    + Attributes (Share directory, fixed-type, required)
+
+### Get file [POST /share/files/by_real]
+
+Get information of a shared file by real path
+
+**Minimum API feature level**: 9
+
++ Request (application/json)
+    + Attributes (object, required)
+        + path: /home/airdcpp/share/Ubuntu/CD1/ubuntu.iso - Real path of the file
+
++ Response 200 (application/json)
+    + Attributes (Share file, fixed-type, required)
+
+### Directory content [POST /share/directories/by_real/content/{start}/{count}]
+
+List content of the directory
+
+**Minimum API feature level**: 9
+
+
++ Parameters
+    + start: 0 - Index of the first item to return
+    + count: 100 - Maximum number of items to return, must be larger than 0
+
++ Request (application/json)
+    + Attributes (object, required)
+        + path: /home/airdcpp/share/Ubuntu/CD1/ - Real path of the directory
+
++ Response 200 (application/json)
+    + Attributes (array[Share directory], fixed-type, required)
+
+
+
 
 ## Generic methods [/share]
 
@@ -3619,7 +3773,7 @@ Search for shared files.
         + share_profile: 7453466 (number, optional) - Items will be searched for from whole share if no profile is specified.
 
 + Response 200 (application/json)
-    + Attributes (array[Share item], fixed-type)
+    + Attributes (array[Share virtual item], fixed-type)
 
 ### Stats [GET /share/stats]
 
@@ -3844,26 +3998,45 @@ It's usually also better not to report validation errors directly to the user an
 + running (boolean) - Whether the task is currently running
 + canceled (boolean) - Whether the task has been canceled (queued tasks won't be removed from the task list immediately after they have been canceled)
 
-### Share item
+### Share item base
 
-+ id: 427 (number)
-+ name: Ubuntu 14.04
-+ virtual_path: /Linux/Ubuntu 14.04/
-+ real_paths: /home/airdcpp/share/Linux/Ubuntu 14.04/ (array)
-+ type (File item type)
-+ time: 1483611358 (number) - Modification date
++ virtual_path: /Linux/Ubuntu 14.04/ (required)
++ type (File item type, required)
++ time: 1483611358 (number, required) - Modification date
++ size: 62523525626 (number, required) - Size in bytes
+
+### Share virtual item (Share item base)
+
++ id: 427 (number, required)
++ name: Ubuntu 14.04 (required)
++ real_paths: /home/airdcpp/share/Linux/Ubuntu 14.04/ (array, required)
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
-+ size: 62523525626 (number) - Size in bytes
+
+### Share directory (Share item base)
+
++ id: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required)
++ name: Ubuntu 14.04 (required)
++ path: /home/airdcpp/share/Linux/Ubuntu 14.04/ (required)
++ profiles: 5, 54, 88 (array[number], required)
++ tth
+
+### Share file (Share item base)
+
++ id: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required)
++ name: Ubuntu.iso (required)
++ path: /home/airdcpp/share/Linux/Ubuntu 14.04/Ubuntu.iso (required)
++ profiles: 5, 54, 88 (array[number], required)
++ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required)
 
 ### Temp share item
 
-+ id: 624563154
-+ name: image1.png - Display name
-+ path: /tmp/54332674327 - Path on disk
-+ size: 7524332 - File size
-+ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y
-+ time_added: 1483611358 (number) - Time when the file was added in temp share
-+ type (File item type)
++ id: 624563154 (required)
++ name: image1.png (required) - Display name
++ path: /tmp/54332674327 (required) - Path on disk
++ size: 7524332 (required) - File size
++ tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required)
++ time_added: 1483611358 (number, required) - Time when the file was added in temp share
++ type (File item type, required)
 + user (User) - Possible user who is able to access the file. If no user is set, the file can be found by everyone.
 
 # Group Share profiles
@@ -4309,6 +4482,7 @@ Only the values that have changed after the last event are sent.
     + finished: false (boolean, required)
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (required) - File TTH
 + flags (array[Transfer flag], fixed-type, required)
++ supports: BASE, BZIP, TIGR, MCN1, CPMI, UBN1, ZLIG (array, required) - [ADC protocol](https://adc.sourceforge.io/ADC.html) transfer features supported by the remote user (empty for NMDC transfers). **Minimum API feature level**: 9
 + queue_file_id: 743457 (number, nullable) - ID of the queued file (not available for uploads)
 
 ### Transfer flag (enum[string])
@@ -4985,6 +5159,7 @@ The receiving instance of the message that is currently provided only for the ch
 + hub_name: Demo hub (required)
 + hub_session_id: 2 (number, required) - **Minimum API feature level**: 4
 + flags (array[Hub user flag], required)
++ supports: SEGA, ADC0, SUD1, CCPM, TCP4, UDP4 (array, required) - [ADC protocol ](https://adc.sourceforge.io/ADC.html) features supported by the user (empty for NMDC users). **Minimum API feature level**: 9
 + ip4 (object, fixed-type, nullable) - IPv4 address
     + country_id: `NL - Netherlands` (required)
     + ip: 89.255.248.35 (required)
