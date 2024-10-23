@@ -82,9 +82,249 @@ You may join the developer hub at adcs://web-dev.airdcpp.net:1511
 
 [Issue tracker](https://github.com/airdcpp-web/airdcpp-webclient/issues)
 
+# Group ADC commands
+
+The ADC command module provides low-level functionality for reading/sending/modifying the ADC protocol traffic (client-hub and client-client) and advertising custom ADC protocol features. 
+
+You shouldn't generally use this module unless you are implementing a new ADC extension or you have a more advanced use case that can't be implemented by using other API modules. Note that ADC protocol is only being used in ADC hubs (the address starts with adc:// or adcs://) and the API doesn't provide similar functionality for the legacy NMDC hubs.
+
+You should use the official [ADC protocol site](https://adc.sourceforge.io/) (including the protocol specifications) for reference when working with the protocol.
+
+**Minimum API feature level**: 9
+
+
+## Send command [/adc_commands/commands]
+
+### Send hub command [POST /adc_commands/hub_command]
+
+Note that either `required_features` or `excluded_features` must be provided when sending a `F` type command.
+
+Required permission: *admin*
+
++ Request (application/json)
+    + Attributes
+        + hub_url: adcs://myhub.com:6423 (required) - Hub URL
+        + command (ADC command, required)
+        + cid: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA (optional) - Command recipient (required for D and E command types)
+        + required_features: `ASCH`, `SEGA` (optional) - The command will be broadcasted only to users having all of the listed features (applied only with the F command type, ignored for other types)
+        + excluded_features: `ASCH`, `SEGA` (optional) - The command will be broadcasted only to users who don't have any of the listed features (applied only with the F command type, ignored for other types)
+
++ Response 201
+
+
+### Send UDP command [POST /adc_commands/udp_command]
+
+Send a protocol command directly to a user over the [UDP protocol](https://en.wikipedia.org/wiki/User_Datagram_Protocol).
+
+Note that only the `U` command type is valid for UDP commands.
+
+Required permission: *admin*
+
++ Request (application/json)
+    + Attributes
+        + user (Hinted user, required) - Command recipient
+        + command (ADC command, required)
+        + hub_fallback: true (boolean, optional) - Send the command via the hub if the user is in passive mode (the command type will be changed to `D` in such case)
+            + Default: false
++ Response 201
+
+### Send user connection command [POST /adc_commands/user_connection_command]
+
+Send a protocol command directly to a user over the TCP connection.
+
+Note that only the `C` command type is valid for user connection commands. Commands can't be sent for connections that are in data mode (binary data is being transferred).
+
+Required permission: *admin*
+
++ Request (application/json)
+    + Attributes
+        + user_connection: 4515616 (number, required) - User connection ID
+        + command (ADC command, required)
++ Response 201
+
+
+
+
+## Hub supports [/adc_commands/supports/hub]
+
+ADC features that are sent to the hub in the [SUP command](https://adc.sourceforge.io/ADC.html#_sup). These won't be broadcasted to all users so features sent in here are typically related only to client-hub communication (see the next section for user supports).
+
+### Add hub support [POST /adc_commands/supports/hub/{support}]
+
+Required permission: *admin*
+
++ Parameters
+    + support: HBRI - Support to be added
++ Response 201
+
+### Remove hub support [DELETE /adc_commands/supports/hub/{support}]
+
+Required permission: *admin*
+
++ Parameters
+    + support: HBRI - Support to be removed
++ Response 204
+
+## Hub user supports [/adc_commands/supports/hub_user]
+
+ADC features that are broadcasted to all users in [INF's SU param](https://adc.sourceforge.io/ADC.html#_inf). Supports that are relevant in client-client communication should be sent here. Note that user connection supports that aren't relevant before establishing the connection shouldn't be sent here in order to save hub's bandwidth (see the next section for user connection supports). 
+
+### Add hub user support [POST /adc_commands/supports/hub_user/{support}]
+
+Required permission: *admin*
+
++ Parameters
+    + support: DFAV - Support to be added
++ Response 201
+
+### Remove hub user support [DELETE /adc_commands/supports/hub_user/{support}]
+
+Required permission: *admin*
+
++ Parameters
+    + support: DFAV - Support to be removed
++ Response 204
+
+## User connection supports [/adc_commands/supports/user_connection]
+
+ADC features that are sent to the other user in the [SUP command](https://adc.sourceforge.io/ADC.html#_sup) when a direct TCP connection is being established. Supports that are relevant for direct TCP communication (typically transfers) should be sent here.
+
+### Add user connection support [POST /adc_commands/supports/user_connection/{support}]
+
+Required permission: *admin*
+
++ Parameters
+    + support: MCN1 - Support to be added
++ Response 201
+
+### Remove user connection support [DELETE /adc_commands/supports/user_connection/{support}]
+
+Required permission: *admin*
+
++ Parameters
+    + support: MCN1 - Support to be removed
++ Response 204
+
+
+## Event listeners [/adc_commands/listeners]
+
+Required permission: *admin*
+
+### Incoming hub command [POST /adc_commands/listeners/incoming_hub_command]
+
++ Response 200 (application/json)
+    + Attributes
+        + user (Hub user, optional) - Possible user who sent the command
+        + hub (Hub base, required) - Hub via which the command was received
+        + command (ADC command, required)
+
+### Outgoing hub command [POST /adc_commands/listeners/outgoing_hub_command]
+
++ Response 200 (application/json)
+    + Attributes (Outgoing hub command)
+
+### Incoming UDP command [POST /adc_commands/listeners/incoming_udp_command]
+
+Note that sending user isn't specified by this event listener as there is no generic way to connect the command to a specific user. UDP command typically include the CID of the sender but be aware that it can also be faked.
+
++ Response 200 (application/json)
+    + Attributes
+        + ip: 2a00:1a48:1261::168 (required) - IP address of the sender of the command
+        + command (ADC command, required)
+
+### Outgoing UDP command [POST /adc_commands/listeners/outgoing_udp_command]
+
++ Response 200 (application/json)
+    + Attributes (Outgoing UDP command)
+
+### Incoming user connection command [POST /adc_commands/listeners/incoming_user_connection_command]
+
++ Response 200 (application/json)
+    + Attributes
+        + user_connection (User connection, required)
+        + command (ADC command, required)
+
+### Outgoing user connection command [POST /adc_commands/listeners/outgoing_user_connection_command]
+
++ Response 200 (application/json)
+    + Attributes (Outgoing user connection command)
+
+## Hooks [/adc_commands/hooks]
+
+### Outgoing hub command [POST /adc_commands/hooks/outgoing_hub_command_hook]
+
++ Request (application/json)
+    + Attributes (Outgoing hub command)
+
++ Response 200 (application/json)
+    + Attributes (Named ADC params)
+
+### Outgoing UDP command [POST /adc_commands/hooks/outgoing_udp_command_hook]
+
++ Request (application/json)
+    + Attributes (Outgoing UDP command)
+
++ Response 200 (application/json)
+    + Attributes (Named ADC params)
+
+### Outgoing user connection command [POST /adc_commands/hooks/outgoing_user_connection_command_hook]
+
++ Request (application/json)
+    + Attributes (Outgoing user connection command)
+
++ Response 200 (application/json)
+    + Attributes (Named ADC params)
+
+
+
+## Data Structures
+
+### ADC command (object, fixed-type)
+
++ type: D (enum[string], required) - [ADC command type](https://adc.sourceforge.io/ADC.html#_message_types)
+    + B
+    + C
+    + D
+    + F
+    + H
+    + I
+    + U
++ command: SCH (required) - Three letter command code
++ params: `TO1/2844416609`, `GE0`, `ANexample`, `ANsearch` (array[string], required) - Command parameters
+
+### Named ADC param
+
++ name: GE (required) - Parameter name
++ value: 0 (required) - Parameter value
+
+### Named ADC params
+
++ params (array[Named ADC param], required) - Command parameters to add (existing parameters can't be removed)
+
+### User connection
+
++ id: 5325 (number, required)
++ user (Hinted user, optional) - Recipient of the command. Note that the user isn't known during the handshake phase.
++ ip: 2a00:1a48:1261::168 (required) - IP address of the remote user
+
+### Outgoing UDP command
+
++ user (Hub user, required) - Recipient of the command
++ command (ADC command, required)
+
+### Outgoing hub command
+
++ user (Hub user, optional) - Possible recipient of the command
++ hub (Hub base, required) - Hub via which the command will be sent
++ command (ADC command, required)
+
+### Outgoing user connection command
+
++ user_connection (User connection, required)
++ command (ADC command, required)
+
 
 # Group Favorite directories
-
 
 ## Favorite directories [/favorite_directories]
 
@@ -2288,6 +2528,18 @@ Required permission: *queue_view*
 + Response 200 (application/json)
     + Attributes (Queue file)
 
+### List files by TTH [GET /queue/files/{tth}]
+
+Required permission: *queue_view*
+
+**Minimum API feature level**: 9
+
++ Parameters
+    + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - TTH of the queued file
+
++ Response 200 (application/json)
+    + Attributes (array[Queue file])
+
 ### Remove file from queue [POST /queue/files/{file_id}/remove]
 
 Required permission: *queue_edit*
@@ -2991,10 +3243,7 @@ Fired when a new search is received and it has been matched against the share.
 
 + Response 200 (application/json)
     + Attributes
-        + hub (required) - Which hub the search was received from
-            + id: 3 (number, required)
-            + name: Hub name (required)
-            + hub_url: adcs://hub.com:6232 (required)
+        + hub (Hub base, required) - Which hub the search was received from
         + user (Hub user) - The user who performed the search. Note that this will be available only for searches that were received via an ADC hub. The sender of the search is not known for active NMDC searches.
         + query (Incoming search query, required)
         + results (array[User search result])
@@ -3719,6 +3968,16 @@ Get information of a shared file by real path
 
 + Response 200 (application/json)
     + Attributes (Share file, fixed-type, required)
+
+### List files by TTH [GET /share/files/{tth}]
+
+**Minimum API feature level**: 9
+
++ Parameters
+    + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y - TTH of the shared file
+
++ Response 200 (application/json)
+    + Attributes (array[Share file])
 
 ### Directory content [POST /share/directories/by_real/content/{start}/{count}]
 
@@ -5152,6 +5411,12 @@ The receiving instance of the message that is currently provided only for the ch
 + hub_names: `Demo hub (Dev hub)` (required) - Name of the hinted hub is shown first and possible other hub names are inside parentheses
 + hub_urls: adcs://myhub.com:6423, adc://devhub.com:1234 (required) - All hub URLs for the user (including the hinted URL)
 + flags (array[Hub user flag], required) - Flags in the hinted hub. All flags are not displayed if the user is offline.
+
+### Hub base (object, fixed-type)
+
++ id: 3 (number, required)
++ name: Hub name (required)
++ hub_url: adcs://hub.com:6232 (required)
 
 ### Hub user (Hinted user base, fixed-type)
 
