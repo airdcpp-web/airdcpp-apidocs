@@ -208,67 +208,87 @@ Required permission: *admin*
 
 ## Event listeners [/adc_commands/listeners]
 
+Each listener allows you to subscribe only to a single three-letter command. It's recommended that you only subscribe to the commands that you are interested in to avoid excess traffic.
+
 Required permission: *admin*
 
-### Incoming hub command [POST /adc_commands/listeners/incoming_hub_command]
+### Incoming hub command [POST /adc_commands/listeners/incoming_hub_command[/{command}]]
 
++ Parameters
+    + command: MSG - Command
 + Response 200 (application/json)
     + Attributes
         + user (Hub user, optional) - Possible user who sent the command
         + hub (Hub base, required) - Hub via which the command was received
         + command (ADC command, required)
 
-### Outgoing hub command [POST /adc_commands/listeners/outgoing_hub_command]
+### Outgoing hub command [POST /adc_commands/listeners/outgoing_hub_command[/{command}]]
 
++ Parameters
+    + command: MSG - Command
 + Response 200 (application/json)
     + Attributes (Outgoing hub command)
 
-### Incoming UDP command [POST /adc_commands/listeners/incoming_udp_command]
+### Incoming UDP command [POST /adc_commands/listeners/incoming_udp_command[/{command}]]
 
 Note that sending user isn't specified by this event listener as there is no generic way to connect the command to a specific user. UDP command typically include the CID of the sender but be aware that it can also be faked.
 
++ Parameters
+    + command: RES - Command
 + Response 200 (application/json)
     + Attributes
         + ip: 2a00:1a48:1261::168 (required) - IP address of the sender of the command
         + command (ADC command, required)
 
-### Outgoing UDP command [POST /adc_commands/listeners/outgoing_udp_command]
+### Outgoing UDP command [POST /adc_commands/listeners/outgoing_udp_command[/{command}]]
 
++ Parameters
+    + command: RES - Command
 + Response 200 (application/json)
     + Attributes (Outgoing UDP command)
 
-### Incoming user connection command [POST /adc_commands/listeners/incoming_user_connection_command]
+### Incoming user connection command [POST /adc_commands/listeners/incoming_user_connection_command[/{command}]]
 
++ Parameters
+    + command: MSG - Command
 + Response 200 (application/json)
     + Attributes
         + user_connection (User connection, required)
         + command (ADC command, required)
 
-### Outgoing user connection command [POST /adc_commands/listeners/outgoing_user_connection_command]
+### Outgoing user connection command [POST /adc_commands/listeners/outgoing_user_connection_command[/{command}]]
 
++ Parameters
+    + command: MSG - Command
 + Response 200 (application/json)
     + Attributes (Outgoing user connection command)
 
 ## Hooks [/adc_commands/hooks]
 
-### Outgoing hub command [POST /adc_commands/hooks/outgoing_hub_command_hook]
+Each hook allows you to subscribe only to a single three-letter command. It's recommended that you only subscribe to the commands that you are interested in to avoid excess traffic.
 
+### Outgoing hub command [POST /adc_commands/hooks/outgoing_hub_command_hook[/{command}]]
+
++ Parameters
+    + command: MSG - Command
 + Request (application/json)
     + Attributes (Outgoing hub command)
-
 + Response 200 (application/json)
     + Attributes (Named ADC params)
 
-### Outgoing UDP command [POST /adc_commands/hooks/outgoing_udp_command_hook]
+### Outgoing UDP command [POST /adc_commands/hooks/outgoing_udp_command_hook[/{command}]]
 
++ Parameters
+    + command: RES - Command
 + Request (application/json)
     + Attributes (Outgoing UDP command)
-
 + Response 200 (application/json)
     + Attributes (Named ADC params)
 
-### Outgoing user connection command [POST /adc_commands/hooks/outgoing_user_connection_command_hook]
+### Outgoing user connection command [POST /adc_commands/hooks/outgoing_user_connection_command_hook[/{command}]]
 
++ Parameters
+    + command: MSG - Command
 + Request (application/json)
     + Attributes (Outgoing user connection command)
 
@@ -680,6 +700,18 @@ Required permission: *admin*
 + Response 200 (application/json)
     + Attributes (Extension)
 
+### Update extension properties [PATCH]
+
+**Minimum API feature level**: 9
+
+Required permission: *admin*
+
++ Request (application/json)
+    + Attributes (object, fixed-type)
+        + disabled: true (boolean) - Whether autostart is disabled for the extension
+
++ Response 204
+
 ### Remove extension [DELETE]
 
 Required permission: *admin*
@@ -740,6 +772,7 @@ All event listeners from extension entities are also available to be used across
 + version: `0.0.1-beta4` (required)
 + homepage: `https://airdcpp-web.github.io` (nullable)
 + author: maksis (required)
++ disabled: false (boolean, required) - Whether autostart is disabled for the extension. **Minimum API feature level**: 9
 + running: true (boolean, required)
 + private: false (boolean, required) - Whether the extension is private (not published at npm)
 + logs (array[Filesystem item], fixed-type, required)
@@ -1046,7 +1079,7 @@ Required permission: *filelists_view*
 
 Note that running of the hooks may take quite a long time for huge filelists and the application may choose to skip them for performance reasons. The hooks won't be fired for background filelists that are only being matched against queue.
 
-### Load directory [POST /filelists/hooks/filelist_load_directory]
+### Load directory [POST /filelists/hooks/filelist_load_directory_hook]
 
 The hook is fired for filelist directories when they are being loaded.
 
@@ -1059,7 +1092,7 @@ The hook is fired for filelist directories when they are being loaded.
 + Response 204
 
 
-### Load directory [POST /filelists/hooks/filelist_load_file]
+### Load directory [POST /filelists/hooks/filelist_load_file_hook]
 
 The hook is fired for filelist files when they are being loaded.
 
@@ -1946,6 +1979,30 @@ Item getter: [Get transfer](#reference/transfers/transfer/get-transfer)
 Item getter: [Get user](#reference/users/miscellaneous/get-user)
 
 *Less commonly being used menu type with users that aren't bound to any hub (e.g. ignored users)*
+
+##### hub
+
+**Minimum API feature level**: 9
+
+Item getter: [Get hub](#reference/hubs/session/get-session)
+
+##### private_chat
+
+**Minimum API feature level**: 9
+
+Item getter: [Get private chat](#reference/private-chat/private-chat-session/get-session)
+
+##### filelist
+
+**Minimum API feature level**: 9
+
+Item getter: [Get filelist](#reference/filelists/filelist/get-filelist-sessions)
+
+##### view_file
+
+**Minimum API feature level**: 9
+
+Item getter: [Get viewed file](#reference/viewed-files/view-file/get-file)
 
 
 
@@ -2996,7 +3053,7 @@ but the total matching time will be totally different with 5 million files.
 TTH searches are generally cheap since clients maintain an index of shared files by their TTH values from which the searches are matched from. 
 
 When performing text searches with partial matching, no such index exists. Various clients use [bloom filters](https://en.wikipedia.org/wiki/Bloom_filter) to cheaply filter out text searches that are guaranteened not to match 
-any shared items, that will work quite well especially with longer seach terms. If an average length of a shared item is 43 characters (43 bytes for ASCII-only names), the total amount of text to match with 5 million shared files
+any shared items, that will work quite well especially with longer seach terms. If the average length of a shared item name is 43 characters, which also equals to 43 bytes for ASCII-only names, the total amount of text to match with 5 million shared files
 would be 215 megabytes (given that the whole share needs to matched).
 
 
@@ -3011,7 +3068,7 @@ the application will maintain queues for outgoing searches on per-hub basis.
 The position of a search in the search queue is determined by its priority, which allows minimizing the waiting times for more urgent searches (such as manual ones made from the UI).
 Since higher priority searches may be added in queue before the existing ones, the actual time when the search will be sent is not known at the time when it's being queued.
 
-When using Websockets, there's a 'search_hub_searches_sent' that will be fired after the search has been sent to all hubs. Here's a snippet of a subscription-based search function for [airdcpp-apisocket](https://github.com/airdcpp-web/airdcpp-apisocket-js):
+When using Websockets, there's a `search_hub_searches_sent` listener that will be fired after the search has been sent to all hubs. Here's a snippet of a subscription-based search function for [airdcpp-apisocket](https://github.com/airdcpp-web/airdcpp-apisocket-js):
 
 ```javascript
 
@@ -3250,7 +3307,7 @@ Fired when a new search is received and it has been matched against the share.
 
 ## Hooks [/search/hooks]
 
-### Incoming user result [POST /search/hooks/search_incoming_user_result]
+### Incoming user result [POST /search/hooks/search_incoming_user_result_hook]
 
 The hook is fired for all incoming individual search results, also for the ones that are only used for matching alternate sources in queue and not tied to a search instance.
 
