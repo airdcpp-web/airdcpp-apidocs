@@ -1938,103 +1938,137 @@ There are no specific permissions required for using this API module, but it's u
 
 ### Menu types
 
+#### Generic menu types (not bound to IDs)
+
+Menu items that are typically shown next to the table. `selected_ids` and `entity_id` won't be supplied.
+
+**favorite_hubs**
+
+Menu shown on the Favorite hubs page
+
+> Minimum API feature level: 9
+
+**events**
+
+Menu shown on the Events page
+
+> Minimum API feature level: 9
+
+**queue**
+
+Menu shown on the Queue page
+
+> Minimum API feature level: 9
+
+**share_roots**
+
+Menu shown on the Share page
+
+> Minimum API feature level: 9
+
+**transfers**
+
+Menu shown on the Transfers page
+
+> Minimum API feature level: 9
+
+
 #### Item types without a parent entity
 
-The following menu types don't have a parent entity and you can call the respective item getter method with each ID in the `selected_ids` list.
+The following menu types don't have a parent entity and you can call the respective item getter method with each ID in the `selected_ids` list. `entity_id` won't be supplied.
 
-##### extension
+**extension
 
 Item getter: [Get extension](#reference/extensions/extension-entity/get-extension)
 
 *Note that your extension will also receive menu events targeting other extensions. If you want add menu items only for your own extension, remember to check that the item ID list includes the ID of your own extesion.*
 
-##### favorite_hub
+**favorite_hub**
 
 Item getter: [Get favorite hub](#reference/favorite-hubs/favorite-hub/get-favorite-hub)
 
-##### hinted_user
+**hinted_user**
 
 Item getter: [Find hinted user](#reference/users/miscellaneous/search-hinted-user)
 
 *The most common menu type for displaying user-related context menus (e.g. for search results, transfers, queue sources, filelists, private messages)*
 
-##### queue_bundle
+**queue_bundle**
 
 Item getter: [Get bundle](#reference/queue/bundle/get-bundle)
 
-##### queue_file
+**queue_file**
 
 Item getter: [Get file](#reference/queue/files/get-file)
 
-##### share_root
+**share_root**
 
 Item getter: [Get share root](#reference/share-roots/share-root/get-share-root)
 
-##### transfer
+**transfer**
 
 Item getter: [Get transfer](#reference/transfers/transfer/get-transfer)
 
-##### user
+**user**
 
 Item getter: [Get user](#reference/users/miscellaneous/get-user)
 
 *Less commonly being used menu type with users that aren't bound to any hub (e.g. ignored users)*
 
-##### hub
-
-**Minimum API feature level**: 9
+**hub**
 
 Item getter: [Get hub](#reference/hubs/session/get-session)
 
-##### private_chat
+> Minimum API feature level: 9
 
-**Minimum API feature level**: 9
+**private_chat**
 
 Item getter: [Get private chat](#reference/private-chat/private-chat-session/get-session)
 
-##### filelist
+> Minimum API feature level: 9
 
-**Minimum API feature level**: 9
+**filelist**
 
 Item getter: [Get filelist](#reference/filelists/filelist/get-filelist-sessions)
 
-##### view_file
+> Minimum API feature level: 9
 
-**Minimum API feature level**: 9
+**view_file**
 
 Item getter: [Get viewed file](#reference/viewed-files/view-file/get-file)
 
+> Minimum API feature level: 9
 
 
 #### Entity-specific item types
 
 The following menu types have an `entity_id` field set, which contains the parent entity needed when calling the item getter method.
 
-##### grouped_search_result
+**grouped_search_result**
 
 Item getter: [Get grouped search result](#reference/search-instances/results/get-result)
 
-##### hub_user
+**hub_user**
 
 Item getter: [Get hub user](#reference/hub-sessions/users/get-user)
  
 *User context menu type bound to a specific hub session with no fallback (e.g. hub's user list)*
 
-##### filelist_item
+**filelist_item**
 
 Item getter: [Get filelist item](#reference/filelist-entities/filelist-item/get-filelist-item)
 
-##### hub_message_highlight
-
-**Minimum API feature level**: 5
+**hub_message_highlight**
 
 Item getter: [Get hub message highlight](#reference/hub-sessions/messages/get-message-highlight)
 
-##### private_chat_message_highlight
+> Minimum API feature level: 5
 
-**Minimum API feature level**: 5
+**private_chat_message_highlight**
 
 Item getter: [Get private message highlight](#reference/private-chat-sessions/messages/get-message-highlight)
+
+> Minimum API feature level: 5
 
 
 ### Flow
@@ -2146,7 +2180,7 @@ Hook is fired when the user attempts to list menu items for a specific menu type
 
 ### Context menu item ids (object, fixed-type)
 
-+ selected_ids: 155214176, 53872534 (array[number], required) - IDs of the selected item entities
++ selected_ids: 155214176, 53872534 (array[number], optional) - IDs of the selected item entities. Won't be available for global menu types.
 + entity_id: 1 (number, optional) - ID of the parent entity, must be provided for menu types that are bound to a specific entity
 
 ### Context menu item selection (Context menu item ids, fixed-type)
@@ -3575,6 +3609,7 @@ This endpoint should be called when communicating the API over [websockets](http
             + Default: 20
 + Response 200 (application/json)
     + Attributes (Authentication info)
+        + refresh_token: `121a485b-548b-424e-a273-43bc883bc222` (required)
 
 ### Socket [POST /sessions/socket]
 
@@ -3680,7 +3715,9 @@ Required permission: *admin*
 
 ### Authentication info
 
++ session_id: 1149157491 (required, number) - **Minimum API feature level**: 4
 + auth_token: `25793d1e-6d48-407c-9c27-a9dcbd2e1188` (required) - Authorization token
++ token_type: Bearer (required)
 + system_info (System info, required) - Generic information about the system that the application is running on
 + user (Web user, required) - Current web user
 + wizard_pending: false (boolean, required) - Whether completion of the initial configuration wizard is pending
@@ -3803,10 +3840,13 @@ Get schema information of the specified settings.
 
 + number - Numeric (integer) field
 + string - Regular string field
++ text - Field for longer text content
++ url - URL (note that there's a separate setting type specifically for hub URLs) **Minimum API feature level**: 10
++ password - Password **Minimum API feature level**: 10
++ email - Email address **Minimum API feature level**: 10
 + file_path - File path selector for new or existing files
 + existing_file_path - File path selector for existing files
 + directory_path - Directory path selector
-+ text - Field for longer text content
 + hub_url - Hub URL **Minimum API feature level**: 5
 + hinted_user - Hinted user (with properties `nicks`, `hub_url` and `cid`) **Minimum API feature level**: 5
 + struct - A value object, each child field must be configured in the 'definitions' field. Nested structs are not currently supported.
@@ -4891,6 +4931,24 @@ Search a user by CID and hub hint. If the user is not found from the hinted hub,
 + Response 200 (application/json)
     + Attributes (Hinted user)
     
+## Upload slots [/users/slots]
+
+### Grant a slot  [GET /users/slots/{cid}]
+
+Grant a slot for the specified user
+
+**Minimum API feature level**: 10
+
++ Request (application/json)
+    + Attributes
+        + duration: 600 (number, required) - Duration for which the slot is granted in seconds
+        + hub_url: adcs://myhub.com:6423 (optional) - An optional hub URL via which the connect attempt should be made (used only if the other user exists in the upload queue)
+
++ Response 200 (application/json)
+    + Attributes 
+        + connect_result (User connect result, optional, fixed-type) - Available only if the user was requested to connect to us (attempted only with users who are waiting for a slot)
+
+
 
 ## Event listeners [/users/listeners]
 
@@ -4932,6 +4990,10 @@ Subscriptions related to connect state changes are tracked globally on per-user 
 + user (User)
 + ignored_messages: 14 (number)
 
+### User connect result
+
++ success: false (boolean, required)
++ error: Remote ADC client does not use TLS encryption (optional)
 
 # Group Web users
 
@@ -5141,7 +5203,17 @@ Required permission: *view_files_view*
 
 Required permission: *view_files_view*
 
-### File added [POST /view_files/listeners/view_file_added]
+### File created [POST /view_files/listeners/view_file_created]
+
+**Minimum API feature level**: 10
+
++ Response 200 (application/json)
+
+    + Attributes (View file)
+
+### File added (deprecated) [POST /view_files/listeners/view_file_added]
+
+Use the listener above instead
 
 + Response 200 (application/json)
 
