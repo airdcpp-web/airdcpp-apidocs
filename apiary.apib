@@ -371,8 +371,7 @@ Required permission: *settings_edit*
         + path: /home/airdcpp/share/Linux/ (required) - Directory path
         + name: Linux (optional) - Virtual display name for the directory. Multiple paths can be added with the same name. Name will be determined from the path if not specified.
     
-+ Response 200 (application/json)
-    + Attributes (Favorite directory)
++ Response 204
 
 ## Favorite directory [/favorite_directories/{directory_id}]
 
@@ -411,7 +410,7 @@ Required permission: *settings_edit*
 
 Required permission: *settings_view*
 
-### Favorite directories updated [POST /favorite_hubs/listeners/favorite_hub_updated]
+### Favorite directories updated [POST /favorite_directories/listeners/favorite_directories_updated]
 
 + Response 200 (application/json)
     + Attributes (array[Favorite directory], fixed-type)
@@ -424,6 +423,70 @@ Required permission: *settings_view*
 + name: Linux (required) - Virtual display name for the directory. Multiple paths can be added with the same name.
 + path: /home/airdcpp/share/Linux/ (required) - Directory path
 
+
+# Group Connectivity
+
+Connectivity API provides information about configured connectivity state and tools for running auto detection.
+
+## Methods [/connectivity]
+
+### Connectivity status [GET /connectivity/status]
+
+Required permission: *settings_view*
+
+ + Response 200 (application/json)
+    + Attributes (object)
+        + status_v4 (Connectivity status, required)
+        + status_v6 (Connectivity status, required)
+        + tcp_port: 16735 (number, required)
+        + tls_port: 16744 (number, required)
+        + udp_port: 16735 (number, required)
+
+### Detect connectivity [POST /connectivity/detect]
+
+Run connectivity auto detection.
+
+Required permission: *settings_edit*
+
+ + Response 204
+
+## Event listeners [/connectivity/listeners]
+
+Required permission: *settings_view*
+
+### Connectivity detection started [POST /connectivity/listeners/connectivity_detection_started]
+
+ + Response 200 (application/json)
+    + Attributes
+        + v6: false (boolean, required) - Whether the IPv6 connectivity detection run started
+
+### Connectivity detection finished [POST /connectivity/listeners/connectivity_detection_finished]
+
+ + Response 200 (application/json)
+    + Attributes
+        + v6: false (boolean, required) - Whether the IPv6 connectivity detection run finished
+        + failed: false (boolean, required) - Whether the detection failed
+
+### Connectivity detection message [POST /connectivity/listeners/connectivity_detection_message]
+
+Fired for all status messages while the detection is running (all messages will also be added in the event log).
+
+**Minimum API feature level**: 10
+
+ + Response 200 (application/json)
+    + Attributes (Status message)
+        + text: Detecting IPv6 connectivity... (required) - Detection message
+
+
+## Data Structures
+
+### Connectivity status
+
+ + auto_detect: true (boolean, required) - Whether auto detection is enabled for the protocol
+ + enabled: true (boolean, required) - Whether the protocol is enabled
+ + text: Active mode (required) - Connectivity status
+ + bind_address: 0.0.0.0 (required)
+ + external_ip: 203.0.113.1
 
 
 
@@ -507,7 +570,7 @@ Required permission: *favorite_hubs_view*
 + Response 200 (application/json)
     + Attributes (Favorite hub)
 
-### Favorite hub created [POST /favorite_hubs/listeners/favorite_hub_removed]
+### Favorite hub removed [POST /favorite_hubs/listeners/favorite_hub_removed]
 
 + Response 200 (application/json)
     + Attributes (Favorite hub)
@@ -591,7 +654,7 @@ Required permission: *events_edit*
 
 ### Set all events as read [POST /events/read]
 
-Required permission: *events_edit*
+Required permission: *events_view*
 
 + Response 204
 
@@ -1071,7 +1134,7 @@ Required permission: *filelists_view*
 ### Directory download failed [POST /filelists/listeners/filelist_directory_download_failed]
 
 + Response 200 (application/json)
-    + Attributes (Directory download item, fixed-type)
+    + Attributes (object, fixed-type)
         + directory_download (Directory download item, required)
         + error: The directory is empty (required)
 
@@ -1092,7 +1155,7 @@ The hook is fired for filelist directories when they are being loaded.
 + Response 204
 
 
-### Load directory [POST /filelists/hooks/filelist_load_file_hook]
+### Load file [POST /filelists/hooks/filelist_load_file_hook]
 
 The hook is fired for filelist files when they are being loaded.
 
@@ -1100,7 +1163,7 @@ The hook is fired for filelist files when they are being loaded.
 
 + Request (application/json)
     + Attributes
-        + directory (Filelist item, required) - File
+        + file (Filelist item, required) - File
         + filelist_id: NJSHVYR4ZHCZFUEZNGA7M2D72S5AB4WQAMPBKFA (required) (string)
 + Response 204
 
@@ -1159,7 +1222,9 @@ Required permission: *filelists_view*
     + count: 100 - Maximum number of items to return, must be larger than 0
 
 + Response 200 (application/json)
-    + Attributes (array[Filelist item], fixed-type)
+    + Attributes (object, fixed-type)
+        + list_path: /Share/Ubuntu/ (required)
+        + items (array[Filelist item], fixed-type, required)
     
 + Response 503
 
@@ -1448,7 +1513,7 @@ The following history types are available:
         + videos
         + linux
 
-### Add string [PATCH /histories/strings/{history_type}]
+### Add string [POST /histories/strings/{history_type}]
 
 Add a new string in the specified string array.
 
@@ -1486,8 +1551,6 @@ The following history types are available:
 
 ### Get session history [GET /histories/sessions/{history_type}/{max_count}]
 
-Required permission: *settings_view*
-
 + Parameters
     + max_count: 0 - Maximum number of most recent sessions to return (0 = unlimited)
     
@@ -1497,8 +1560,6 @@ Required permission: *settings_view*
 ### Search session history [POST /histories/sessions/{history_type}/search]
 
 Search sessions with name matching the provided pattern. The most relevant match is returned first.
-
-Required permission: *settings_view*
 
 + Request (application/json)
     + Attributes
@@ -1869,7 +1930,7 @@ Required permission: *hubs_edit*
 
 Get the current user and share counts.
 
-Required permission: *hubs_edit*
+Required permission: *hubs_view*
 
 + Response 200 (application/json)
     + Attributes (Hub counts)
@@ -2396,8 +2457,8 @@ Required permission: *private_chat_view*
 + Response 200 (application/json)
     + Attributes (Message highlight)
 
-## Direct enrypted connection [/private_chat/{session_id}/ccpm]
-
+## Direct encrypted connection [/private_chat/{session_id}/ccpm]
+ 
 ### Initiate CCPM connection [POST /private_chat/{session_id}/ccpm]
 
 Establish an encrypted client-to-client private messaging channel. CCPM is available only with users having the *ccpm* flag.
@@ -2583,7 +2644,7 @@ Required permission: *queue_edit*
     + Attributes
         + priority (Queue priority ID, optional) - Auto priority will be enabled if no priority is supplied
 
-+ Response 204 (application/json)
++ Response 204
 
 ### Search bundle for alternates [POST /queue/bundles/{bundle_id}/search]
 
@@ -2598,7 +2659,7 @@ Required permission: *queue_edit*
 
 ### Share a failed bundle [POST /queue/bundles/{bundle_id}/share]
 
-Attempt to add a failed bundle in share. This may used only for bundle that are in 'completion_validation_error' state.
+Attempt to add a failed bundle in share. This may be used only for bundles that are in 'completion_validation_error' state.
 
 Required permission: *queue_edit*
 
@@ -2650,13 +2711,13 @@ Required permission: *queue_edit*
     + Attributes
         + priority (Queue priority ID, optional) - Auto priority will be enabled if no priority is supplied
 
-+ Response 204 (application/json)
++ Response 204
 
 ### Search file for alternates [POST /queue/files/{file_id}/search]
 
 Required permission: *queue_edit*
 
-+ Response 204 (application/json)
++ Response 204
 
 ### Get file sources [GET /queue/files/{file_id}/sources]
 
@@ -2669,7 +2730,7 @@ Required permission: *queue_view*
 
 Required permission: *queue_edit*
 
-+ Response 204 (application/json)
++ Response 204
 
 ### Get file segments [GET /queue/files/{file_id}/segments]
 
@@ -2950,7 +3011,7 @@ The hook is fired for directory bundle files and file bundles that are being add
 + name: Ubuntu (required)
 + target: /home/airdcpp/share/Ubuntu/ (required)
 + type (File item type, required)
-+ sources (Queue bundle source, required)
++ sources (Queue source info, required)
 + status (object, required)
     + id: queued (enum[string], required)
          + new - Not added in queue yet
@@ -3129,7 +3190,7 @@ await socket.post(`search/${instance.id}/hub_search`, {
 
 [Complete example extension](https://github.com/airdcpp-web/airdcpp-extension-js/blob/master/examples/airdcpp-auto-downloader.js)
 
-HTTP users may also check the search instance object to see the current queue time or time ellapsed from the search.
+HTTP users may also check the search instance object to see the current queue time or time elapsed from the search.
 
 Note that the application may also choose reject new searches in order to prevent the search queue from growing indefinitely. Therefore, you should
 use some consideration regarding the number of searches that you really need to perform.
@@ -3258,8 +3319,6 @@ Required permission: *settings_edit*
 
 Get search type by ID
 
-Required permission: *settings_edit*
-
 **Minimum API feature level**: 3
 
 + Response 200 (application/json)
@@ -3326,7 +3385,7 @@ Fired when search types are added/updated/removed
 
 + Response 204
 
-### Incoming search [POST /search/listeners/search_incoming search]
+### Incoming search [POST /search/listeners/search_incoming_search]
 
 Fired when a new search is received and it has been matched against the share.
 
@@ -3365,7 +3424,7 @@ The hook is fired for all incoming individual search results, also for the ones 
 + queue_time: 0 (number, required) - Current queue time in milliseconds for the previously sent search (hub searches only)
 + queued_count: 0 (number, required) - Number of hub searches that haven't been sent yet (hub searches only)
 + result_count: 3153 (number, required) - Number of received results
-+ searches_sent_ago: 47243 (number, required) - Milliseconds ellapsed since the previous search was sent
++ searches_sent_ago: 47243 (number, required) - Milliseconds elapsed since the previous search was sent
 + query (Search query, optional) - Current search query (not available if no searches have been performed in this search instance) **Minimum API feature level**: 4
 
 ### Search item type
@@ -3406,8 +3465,8 @@ The hook is fired for all incoming individual search results, also for the ones 
 + tth: CUO74LMZUQMQCBR5UKTIFJPO32LVUH5VZBOL54Y (nullable)
 + dupe (Dupe, nullable)
 + time: 1483611358 (number) - File creation/modification date. The oldest found date is shown for parent results. Available from certain ADC users only.
-+ slots (Slot count, required) - Accummulated slot counts from users
-+ connection: 42500000 (number) - Accummulated connection speed from users, bytes per second
++ slots (Slot count, required) - Accumulated slot counts from users
++ connection: 42500000 (number) - Accumulated connection speed from users, bytes per second
 + size: 62523525626 (number, required) - Size in bytes (zero for NMDC directory results)
 
 ### User search result
@@ -3609,7 +3668,6 @@ This endpoint should be called when communicating the API over [websockets](http
             + Default: 20
 + Response 200 (application/json)
     + Attributes (Authentication info)
-        + refresh_token: `121a485b-548b-424e-a273-43bc883bc222` (required)
 
 ### Socket [POST /sessions/socket]
 
@@ -3656,7 +3714,7 @@ Invalidate the current session (log out). This method is not available when usin
         
 ### Get sessions [GET]
 
-Get a list of current web server sessionsURL 
+Get a list of current web server sessions
 
 Required permission: *admin*
 
@@ -4151,7 +4209,7 @@ Checked whether the supplied real path currently exists in share. Won't perform 
     + Attributes (object, fixed-type, required)
         + is_shared: true (boolean) - Whether the path exists in share
 
-### Validate path [GET /share/validate_path]
+### Validate path [POST /share/validate_path]
 
 Check whether a file/directory that exists on disk can be added in share (or is shared already). Works only with paths that are inside a shared directory.
 
@@ -4198,7 +4256,7 @@ Check whether a file/directory that exists on disk can be added in share (or is 
 
 ## Event listeners [/share/listeners]
 
-Required permission: *settings_view*
+Required permission: *share_view*
 
 ### Share refresh queued [POST /share/listeners/share_refresh_queued]
 
@@ -4573,7 +4631,7 @@ Only the updated properties are sent.
 + Response 200 (application/json)
     + Attributes (Share root)
 
-### Share root created [POST /share_roots/listeners/share_root_removed]
+### Share root removed [POST /share_roots/listeners/share_root_removed]
 
 + Response 200 (application/json)
     + Attributes (Share root)
@@ -4632,7 +4690,7 @@ Only the updated properties are sent.
 + Response 200 (application/json)
     + Attributes
         + server_threads: 4 (number) - Number of configured web server threads
-        + active_session: 2 (number)
+        + active_sessions: 2 (number)
 
 
 ### Get system info [GET /system/system_info]
@@ -4692,7 +4750,7 @@ Required permission: *admin*
 
 # Group Transfers
 
-Tranfer API manages download and upload connections. In addition to regular file transfers, filelist and TTH tranfers are listed as well.
+Transfer API manages download and upload connections. In addition to regular file transfers, filelist and TTH transfers are listed as well.
 
 Transfer items represent individual transfer connections that may be reused to transfer multiple different files (or file chunks). If you want to track the download progress of the entire file, it's better to use the [queue API](#reference/queue) instead.
 
@@ -4734,7 +4792,9 @@ Required permission: *transfers*
 
 ## Generic methods [/transfers/stats]
 
-### Get transferred bytes [GET /transfers/tranferred_bytes]
+### Get transferred bytes [GET /transfers/transferred_bytes]
+
+**Minimum API feature level**: 10 (was previously misspelled as "tranferred_bytes")
 
 Get transferred bytes (session and total)
 
@@ -4743,7 +4803,7 @@ Required permission: *transfers*
 + Response 200 (application/json)
     + Attributes (object, fixed-type)
         + session_downloaded: 5325235 (number, required)
-        + session_uploaded 6768544233 (number, required)
+        + session_uploaded: 6768544233 (number, required)
         + start_total_downloaded: 5543652344 (number, required)
         + start_total_uploaded: 6433254263622 (number, required)
 
@@ -4933,11 +4993,13 @@ Search a user by CID and hub hint. If the user is not found from the hinted hub,
     
 ## Upload slots [/users/slots]
 
-### Grant a slot  [GET /users/slots/{cid}]
+### Grant a slot  [POST /users/slots/{cid}]
 
 Grant a slot for the specified user
 
 **Minimum API feature level**: 10
+
+Required permission: *settings_edit*
 
 + Request (application/json)
     + Attributes
@@ -5021,13 +5083,16 @@ Required permission: *admin*
 + Response 200 (application/json)
     + Attributes (Web user)
 
-## Web user [/web_users/{user_id}]
+## Web user [/web_users/{username}]
 
 ### Update web user [PATCH]
 
 Update the specified fields of a web user
 
 Required permission: *admin*
+
++ Parameters
+    + username: user1 (string, required) - Username
 
 + Request (application/json)
     + Attributes
@@ -5039,11 +5104,12 @@ Required permission: *admin*
 
 ### Get web user [GET]
 
-Get a single user by ID.
+Get a single user by username.
 
 Required permission: *admin*
 
-+ Request (application/json)
++ Parameters
+    + username: user1 (string, required) - Username
 
 + Response 200 (application/json)
     + Attributes (Web user)
@@ -5051,6 +5117,9 @@ Required permission: *admin*
 ### Remove web user [DELETE]
 
 Required permission: *admin*
+
++ Parameters
+    + username: user1 (string, required) - Username
 
 + Response 204
 
@@ -5107,8 +5176,8 @@ Required permission: *admin*
 + queue_view
 + settings_view
 + settings_edit
-+ view_file_view
-+ view_file_edit
++ view_files_view
++ view_files_edit
 
 
 
@@ -5135,7 +5204,7 @@ on systems with low amount of memory. Therefore, it's recommended to use this AP
 
 ## Viewed files [/view_files]
 
-### Get a list of all viewed file [GET]
+### Get a list of all viewed files [GET]
 
 Required permission: *view_files_view*
 
