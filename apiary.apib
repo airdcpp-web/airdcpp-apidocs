@@ -3634,12 +3634,16 @@ Fired after all queued searches were sent.
 ### Grouped result added [POST /search/{instance_id}/listeners/search_result_added]
 
 + Response 200 (application/json)
-    + Attributes (Grouped search result)
+    + Attributes (object, fixed-type)
+        + result (Grouped search result)
+        + search_id: 643345 (required) - ID of the current search
 
 ### Grouped result updated [POST /search/{instance_id}/listeners/search_result_updated]
 
 + Response 200 (application/json)
-    + Attributes (Grouped search result)
+    + Attributes (object, fixed-type)
+        + result (Grouped search result)
+        + search_id: 643345 (required) - ID of the current search
 
 ### User result received [POST /search/{instance_id}/listeners/search_user_result]
 
